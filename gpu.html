@@ -1,0 +1,2383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The GPU — Silicon for Parallel Arithmetic</title>
+<meta name="description" content="A complete technical reference on the graphics processing unit: from the transistor-level tradeoff that created it, through SIMT execution and the memory hierarchy, to tensor cores, the roofline model, and multi-GPU scale-out.">
+<link rel="stylesheet" href="vendor/katex.nofont.css">
+<script defer src="vendor/katex.min.js"></script>
+<script defer src="vendor/d3.min.js"></script>
+<style>
+/* ============================================================
+   GPU — technical spec-sheet aesthetic.
+   Cool neutrals, hairline rules, geometric sans, mono for data.
+   No serif display. No gradient text. No corner glows.
+   ============================================================ */
+:root{
+  --paper:#fcfcfd;
+  --plane:#ffffff;
+  --plane-2:#f4f5f7;
+  --plane-3:#eceef1;
+  --ink:#0d1117;
+  --ink-2:#3d4451;
+  --ink-3:#6b7280;
+  --ink-4:#9aa1ad;
+  --rule:#e2e5ea;
+  --rule-2:#cdd2da;
+  --rule-3:#b4bcc7;
+
+  /* technical accent set — instrument panel, not brand palette */
+  --acc:#007a4d;          /* primary: signal green */
+  --acc-deep:#005c3a;
+  --acc-wash:#e6f4ee;
+  --sig-blue:#1668b3;
+  --sig-blue-wash:#e5eff8;
+  --sig-amber:#9a6700;
+  --sig-amber-wash:#fbf3e0;
+  --sig-red:#b4232c;
+  --sig-red-wash:#fbeaea;
+  --sig-violet:#5b3fa8;
+  --sig-violet-wash:#efeafa;
+
+  --sans:"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+
+  --nav-w:290px;
+  --col:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.62;
+  font-feature-settings:"kern" 1,"liga" 1,"cv05" 1;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------------- structural shell ---------------- */
+.shell{display:flex;min-height:100vh}
+
+/* ---------------- side rail ---------------- */
+.rail{
+  width:var(--nav-w);flex:0 0 var(--nav-w);height:100vh;position:sticky;top:0;
+  background:var(--plane);border-right:1px solid var(--rule);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.rail::-webkit-scrollbar{width:5px}
+.rail::-webkit-scrollbar-thumb{background:var(--rule-2)}
+.rail-head{padding:22px 22px 18px;border-bottom:1px solid var(--rule)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-mark{
+  width:30px;height:30px;flex:0 0 30px;border-radius:5px;background:var(--ink);
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  gap:2.5px;padding:5px;
+}
+.logo-mark i{background:var(--acc);border-radius:1px;opacity:.35}
+.logo-mark i:nth-child(1),.logo-mark i:nth-child(5),.logo-mark i:nth-child(9),
+.logo-mark i:nth-child(3),.logo-mark i:nth-child(7){opacity:1}
+.logo-txt{font-size:.94rem;font-weight:650;letter-spacing:-.015em}
+.logo-txt span{display:block;font-family:var(--mono);font-size:.6rem;font-weight:400;color:var(--ink-3);letter-spacing:.02em;margin-top:1px}
+.rail-meta{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  font-family:var(--mono);font-size:.605rem;padding:3px 7px;border-radius:3px;
+  background:var(--plane-2);border:1px solid var(--rule);color:var(--ink-3);
+}
+.chip.on{background:var(--acc-wash);border-color:#bfe0d2;color:var(--acc-deep)}
+
+.rail-nav{padding:14px 12px 30px;flex:1}
+.nav-grp{margin-bottom:15px}
+.nav-grp-h{
+  font-family:var(--mono);font-size:.6rem;color:var(--ink-4);
+  padding:6px 10px 5px;text-transform:uppercase;
+}
+.rail-nav a{
+  display:flex;align-items:baseline;gap:9px;padding:5px 10px;border-radius:5px;
+  color:var(--ink-2);text-decoration:none;font-size:.815rem;line-height:1.4;
+  border-left:2px solid transparent;transition:background .12s,color .12s;
+}
+.rail-nav a:hover{background:var(--plane-2);color:var(--ink)}
+.rail-nav a.on{background:var(--acc-wash);color:var(--acc-deep);border-left-color:var(--acc);font-weight:550}
+.rail-nav a b{font-family:var(--mono);font-size:.66rem;font-weight:400;color:var(--ink-4);flex:0 0 20px}
+.rail-nav a.on b{color:var(--acc)}
+
+/* ---------------- main column ---------------- */
+.main{flex:1;min-width:0}
+.bar{
+  position:sticky;top:0;z-index:40;height:46px;background:rgba(252,252,253,.93);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;padding:0 30px;gap:14px;
+}
+.bar-crumb{font-family:var(--mono);font-size:.7rem;color:var(--ink-3)}
+.bar-crumb b{color:var(--ink);font-weight:500}
+.bar-prog{flex:1;height:2px;background:var(--plane-3);border-radius:2px;overflow:hidden;max-width:220px;margin-left:auto}
+.bar-prog i{display:block;height:100%;background:var(--acc);width:0}
+
+.wrap{max-width:var(--col);margin:0 auto;padding:0 30px 140px}
+
+/* ---------------- hero ---------------- */
+.hero{padding:74px 0 56px;border-bottom:1px solid var(--rule);margin-bottom:8px}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.665rem;
+  color:var(--acc-deep);background:var(--acc-wash);border:1px solid #bfe0d2;
+  padding:4px 10px;border-radius:3px;margin-bottom:24px;
+}
+.hero-kicker i{width:5px;height:5px;border-radius:50%;background:var(--acc);display:block}
+.hero h1{
+  font-size:clamp(2.5rem,5.6vw,4.15rem);line-height:1.02;letter-spacing:-.032em;
+  font-weight:680;margin:0 0 20px;max-width:15ch;
+}
+.hero h1 u{text-decoration:none;color:var(--acc)}
+.hero-lede{font-size:clamp(1.02rem,1.5vw,1.16rem);line-height:1.58;color:var(--ink-2);max-width:70ch;margin:0}
+.hero-lede b{color:var(--ink);font-weight:600}
+.hero-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:0;
+  margin-top:44px;border:1px solid var(--rule);border-radius:7px;overflow:hidden;background:var(--plane);
+}
+.hs{padding:15px 17px;border-right:1px solid var(--rule)}
+.hs:last-child{border-right:0}
+.hs-n{font-family:var(--mono);font-size:1.42rem;font-weight:550;letter-spacing:-.02em;line-height:1.1}
+s{text-decoration:none}
+.hs-n s{text-decoration:none;font-size:.72rem;color:var(--ink-3);margin-left:2px}
+.hs-l{font-size:.695rem;color:var(--ink-3);margin-top:5px;line-height:1.35}
+
+/* ---------------- section furniture ---------------- */
+.sec{padding:62px 0 10px;scroll-margin-top:60px}
+.sec-head{display:flex;gap:16px;align-items:flex-start;margin-bottom:26px}
+.sec-num{
+  font-family:var(--mono);font-size:.7rem;color:var(--acc);border:1px solid #bfe0d2;
+  background:var(--acc-wash);border-radius:4px;padding:4px 8px;flex:0 0 auto;margin-top:5px;
+}
+.sec-head h2{font-size:clamp(1.6rem,3vw,2.15rem);line-height:1.14;letter-spacing:-.026em;font-weight:660;margin:0 0 9px}
+.sec-head p{color:var(--ink-2);font-size:1rem;margin:0;max-width:74ch}
+.sec-body{max-width:none}
+h3{font-size:1.12rem;font-weight:620;letter-spacing:-.014em;margin:34px 0 11px;line-height:1.3}
+h4{font-size:.9rem;font-weight:620;margin:22px 0 8px;color:var(--ink)}
+p{margin:0 0 14px;max-width:78ch}
+.sec-body>p{color:var(--ink-2)}
+strong{font-weight:620;color:var(--ink)}
+code{font-family:var(--mono);font-size:.855em;background:var(--plane-2);border:1px solid var(--rule);padding:1px 5px;border-radius:3px;color:var(--ink)}
+a.ref{color:var(--sig-blue);text-decoration:none;border-bottom:1px solid #b9d3ea}
+a.ref:hover{border-bottom-color:var(--sig-blue)}
+
+/* ---------------- callouts ---------------- */
+.note{
+  border-left:2px solid var(--rule-2);background:var(--plane-2);padding:13px 16px;
+  border-radius:0 5px 5px 0;margin:18px 0;font-size:.895rem;color:var(--ink-2);
+}
+.note b{color:var(--ink)}
+.note.key{border-left-color:var(--acc);background:var(--acc-wash)}
+.note.warn{border-left-color:var(--sig-amber);background:var(--sig-amber-wash)}
+.note.trap{border-left-color:var(--sig-red);background:var(--sig-red-wash)}
+.note-t{font-family:var(--mono);font-size:.63rem;text-transform:uppercase;display:block;margin-bottom:5px;opacity:.75}
+
+/* ---------------- data tables ---------------- */
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:7px;background:var(--plane)}
+table{border-collapse:collapse;width:100%;font-size:.83rem;min-width:520px}
+th{
+  text-align:left;font-family:var(--mono);font-size:.645rem;font-weight:500;text-transform:uppercase;
+  color:var(--ink-3);padding:9px 13px;background:var(--plane-2);border-bottom:1px solid var(--rule);
+  white-space:nowrap;
+}
+td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--plane-2)}
+td b{color:var(--ink)}
+.num{font-family:var(--mono);font-size:.8rem;color:var(--ink);white-space:nowrap}
+.tag{font-family:var(--mono);font-size:.635rem;padding:2px 6px;border-radius:3px;white-space:nowrap;display:inline-block}
+.t-g{background:var(--acc-wash);color:var(--acc-deep)}
+.t-b{background:var(--sig-blue-wash);color:var(--sig-blue)}
+.t-a{background:var(--sig-amber-wash);color:var(--sig-amber)}
+.t-r{background:var(--sig-red-wash);color:var(--sig-red)}
+.t-v{background:var(--sig-violet-wash);color:var(--sig-violet)}
+
+/* ---------------- cards / grids ---------------- */
+.grid{display:grid;gap:12px;margin:20px 0}
+.g2{grid-template-columns:repeat(auto-fit,minmax(268px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(212px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(166px,1fr))}
+.card{background:var(--plane);border:1px solid var(--rule);border-radius:7px;padding:16px 17px}
+.card-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.card-h .ico{
+  width:23px;height:23px;border-radius:4px;background:var(--plane-2);border:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.66rem;color:var(--ink-2);flex:0 0 23px;
+}
+.card-h h4{margin:0;font-size:.885rem}
+.card p{font-size:.865rem;color:var(--ink-2);margin:0}
+.card p+p{margin-top:8px}
+
+/* metric card */
+.mc{background:var(--plane);border:1px solid var(--rule);border-radius:7px;padding:14px 15px}
+.mc-n{font-family:var(--mono);font-size:1.24rem;font-weight:550;letter-spacing:-.02em;line-height:1.15}
+.mc-n s{text-decoration:none;font-size:.68rem;color:var(--ink-3)}
+.mc-l{font-size:.7rem;color:var(--ink-3);margin-top:4px;line-height:1.4}
+
+/* ---------------- code blocks ---------------- */
+.code{
+  background:#0e1420;border:1px solid #1e2836;border-radius:7px;margin:18px 0;overflow:hidden;
+}
+.code-bar{
+  display:flex;align-items:center;gap:8px;padding:7px 13px;background:#141c2b;border-bottom:1px solid #1e2836;
+}
+.code-bar span{font-family:var(--mono);font-size:.65rem;color:#7d8899}
+.code-bar i{width:8px;height:8px;border-radius:50%;background:#2c3a4d;display:block}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.775rem;line-height:1.65;color:#c8d3e0}
+.code pre::-webkit-scrollbar{height:7px}
+.code pre::-webkit-scrollbar-thumb{background:#2c3a4d;border-radius:4px}
+.k{color:#7fb3f5}.s{color:#8ed19b}.c{color:#5f6d80;font-style:italic}.n2{color:#e0a878}.f{color:#d6a5e8}.t2{color:#5fc9c0}
+
+/* ---------------- interactive panels ---------------- */
+.panel{background:var(--plane);border:1px solid var(--rule);border-radius:8px;margin:22px 0;overflow:hidden}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:11px 16px;border-bottom:1px solid var(--rule);background:var(--plane-2);
+}
+.panel-head h4{margin:0;font-size:.83rem;font-weight:600}
+.panel-head .sub{font-family:var(--mono);font-size:.65rem;color:var(--ink-3)}
+.panel-body{padding:16px}
+.ctl{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ctl label{font-family:var(--mono);font-size:.66rem;color:var(--ink-3)}
+.ctl input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--rule-2);border-radius:2px;outline:none;width:150px}
+.ctl input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--acc);
+  border:2px solid #fff;box-shadow:0 0 0 1px var(--rule-2);cursor:pointer;
+}
+.btn{
+  font-family:var(--mono);font-size:.66rem;padding:5px 11px;border-radius:4px;cursor:pointer;
+  background:var(--plane);border:1px solid var(--rule-2);color:var(--ink-2);transition:.12s;
+}
+.btn:hover{background:var(--plane-2);color:var(--ink)}
+.btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.readout{display:flex;gap:20px;flex-wrap:wrap;margin-top:13px;padding-top:13px;border-top:1px solid var(--rule)}
+.ro-i .ro-l{font-family:var(--mono);font-size:.61rem;color:var(--ink-4);text-transform:uppercase}
+.ro-i .ro-v{font-family:var(--mono);font-size:1rem;color:var(--ink);margin-top:2px;font-weight:550}
+
+svg{display:block;max-width:100%;height:auto}
+canvas{display:block;max-width:100%}
+
+/* ---------------- diagrams ---------------- */
+.dia{margin:20px 0;border:1px solid var(--rule);border-radius:8px;background:var(--plane);padding:18px;overflow-x:auto}
+.dia-cap{font-size:.755rem;color:var(--ink-3);margin-top:11px;padding-top:10px;border-top:1px solid var(--rule);line-height:1.5}
+.dia-cap b{color:var(--ink-2)}
+
+/* memory pyramid rows */
+.mem-row{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.mem-bar{
+  height:34px;border-radius:4px;display:flex;align-items:center;padding:0 11px;
+  font-family:var(--mono);font-size:.7rem;color:#fff;white-space:nowrap;overflow:hidden;
+}
+.mem-meta{font-family:var(--mono);font-size:.675rem;color:var(--ink-3);white-space:nowrap}
+
+/* KaTeX */
+.math-block{margin:16px 0;padding:14px 16px;background:var(--plane);border:1px solid var(--rule);border-radius:7px;overflow-x:auto}
+.katex{font-size:1.06em;font-family:"KaTeX_Main","Latin Modern Math","Times New Roman",Times,serif}
+.math-note{font-size:.775rem;color:var(--ink-3);margin-top:9px;padding-top:9px;border-top:1px solid var(--rule)}
+
+
+/* ---------------- rendered imagery ---------------- */
+.hero-vis{
+  position:relative;margin:34px 0 0;border-radius:10px;overflow:hidden;
+  border:1px solid #101826;background:#05070d;
+  box-shadow:0 1px 2px rgba(13,17,23,.06),0 18px 50px -22px rgba(13,17,23,.5);
+  aspect-ratio:2360/1000;
+}
+.hero-vis canvas{width:100%;height:100%;display:block}
+.vis-overlay{
+  position:relative;padding:18px 22px 19px;
+  background:#09101b;
+  pointer-events:none;
+}
+.vis-tag{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.62rem;
+  color:#5ce0a8;background:rgba(0,122,77,.16);border:1px solid rgba(92,224,168,.32);
+  padding:3px 9px;border-radius:3px;margin-bottom:11px;backdrop-filter:blur(6px);
+}
+.vis-tag i{width:5px;height:5px;border-radius:50%;background:#5ce0a8;display:block;
+  animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.28}}
+.vis-title{font-size:1.16rem;font-weight:620;color:#f2f5f9;letter-spacing:-.018em;margin-bottom:4px}
+.vis-sub{font-size:.815rem;color:#94a3b8;max-width:62ch;line-height:1.5}
+.vis-scan{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.028) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay;
+}
+
+/* inline rendered plates */
+.plate{
+  position:relative;margin:22px 0;border-radius:9px;overflow:hidden;
+  border:1px solid #111a28;background:#05070d;
+  box-shadow:0 12px 34px -18px rgba(13,17,23,.45);
+}
+.plate canvas{width:100%;display:block}
+.plate-cap{
+  position:relative;padding:14px 18px 16px;
+  background:#09101b;border-top:1px solid rgba(143,163,186,.18);
+  font-size:.77rem;color:#9fb0c4;line-height:1.5;pointer-events:none;
+}
+.plate-cap b{color:#e6edf5;font-weight:600;display:block;font-size:.855rem;margin-bottom:3px;letter-spacing:-.01em}
+.plate-badge{
+  position:relative;display:inline-block;margin:13px 0 -2px 15px;z-index:1;font-family:var(--mono);font-size:.6rem;
+  color:#8fa3ba;background:rgba(5,9,16,.9);border:1px solid rgba(143,163,186,.22);
+  padding:3px 8px;border-radius:3px;
+}
+.plate-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin:22px 0}
+.plate-grid .plate{margin:0}
+
+/* footer */
+.foot{border-top:1px solid var(--rule);margin-top:70px;padding:30px 0 0;font-size:.79rem;color:var(--ink-3)}
+.foot a{color:var(--sig-blue);text-decoration:none}
+.foot-srcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:7px;margin-top:14px}
+
+@media(max-width:1080px){
+  .rail{display:none}
+  .wrap{padding:0 20px 90px}
+}
+@media(max-width:620px){
+  .hero-vis{margin-top:22px}.vis-overlay{padding:15px 16px}.vis-title{font-size:1rem}.vis-sub{font-size:.73rem}
+  .plate-badge{margin-left:10px;font-size:.52rem}.plate-cap{padding:12px 14px;font-size:.7rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ============ RAIL ============ -->
+<aside class="rail">
+  <div class="rail-head">
+    <div class="logo">
+      <div class="logo-mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="logo-txt">The GPU<span>ai-everything / hardware</span></div>
+    </div>
+    <div class="rail-meta">
+      <span class="chip on">24 sections</span>
+      <span class="chip">reference edition</span>
+    </div>
+  </div>
+  <nav class="rail-nav" id="nav">
+    <div class="nav-grp">
+      <div class="nav-grp-h">I · Foundations</div>
+      <a href="#s1"><b>01</b>Why the GPU Exists</a>
+      <a href="#s2"><b>02</b>Math Prerequisites</a>
+      <a href="#s3"><b>03</b>Systems Prerequisites</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-grp-h">II · Architecture</div>
+      <a href="#s4"><b>04</b>Anatomy of the Die</a>
+      <a href="#s5"><b>05</b>SIMT and the Warp</a>
+      <a href="#s6"><b>06</b>Latency Hiding</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-grp-h">III · Memory</div>
+      <a href="#s7"><b>07</b>The Memory Hierarchy</a>
+      <a href="#s8"><b>08</b>Coalescing &amp; Banks</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-grp-h">IV · Compute</div>
+      <a href="#s9"><b>09</b>Tensor Cores</a>
+      <a href="#s10"><b>10</b>Numeric Formats</a>
+      <a href="#s11"><b>11</b>The Roofline Model</a>
+      <a href="#s12"><b>12</b>GEMM: The Ideal Load</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-grp-h">V · Applied</div>
+      <a href="#s13"><b>13</b>FlashAttention</a>
+      <a href="#s14"><b>14</b>Occupancy Tuning</a>
+      <a href="#s15"><b>15</b>Multi-GPU Scale-Out</a>
+      <a href="#s16"><b>16</b>Generational Spec Sheet</a>
+    </div>
+    <div class="nav-grp">
+      <div class="nav-grp-h">VI · Build &amp; operate</div>
+      <a href="#s17"><b>17</b>Programming Models</a>
+      <a href="#s18"><b>18</b>Model Memory Planning</a>
+      <a href="#s19"><b>19</b>Profiling Workflow</a>
+      <a href="#s20"><b>20</b>Kernel Optimisation</a>
+      <a href="#s21"><b>21</b>Correctness &amp; Debugging</a>
+      <a href="#s22"><b>22</b>Data Movement &amp; Streams</a>
+      <a href="#s23"><b>23</b>Training &amp; Inference</a>
+      <a href="#s24"><b>24</b>Field Checklist</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<main class="main">
+  <div class="bar">
+    <div class="bar-crumb">ai-everything <b>/</b> hardware <b>/</b> <b id="crumb">gpu</b></div>
+    <div class="bar-prog"><i id="prog"></i></div>
+  </div>
+
+  <div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-kicker"><i></i>HARDWARE · MODULE 01 · REFERENCE EDITION</div>
+    <h1>Silicon built for <u>parallel arithmetic</u></h1>
+    <p class="hero-lede">A CPU is a machine for finishing one instruction stream as fast as physics allows. A GPU is a machine for keeping <b>tens of thousands of arithmetic units fed</b>. Everything else — the warp, the memory hierarchy, tensor cores, the entire discipline of kernel optimisation — follows from that single decision about where to spend transistors. This module goes from the transistor tradeoff to multi-GPU collectives, with the mathematics and systems background assumed at zero.</p>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-n">208<s>B</s></div><div class="hs-l">Transistors on a Blackwell B200 (dual-die)</div></div>
+      <div class="hs"><div class="hs-n">9<s>PFLOPS</s></div><div class="hs-l">Dense FP4 tensor throughput, B200</div></div>
+      <div class="hs"><div class="hs-n">8<s>TB/s</s></div><div class="hs-l">HBM3e memory bandwidth</div></div>
+      <div class="hs"><div class="hs-n">32</div><div class="hs-l">Threads per warp — unchanged since 2006</div></div>
+      <div class="hs"><div class="hs-n">~600<s>×</s></div><div class="hs-l">Latency gap, register vs. HBM access</div></div>
+    </div>
+  </header>
+
+  <!-- ============ HERO VISUAL: procedural die render ============ -->
+  <figure class="hero-vis">
+    <canvas id="dieCanvas" width="2360" height="1000"></canvas>
+    <div class="vis-overlay">
+      <div class="vis-tag"><i></i>LIVE RENDER · PROCEDURAL DIE SHOT</div>
+      <div class="vis-title">Blackwell-class dual-die package</div>
+      <div class="vis-sub">Two reticle-limit dies bridged by a 10 TB/s die-to-die link, flanked by eight HBM3e stacks</div>
+    </div>
+    <div class="vis-scan"></div>
+  </figure>
+
+  <!-- ================= 01 ================= -->
+  <section class="sec" id="s1">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <div>
+        <h2>Why the GPU exists</h2>
+        <p>The GPU is not a faster CPU. It is the answer to a different question, and the difference is visible in where the transistors go.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Imagine you must deliver ten thousand letters across a city. One strategy is to hire a single courier on a motorcycle that can reach 300 km/h — you optimise the speed of one agent, and you invest heavily in helping that agent make good decisions: which route, which shortcut, what to do when a road closes. The other strategy is to hire five thousand cyclists. No individual cyclist is fast, and you cannot afford to give each one a sophisticated navigation system. But if the letters are independent, the cyclists finish first, by a wide margin.</p>
+      <p>That is the entire distinction. The motorcycle courier is a <strong>CPU core</strong>, and it is optimised for <strong>latency</strong> — the time to finish one task. The cyclists are a <strong>GPU</strong>, and it is optimised for <strong>throughput</strong> — the total work completed per unit time. Both are built from the same transistors on the same silicon process. They differ in how those transistors are spent.</p>
+
+      <h3>Where the transistors go</h3>
+      <p>A modern CPU core devotes the overwhelming majority of its die area to machinery that makes a <em>single</em> instruction stream run fast, none of which performs arithmetic. Branch predictors guess the outcome of an <code>if</code> before it is evaluated. Out-of-order execution engines reorder instructions to work around stalls. Large multi-level caches keep data close. Register renaming, speculative execution, prefetchers — this is control logic, and it is expensive.</p>
+      <p>A GPU deletes almost all of it. There is no branch predictor worth the name, no out-of-order engine, and a small cache per compute unit. What replaces them is arithmetic units, in enormous quantity, and a scheduler whose only job is to keep them busy.</p>
+      <div class="plate">
+        <canvas id="budgetCanvas" width="2200" height="760"></canvas>
+        <div class="plate-badge">FLOORPLAN COMPARISON · TO SCALE BY AREA</div>
+        <div class="plate-cap"><b>The same silicon, spent two ways</b>
+        Left: a CPU core — a small arithmetic island surrounded by control logic and cache. Right: a GPU SM array — control shrinks to a sliver, and the die fills with ALUs. Green is arithmetic; blue is cache; grey is control.</div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-h"><div class="ico">C</div><h4>CPU: minimise time-to-answer</h4></div>
+          <p>Few, very wide cores at high clocks. Deep pipelines, aggressive speculation, large private caches. Excellent on branchy, serial, pointer-chasing code where the next instruction depends on the last.</p>
+          <p><strong>Wins at:</strong> operating systems, databases, compilers, game logic, anything irregular.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="ico">G</div><h4>GPU: maximise work-per-second</h4></div>
+          <p>Thousands of narrow lanes at modest clocks. Shallow pipelines, no speculation, tiny per-thread cache — but colossal register files and bandwidth. Needs work that is regular and independent.</p>
+          <p><strong>Wins at:</strong> matrix multiply, convolution, rendering, simulation, anything with a wide inner loop.</p>
+        </div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Property</th><th>CPU (Xeon-class core)</th><th>GPU (H100)</th><th>Ratio</th></tr></thead>
+          <tbody>
+            <tr><td><b>Cores / SMs</b></td><td class="num">~64 cores</td><td class="num">132 SMs</td><td><span class="tag t-g">~2×</span></td></tr>
+            <tr><td><b>Concurrent threads</b></td><td class="num">~128 (2/core)</td><td class="num">~270,000</td><td><span class="tag t-g">~2000×</span></td></tr>
+            <tr><td><b>Clock speed</b></td><td class="num">~3.5 GHz</td><td class="num">~1.8 GHz</td><td><span class="tag t-r">0.5×</span></td></tr>
+            <tr><td><b>FP32 throughput</b></td><td class="num">~2 TFLOPS</td><td class="num">67 TFLOPS</td><td><span class="tag t-g">~33×</span></td></tr>
+            <tr><td><b>Memory bandwidth</b></td><td class="num">~200 GB/s</td><td class="num">3,350 GB/s</td><td><span class="tag t-g">~17×</span></td></tr>
+            <tr><td><b>Cache per thread</b></td><td class="num">~512 KB</td><td class="num">~0.2 KB</td><td><span class="tag t-r">0.0004×</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">The central tradeoff</span>
+        The GPU is <b>slower per thread and vastly faster in aggregate</b>. A single GPU thread runs roughly 20–50× slower than a CPU thread on the same serial work. You win only by having enough independent work to fill the machine. This is why "port it to GPU" fails on irregular code and succeeds spectacularly on dense linear algebra.
+      </div>
+
+      <h3>Why deep learning landed on the GPU</h3>
+      <p>Training a neural network is, computationally, a long sequence of large matrix multiplications. A matrix multiply of two <code>n×n</code> matrices performs about <code>2n³</code> arithmetic operations while touching only about <code>3n²</code> numbers. As <code>n</code> grows, the arithmetic grows faster than the data movement — which is precisely the shape of problem a throughput machine is built for. Deep learning did not choose the GPU because it was convenient; it scaled because the GPU's cost curve happened to match the workload's arithmetic profile.</p>
+
+      <div class="note trap">
+        <span class="note-t">Common mistake</span>
+        Assuming GPU speedup comes from the clock. It does not — GPUs clock <b>lower</b> than CPUs. All the gain is parallelism and bandwidth. If your problem has a serial dependency chain, or fewer than a few thousand independent work items, the GPU will be <b>slower</b> than a CPU, and no amount of kernel tuning will fix it.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 02 ================= -->
+  <section class="sec" id="s2">
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <div>
+        <h2>Mathematical prerequisites</h2>
+        <p>Four ideas carry almost all of GPU computing: the dot product, the matrix product, operation counting, and the notion of intensity. Assumed knowledge here is arithmetic only.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <h3>The dot product — the atom of everything</h3>
+      <p>Take two lists of numbers of equal length. Multiply them position by position, then add up all the products. That single number is the <strong>dot product</strong>. If one list is <code>[2, 3, 4]</code> and the other is <code>[10, 20, 30]</code>, you compute <code>2×10 + 3×20 + 4×30 = 20 + 60 + 120 = 200</code>.</p>
+      <div class="math-block" data-math="\mathbf{a}\cdot\mathbf{b}=\sum_{i=1}^{n}a_i b_i = a_1b_1 + a_2b_2 + \cdots + a_nb_n"></div>
+      <p>This pattern — multiply pairs, accumulate the sum — is so central that GPUs implement it as a single hardware instruction called <strong>fused multiply-add</strong> (FMA): it computes <code>a×b + c</code> in one step, with one rounding instead of two. Every FMA counts as <strong>two</strong> floating-point operations. When a vendor quotes "67 TFLOPS", they are counting FMAs as two.</p>
+
+      <h3>The matrix product</h3>
+      <p>A matrix is a rectangular grid of numbers. Multiplying matrix <code>A</code> (size <code>M×K</code>) by matrix <code>B</code> (size <code>K×N</code>) produces <code>C</code> (size <code>M×N</code>), where every entry of <code>C</code> is one dot product: row <code>i</code> of <code>A</code> against column <code>j</code> of <code>B</code>.</p>
+      <div class="math-block" data-math="C_{ij}=\sum_{k=1}^{K}A_{ik}B_{kj}\qquad\text{for } i=1\ldots M,\ j=1\ldots N"></div>
+      <p>The critical observation for hardware: <strong>every one of the <code>M×N</code> entries is independent</strong>. Nothing about computing <code>C₁₁</code> depends on <code>C₁₂</code>. You could compute all of them simultaneously, given enough arithmetic units — which is exactly what a GPU provides. This independence is why matrix multiply is the canonical GPU workload, and why the entire deep learning field runs on hardware designed for graphics.</p>
+
+      <div class="note">
+        <span class="note-t">Operation count</span>
+        A matrix multiply of <code>M×K</code> by <code>K×N</code> performs <b>2·M·N·K</b> floating-point operations — one multiply and one add per term, <code>K</code> terms per output, <code>M·N</code> outputs. For square <code>n×n</code> matrices this is <b>2n³</b>. Doubling the dimension multiplies the work by eight.
+      </div>
+
+      <h3>Arithmetic intensity — the number that predicts performance</h3>
+      <p>Here is the idea that governs nearly every optimisation decision in this document. For any computation, ask: <em>how much arithmetic do I perform per byte of data I move?</em> That ratio is <strong>arithmetic intensity</strong>.</p>
+      <div class="math-block" data-math="I=\frac{\text{floating-point operations performed}}{\text{bytes transferred from memory}}\quad\left[\frac{\text{FLOP}}{\text{byte}}\right]"></div>
+      <p>Consider adding two vectors of length <code>n</code>. You read <code>2n</code> numbers, write <code>n</code> numbers, and perform <code>n</code> additions. In FP32 (4 bytes each) the intensity is <code>n / (12n) = 0.083</code> FLOP/byte — dreadful. Now consider the square matrix multiply: <code>2n³</code> operations against roughly <code>12n²</code> bytes, giving intensity <code>n/6</code>. At <code>n = 4096</code> that is about <strong>680 FLOP/byte</strong> — four orders of magnitude better.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Operation</th><th>FLOPs</th><th>Bytes moved (FP32)</th><th>Intensity</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td><b>Vector add</b> <code>c=a+b</code></td><td class="num">n</td><td class="num">12n</td><td class="num">0.08</td><td><span class="tag t-r">memory-bound</span></td></tr>
+            <tr><td><b>Scale</b> <code>y=αx</code></td><td class="num">n</td><td class="num">8n</td><td class="num">0.13</td><td><span class="tag t-r">memory-bound</span></td></tr>
+            <tr><td><b>Dot product</b></td><td class="num">2n</td><td class="num">8n</td><td class="num">0.25</td><td><span class="tag t-r">memory-bound</span></td></tr>
+            <tr><td><b>Matrix–vector</b></td><td class="num">2n²</td><td class="num">4n²</td><td class="num">0.5</td><td><span class="tag t-r">memory-bound</span></td></tr>
+            <tr><td><b>Matrix–matrix</b> n=1024</td><td class="num">2n³</td><td class="num">12n²</td><td class="num">171</td><td><span class="tag t-g">compute-bound</span></td></tr>
+            <tr><td><b>Matrix–matrix</b> n=8192</td><td class="num">2n³</td><td class="num">12n²</td><td class="num">1365</td><td><span class="tag t-g">compute-bound</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">Why this matters immediately</span>
+        Every operation in that table above the matrix–matrix rows is <b>limited by memory bandwidth, not by arithmetic</b>. Buying a GPU with twice the FLOPS will not speed them up at all. This single table explains why activation functions, normalisation layers, and element-wise operations are fused together in every serious deep learning framework — each fusion removes a round trip to memory.
+      </div>
+
+      <h3>Numbers in binary — floating point</h3>
+      <p>A computer stores a real number in three parts: a <strong>sign</strong> bit, an <strong>exponent</strong> that sets the scale, and a <strong>mantissa</strong> (or significand) that holds the precision. The value is reconstructed as:</p>
+      <div class="math-block" data-math="x=(-1)^{s}\times 2^{\,e-\text{bias}}\times\left(1+\frac{m}{2^{p}}\right)"></div>
+      <p>The exponent controls <em>range</em> — how large and how small a number can be. The mantissa controls <em>resolution</em> — how finely you can distinguish nearby values. Shrinking a format trades one against the other, and section 10 shows exactly how the AI-specific formats make that trade.</p>
+    </div>
+  </section>
+
+  <!-- ================= 03 ================= -->
+  <section class="sec" id="s3">
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <div>
+        <h2>Systems prerequisites</h2>
+        <p>Three laws bound every parallel machine: memory is far away, parallelism has diminishing returns, and concurrency is the product of latency and rate.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <h3>The memory wall</h3>
+      <p>Processor arithmetic has improved far faster than memory access time for four decades. The consequence is that a modern chip can perform hundreds of operations in the time it takes to fetch one number from DRAM. Memory is not merely slower — it is slower <em>by a margin that keeps widening</em>.</p>
+      <p>Concretely: reading a value from a register takes about one clock cycle. Reading the same value from HBM takes roughly 500–600 cycles. If a compute unit sat idle waiting for each fetch, it would be busy less than one percent of the time. Every architectural feature in the rest of this document is, directly or indirectly, a response to this fact.</p>
+
+      <h3>Little's Law — how much work must be in flight</h3>
+      <p>A result from queueing theory sets the concurrency a throughput machine requires. If you want to sustain a rate of <code>R</code> operations per second, and each operation takes <code>L</code> seconds to complete, then the number of operations that must be simultaneously in progress is their product.</p>
+      <div class="math-block" data-math="N_{\text{in flight}} = L_{\text{latency}} \times R_{\text{throughput}}"></div>
+      <p>Apply it to an H100: to sustain 3,350 GB/s at roughly 500 ns of memory latency, about <strong>1.6 megabytes</strong> of reads must be outstanding at every instant. A single thread issuing one load cannot do this. Thousands of concurrent threads can — and that is the quantitative justification for the GPU's enormous thread count. The thread count is not arbitrary; it is Little's Law solved for the hardware's latency and bandwidth.</p>
+
+      <h3>Amdahl's Law — the ceiling on parallel speedup</h3>
+      <p>If a fraction <code>p</code> of a program can be parallelised and the rest is inherently serial, the maximum speedup from <code>N</code> processors is bounded:</p>
+      <div class="math-block" data-math="S(N)=\frac{1}{(1-p)+\dfrac{p}{N}}\qquad\lim_{N\to\infty}S=\frac{1}{1-p}"></div>
+      <p>The implication is severe. If 95% of your program parallelises perfectly, infinite hardware buys you at most 20×. If 99% parallelises, the ceiling is 100×. This is why GPU work concentrates on kernels that are essentially <em>entirely</em> parallel, and why moving a mostly-serial application to a GPU disappoints.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Parallel fraction p</th><th>Ceiling (N→∞)</th><th>Speedup at N=1000</th><th>Efficiency</th></tr></thead>
+          <tbody>
+            <tr><td class="num">50%</td><td class="num">2×</td><td class="num">2.0×</td><td><span class="tag t-r">0.2%</span></td></tr>
+            <tr><td class="num">90%</td><td class="num">10×</td><td class="num">9.9×</td><td><span class="tag t-r">1.0%</span></td></tr>
+            <tr><td class="num">99%</td><td class="num">100×</td><td class="num">91×</td><td><span class="tag t-a">9.1%</span></td></tr>
+            <tr><td class="num">99.9%</td><td class="num">1000×</td><td class="num">500×</td><td><span class="tag t-g">50%</span></td></tr>
+            <tr><td class="num">99.99%</td><td class="num">10000×</td><td class="num">909×</td><td><span class="tag t-g">91%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">The escape hatch</span>
+        Amdahl assumes a <b>fixed problem size</b>. Gustafson's Law observes that in practice we grow the problem to match the machine — nobody buys a thousand GPUs to train the same small model faster; they train a much larger one. Under weak scaling the serial fraction shrinks relative to the parallel work, and the ceiling largely dissolves. This is precisely what happened in deep learning.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 04 ================= -->
+  <section class="sec" id="s4">
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <div>
+        <h2>Anatomy of the die</h2>
+        <p>A GPU is a strict hierarchy of replicated units. Understanding the nesting — chip, GPC, TPC, SM, core — makes every performance rule that follows predictable rather than arbitrary.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Zoom in on the die render at the top of this page and the structure is visible: the same block, repeated. That repetition is deliberate. Designing one good compute unit and stamping it out 132 times is far cheaper than designing 132 different units, and it means a defective unit can simply be disabled — which is how a single physical die becomes several product tiers.</p>
+
+      <div class="plate">
+        <canvas id="hierCanvas" width="2200" height="820"></canvas>
+        <div class="plate-badge">HIERARCHY · CHIP → GPC → SM → CORE</div>
+        <div class="plate-cap"><b>Four levels of replication</b>
+        The full chip divides into Graphics Processing Clusters; each GPC holds Texture Processing Clusters; each TPC holds two Streaming Multiprocessors; each SM holds four partitions of CUDA cores, tensor cores, and a register file.</div>
+      </div>
+
+      <h3>The Streaming Multiprocessor</h3>
+      <p>The <strong>SM</strong> is the unit that matters. It is the smallest block that independently schedules and executes work, and it is where every resource limit you will ever tune against lives. An H100 has 132 of them; a B200 has 144 across two dies.</p>
+      <p>Each SM is internally divided into <strong>four processing partitions</strong>. Each partition has its own warp scheduler, its own dispatch unit, its own slice of the register file, and its own arithmetic units. The four partitions share the SM's L1 cache and shared memory block. This subdivision is why a thread block's resources are allocated in quarters, and why occupancy calculations often produce numbers divisible by four.</p>
+
+      <div class="grid g4">
+        <div class="mc"><div class="mc-n">132</div><div class="mc-l">SMs on H100 SXM</div></div>
+        <div class="mc"><div class="mc-n">128</div><div class="mc-l">FP32 CUDA cores per SM</div></div>
+        <div class="mc"><div class="mc-n">4</div><div class="mc-l">Tensor cores per SM</div></div>
+        <div class="mc"><div class="mc-n">64<s>KB</s></div><div class="mc-l">Register file per partition</div></div>
+        <div class="mc"><div class="mc-n">228<s>KB</s></div><div class="mc-l">L1 + shared memory per SM</div></div>
+        <div class="mc"><div class="mc-n">64</div><div class="mc-l">Max resident warps per SM</div></div>
+        <div class="mc"><div class="mc-n">2048</div><div class="mc-l">Max resident threads per SM</div></div>
+        <div class="mc"><div class="mc-n">50<s>MB</s></div><div class="mc-l">L2 cache, chip-wide</div></div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Level</th><th>Contains</th><th>Shares</th><th>Programmer sees it as</th></tr></thead>
+          <tbody>
+            <tr><td><b>Device</b></td><td>8 GPCs, L2, HBM controllers</td><td>L2 cache, global memory</td><td>The GPU / <code>cudaSetDevice</code></td></tr>
+            <tr><td><b>GPC</b></td><td>~9 TPCs, raster engine</td><td>Its slice of L2</td><td>Mostly invisible</td></tr>
+            <tr><td><b>TPC</b></td><td>2 SMs</td><td>Texture units</td><td>Invisible</td></tr>
+            <tr><td><b>SM</b></td><td>4 partitions, L1/shared</td><td>Shared memory, L1</td><td>A <b>thread block</b> lands here</td></tr>
+            <tr><td><b>Partition</b></td><td>32 FP32 lanes, 1 tensor core</td><td>Register file slice, scheduler</td><td>A <b>warp</b> executes here</td></tr>
+            <tr><td><b>Lane</b></td><td>One FP32 ALU</td><td>—</td><td>A <b>thread</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">The mapping that matters</span>
+        Software hierarchy maps onto hardware hierarchy exactly: a <b>grid</b> covers the device, a <b>thread block</b> is assigned to one SM and never migrates, a <b>warp</b> of 32 threads executes on one partition, and a <b>thread</b> occupies one lane. Every occupancy and shared-memory limit follows from this correspondence.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Common mistake</span>
+        Believing more SMs automatically means proportionally more performance. A thread block is pinned to a single SM for its lifetime — if your grid launches only 40 blocks on a 132-SM device, <b>70% of the chip is idle</b> regardless of how well the kernel is written. Grid sizing is a first-order concern, not a detail.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 05 ================= -->
+  <section class="sec" id="s5">
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <div>
+        <h2>SIMT and the warp</h2>
+        <p>Thirty-two threads move as one. This is the single most consequential design decision in GPU programming, and the source of its most expensive performance bug.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>A control unit — the logic that fetches an instruction, decodes it, and tells the arithmetic units what to do — is expensive in transistors. Giving every one of 16,896 arithmetic lanes its own control unit would consume most of the die on overhead. The GPU's answer: <strong>share one control unit across 32 lanes</strong>. One instruction is fetched and decoded once, then broadcast to all 32 lanes, which execute it simultaneously on 32 different data elements.</p>
+      <p>That group of 32 is a <strong>warp</strong>, and the execution model is called <strong>SIMT</strong> — Single Instruction, Multiple Thread. The warp size has been 32 on every NVIDIA GPU since 2006. AMD calls its equivalent a <em>wavefront</em>, historically 64 wide, now 32 on RDNA.</p>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Warp divergence — watch the lanes go idle</h4>
+          <div class="ctl">
+            <button class="btn on" data-div="uniform">Uniform</button>
+            <button class="btn" data-div="split">If / else</button>
+            <button class="btn" data-div="scatter">Data-dependent</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="divCanvas" width="1800" height="360"></canvas>
+          <div class="readout">
+            <div class="ro-i"><div class="ro-l">Active lanes</div><div class="ro-v" id="divActive">32 / 32</div></div>
+            <div class="ro-i"><div class="ro-l">Passes required</div><div class="ro-v" id="divPass">1</div></div>
+            <div class="ro-i"><div class="ro-l">Effective utilisation</div><div class="ro-v" id="divUtil">100%</div></div>
+            <div class="ro-i"><div class="ro-l">Wasted lane-cycles</div><div class="ro-v" id="divWaste">0</div></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>What happens at a branch</h3>
+      <p>All 32 lanes share one program counter, so they must execute the same instruction. What happens when a conditional sends some threads down one path and the rest down another? The hardware cannot execute two instructions at once. Instead it executes <strong>both paths sequentially</strong>, masking off the lanes that should not participate in each.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>divergent.cu — both branches cost full time</span></div>
+        <pre><span class="k">__global__</span> <span class="t2">void</span> <span class="f">divergent</span>(<span class="t2">float</span>* data) {
+    <span class="t2">int</span> tid = threadIdx.x;
+
+    <span class="c">// Threads 0-15 take one path, 16-31 the other.</span>
+    <span class="c">// The warp executes BOTH bodies, one after the other.</span>
+    <span class="k">if</span> (tid &lt; <span class="n2">16</span>) {
+        data[tid] = expensive_a(data[tid]);   <span class="c">// lanes 16-31 masked off, idle</span>
+    } <span class="k">else</span> {
+        data[tid] = expensive_b(data[tid]);   <span class="c">// lanes 0-15 masked off, idle</span>
+    }
+    <span class="c">// Cost = time(a) + time(b), not max(a, b).</span>
+}
+
+<span class="c">// FIX: align the branch to warp boundaries so whole warps</span>
+<span class="c">// take the same path — then there is no divergence at all.</span>
+<span class="k">if</span> ((tid / <span class="n2">32</span>) % <span class="n2">2</span> == <span class="n2">0</span>) { ... } <span class="k">else</span> { ... }</pre>
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">The worst case</span>
+        A <code>switch</code> with 32 arms, where every lane takes a different arm, serialises into <b>32 passes at 1/32 utilisation</b> — a 32× slowdown on that region. Divergence between <em>different</em> warps is completely free; only divergence <em>within</em> a warp costs anything. Restructure data so that threads in the same warp follow the same control path.
+      </div>
+
+      <h3>Independent thread scheduling</h3>
+      <p>Since Volta (2017), each thread maintains its own program counter, and the hardware may interleave divergent paths rather than strictly serialising them. This enables correct fine-grained synchronisation inside a warp, but it also broke a great deal of older code that implicitly assumed lockstep execution. The modern rule is explicit: use <code>__syncwarp()</code> where you need warp-level agreement, and always use the <code>_sync</code> variants of shuffle and vote intrinsics.</p>
+    </div>
+  </section>
+
+  <!-- ================= 06 ================= -->
+  <section class="sec" id="s6">
+    <div class="sec-head">
+      <div class="sec-num">06</div>
+      <div>
+        <h2>Latency hiding</h2>
+        <p>The GPU never makes a memory access fast. It makes the wait invisible by always having another warp ready to run.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>A CPU faced with a cache miss stalls, and spends its transistors on speculation and prefetching to avoid stalling. A GPU takes the opposite approach: when a warp issues a memory request and cannot proceed, the scheduler simply <strong>switches to a different warp</strong> in the same clock cycle, with zero switching cost.</p>
+      <p>The zero cost is the essential trick. On a CPU, a context switch means saving registers to memory and restoring others — hundreds of cycles. On a GPU, every resident warp's registers stay permanently in the register file. Nothing is saved or restored; the scheduler just selects a different set of registers to read. This is why the register file is enormous (64 KB per partition, 16 MB across an H100 — larger than its L2 cache).</p>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Latency hiding — add warps until the ALU saturates</h4>
+          <div class="ctl">
+            <label>Resident warps</label>
+            <input type="range" id="warpSlider" min="1" max="16" value="1">
+            <span class="chip" id="warpVal">1</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="latCanvas" width="1800" height="420"></canvas>
+          <div class="readout">
+            <div class="ro-i"><div class="ro-l">ALU utilisation</div><div class="ro-v" id="latUtil">12%</div></div>
+            <div class="ro-i"><div class="ro-l">Cycles stalled</div><div class="ro-v" id="latStall">88%</div></div>
+            <div class="ro-i"><div class="ro-l">Verdict</div><div class="ro-v" id="latVerdict">Latency-bound</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">Occupancy, defined</span>
+        <b>Occupancy</b> is resident warps divided by the hardware maximum (64 per SM on H100). It is a measure of how much latency the SM is <em>able</em> to hide. It is a means, not a goal — a kernel at 50% occupancy that uses registers well often beats one at 100% occupancy that spills. Section 14 covers the tuning in full.
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">The resource tension</span>
+        Registers and shared memory are fixed budgets divided among resident warps. A kernel using 128 registers per thread allows only 4 warps per partition instead of 16. Every register you spend buys speed in one warp and costs you the ability to hide latency across many. This tension is the core of GPU tuning.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 07 ================= -->
+  <section class="sec" id="s7">
+    <div class="sec-head">
+      <div class="sec-num">07</div>
+      <div>
+        <h2>The memory hierarchy</h2>
+        <p>Five tiers, spanning three orders of magnitude in latency and four in capacity. Nearly all GPU optimisation is the art of moving data upward and keeping it there.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Fast memory is small and expensive; large memory is slow and cheap. No technology escapes this, so every processor builds a pyramid: a little very fast storage near the arithmetic units, backed by progressively larger and slower tiers. What distinguishes the GPU is that one of its tiers — <strong>shared memory</strong> — is not a cache at all, but a scratchpad the programmer controls explicitly.</p>
+
+      <div class="plate">
+        <canvas id="memCanvas" width="2200" height="900"></canvas>
+        <div class="plate-badge">MEMORY HIERARCHY · LATENCY TO SCALE (LOG)</div>
+        <div class="plate-cap"><b>Distance is time</b>
+        Bar width encodes access latency on a logarithmic scale; brightness encodes bandwidth. The jump from on-chip SRAM to off-chip HBM is the cliff that defines GPU performance engineering.</div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Tier</th><th>Capacity (H100)</th><th>Latency</th><th>Bandwidth</th><th>Scope</th><th>Managed by</th></tr></thead>
+          <tbody>
+            <tr><td><b>Registers</b></td><td class="num">64 KB / partition<br>16 MB total</td><td class="num">~1 cycle</td><td class="num">~500 TB/s</td><td>One thread</td><td><span class="tag t-b">Compiler</span></td></tr>
+            <tr><td><b>Shared memory</b></td><td class="num">up to 228 KB / SM</td><td class="num">~23 cycles</td><td class="num">~130 TB/s</td><td>Thread block</td><td><span class="tag t-g">Programmer</span></td></tr>
+            <tr><td><b>L1 cache</b></td><td class="num">shares the 228 KB</td><td class="num">~32 cycles</td><td class="num">~130 TB/s</td><td>SM</td><td><span class="tag t-a">Hardware</span></td></tr>
+            <tr><td><b>L2 cache</b></td><td class="num">50 MB</td><td class="num">~200 cycles</td><td class="num">~7 TB/s</td><td>Whole device</td><td><span class="tag t-a">Hardware</span></td></tr>
+            <tr><td><b>HBM3 (global)</b></td><td class="num">80 GB</td><td class="num">~480–600 cycles</td><td class="num">3.35 TB/s</td><td>Whole device</td><td><span class="tag t-g">Programmer</span></td></tr>
+            <tr><td><b>Host DRAM</b></td><td class="num">system RAM</td><td class="num">~10,000+ cycles</td><td class="num">64 GB/s (PCIe 5)</td><td>System</td><td><span class="tag t-g">Programmer</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Shared memory — the programmable tier</h3>
+      <p>Shared memory is a block of SRAM inside each SM, addressable directly by the programmer. It is roughly 20× faster than global memory and visible to every thread in a block. The canonical usage pattern is <strong>load once, reuse many times</strong>: cooperatively stage a tile of data from HBM into shared memory, synchronise, then have every thread in the block read that tile repeatedly at SRAM speed.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>tiled_matmul.cu — the fundamental GPU idiom</span></div>
+        <pre><span class="k">#define</span> TILE <span class="n2">32</span>
+
+<span class="k">__global__</span> <span class="t2">void</span> <span class="f">matmul_tiled</span>(<span class="k">const</span> <span class="t2">float</span>* A, <span class="k">const</span> <span class="t2">float</span>* B,
+                             <span class="t2">float</span>* C, <span class="t2">int</span> N) {
+    <span class="c">// Scratchpad in SM-local SRAM — explicitly managed.</span>
+    <span class="k">__shared__</span> <span class="t2">float</span> As[TILE][TILE];
+    <span class="k">__shared__</span> <span class="t2">float</span> Bs[TILE][TILE];
+
+    <span class="t2">int</span> row = blockIdx.y * TILE + threadIdx.y;
+    <span class="t2">int</span> col = blockIdx.x * TILE + threadIdx.x;
+    <span class="t2">float</span> acc = <span class="n2">0.0f</span>;
+
+    <span class="k">for</span> (<span class="t2">int</span> t = <span class="n2">0</span>; t &lt; N / TILE; ++t) {
+        <span class="c">// 1. Cooperative load: HBM -> shared. One trip.</span>
+        As[threadIdx.y][threadIdx.x] = A[row * N + t * TILE + threadIdx.x];
+        Bs[threadIdx.y][threadIdx.x] = B[(t * TILE + threadIdx.y) * N + col];
+        <span class="f">__syncthreads</span>();          <span class="c">// tile is now complete</span>
+
+        <span class="c">// 2. Reuse: each loaded value is read TILE times from SRAM.</span>
+        <span class="k">#pragma unroll</span>
+        <span class="k">for</span> (<span class="t2">int</span> k = <span class="n2">0</span>; k &lt; TILE; ++k)
+            acc = <span class="f">fmaf</span>(As[threadIdx.y][k], Bs[k][threadIdx.x], acc);
+
+        <span class="f">__syncthreads</span>();          <span class="c">// before overwriting the tile</span>
+    }
+    C[row * N + col] = acc;
+}
+<span class="c">// Arithmetic intensity improves by a factor of TILE (32x here),</span>
+<span class="c">// which is what moves this kernel across the roofline ridge.</span></pre>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">Why tiling is the whole game</span>
+        The naive matmul reads <code>2N</code> values from HBM per output element. The tiled version reads <code>2N/TILE</code>. With <code>TILE = 32</code> that is <b>32× less memory traffic for identical arithmetic</b> — arithmetic intensity multiplied by 32. Section 11 shows precisely why that moves the kernel from bandwidth-limited to compute-limited.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Both barriers are required</span>
+        Omitting the second <code>__syncthreads()</code> is a classic race: fast threads begin overwriting the tile for iteration <code>t+1</code> while slower threads are still reading it for iteration <code>t</code>. The kernel produces <em>almost</em> correct results, non-deterministically — the hardest class of bug to find.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 08 ================= -->
+  <section class="sec" id="s8">
+    <div class="sec-head">
+      <div class="sec-num">08</div>
+      <div>
+        <h2>Coalescing and bank conflicts</h2>
+        <p>Two access-pattern rules, one for global memory and one for shared memory. Violating either silently costs an order of magnitude.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <h3>Global memory: coalescing</h3>
+      <p>The memory system does not transfer individual values. It moves fixed-size <strong>transactions</strong> of 32 bytes, and a request for a single 4-byte float causes the full 32-byte sector to be fetched regardless. When the 32 threads of a warp issue loads simultaneously, the hardware attempts to merge them into as few transactions as possible.</p>
+      <p>If the warp reads 32 consecutive floats — 128 contiguous bytes — the hardware satisfies it with four 32-byte transactions and every byte fetched is used. This is <strong>coalesced</strong> access. If those same 32 threads read floats scattered across memory, each may land in a separate sector: 32 transactions, 1,024 bytes moved to deliver 128 useful bytes. Same instruction, same thread count, <strong>8× the traffic</strong>.</p>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Access patterns and their true cost</h4>
+          <div class="ctl">
+            <button class="btn on" data-pat="coalesced">Coalesced</button>
+            <button class="btn" data-pat="strided">Strided ×8</button>
+            <button class="btn" data-pat="random">Random</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="coalCanvas" width="1800" height="330"></canvas>
+          <div class="readout">
+            <div class="ro-i"><div class="ro-l">Transactions</div><div class="ro-v" id="coalTx">4</div></div>
+            <div class="ro-i"><div class="ro-l">Bytes fetched</div><div class="ro-v" id="coalBytes">128</div></div>
+            <div class="ro-i"><div class="ro-l">Bytes used</div><div class="ro-v" id="coalUsed">128</div></div>
+            <div class="ro-i"><div class="ro-l">Efficiency</div><div class="ro-v" id="coalEff">100%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">Layout follows access</span>
+        This is why frameworks care so much about tensor layout. Storing an array of structs (<code>xyz xyz xyz</code>) means a warp reading all <code>x</code> values strides by 12 bytes and wastes two thirds of every transaction. A struct of arrays (<code>xxx yyy zzz</code>) makes the same read perfectly coalesced. <b>Choose the layout that matches how threads index it</b>, not the one that reads naturally in source.
+      </div>
+
+      <h3>Shared memory: bank conflicts</h3>
+      <p>Shared memory is physically divided into <strong>32 banks</strong>, each 4 bytes wide, interleaved so that consecutive 4-byte words land in consecutive banks. All 32 banks can be accessed in the same cycle — provided the 32 lanes of a warp touch 32 <em>different</em> banks. When two lanes address different addresses in the <em>same</em> bank, the accesses serialise.</p>
+      <div class="math-block" data-math="\text{bank}(addr) = \left\lfloor \frac{addr}{4} \right\rfloor \bmod 32"></div>
+      <p>The classic trigger is a shared array of width 32 accessed by column: <code>tile[threadIdx.x][k]</code> makes every lane hit bank <code>k</code> — a 32-way conflict and a 32× slowdown on that access. The standard fix is one line: pad the row width by one element.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>padding.cu — a single element that removes a 32× penalty</span></div>
+        <pre><span class="c">// BAD: column access hits one bank 32 ways.</span>
+<span class="k">__shared__</span> <span class="t2">float</span> tile[<span class="n2">32</span>][<span class="n2">32</span>];
+<span class="t2">float</span> v = tile[threadIdx.x][k];     <span class="c">// stride 32 words -> same bank</span>
+
+<span class="c">// GOOD: pad the row to 33. Now element [i][k] sits in</span>
+<span class="c">// bank (33*i + k) % 32 = (i + k) % 32 — all 32 lanes differ.</span>
+<span class="k">__shared__</span> <span class="t2">float</span> tile[<span class="n2">32</span>][<span class="n2">33</span>];
+<span class="t2">float</span> v = tile[threadIdx.x][k];     <span class="c">// conflict-free</span>
+
+<span class="c">// Costs 128 extra bytes of shared memory per tile.</span>
+<span class="c">// Recovers up to 32x on the access. Always worth it.</span></pre>
+      </div>
+
+      <div class="note">
+        <span class="note-t">The exception</span>
+        A <b>broadcast</b> is free. If all 32 lanes read the <em>same address</em>, the hardware serves them from one bank in a single cycle. Conflicts arise only from different addresses within the same bank — reading identical data costs nothing extra.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 09 ================= -->
+  <section class="sec" id="s9">
+    <div class="sec-head">
+      <div class="sec-num">09</div>
+      <div>
+        <h2>Tensor cores</h2>
+        <p>A CUDA core multiplies two numbers. A tensor core multiplies two small matrices in a single instruction — and that difference accounts for the last decade of AI compute growth.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>By 2017 it was clear that neural networks spend nearly all their time in matrix multiplication, and that general-purpose FP32 lanes were an inefficient way to do it. The response was a dedicated unit that consumes entire matrix tiles as operands. Where a CUDA core executes <code>a×b+c</code> on scalars, a tensor core executes <code>D = A×B + C</code> where each operand is a small matrix — a 4×4×4 tile is 128 FLOPs from one instruction.</p>
+      <div class="math-block" data-math="\mathbf{D}_{m\times n}=\mathbf{A}_{m\times k}\cdot\mathbf{B}_{k\times n}+\mathbf{C}_{m\times n}"></div>
+      <p>The efficiency gain is structural. A scalar FMA must fetch operands, decode, and route results for every single multiply-add. A tensor core amortises all of that overhead across hundreds of arithmetic operations, and hard-wires the internal data movement in silicon rather than paying for it in register reads.</p>
+
+      <div class="plate">
+        <canvas id="tcCanvas" width="2200" height="740"></canvas>
+        <div class="plate-badge">MMA · TILE-LEVEL MATRIX MULTIPLY–ACCUMULATE</div>
+        <div class="plate-cap"><b>One instruction, one tile</b>
+        Operand tiles stream from the register file into the systolic array; partial products accumulate in place at higher precision than the inputs, and the result tile is written back once.</div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Generation</th><th>Architecture</th><th>Year</th><th>Formats added</th><th>Dense FP16 / SM</th></tr></thead>
+          <tbody>
+            <tr><td><b>1st gen</b></td><td>Volta (V100)</td><td class="num">2017</td><td>FP16 with FP32 accumulate</td><td class="num">1024 FLOP/cy</td></tr>
+            <tr><td><b>2nd gen</b></td><td>Turing (T4)</td><td class="num">2018</td><td>INT8, INT4, INT1</td><td class="num">1024 FLOP/cy</td></tr>
+            <tr><td><b>3rd gen</b></td><td>Ampere (A100)</td><td class="num">2020</td><td>TF32, BF16, structured sparsity</td><td class="num">2048 FLOP/cy</td></tr>
+            <tr><td><b>4th gen</b></td><td>Hopper (H100)</td><td class="num">2022</td><td>FP8 (E4M3 / E5M2), TMA</td><td class="num">4096 FLOP/cy</td></tr>
+            <tr><td><b>5th gen</b></td><td>Blackwell (B200)</td><td class="num">2024</td><td>FP6, FP4, second-gen Transformer Engine</td><td class="num">8192 FLOP/cy</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Programming them</h3>
+      <p>Tensor cores operate at <strong>warp scope</strong>: all 32 threads cooperate to supply one MMA operation, with each thread holding a fragment of the operand tiles in its registers. You rarely write this directly — cuBLAS, cuDNN and CUTLASS emit it — but the API makes the model explicit.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>wmma.cu — warp-level matrix multiply–accumulate</span></div>
+        <pre><span class="k">#include</span> <span class="s">&lt;mma.h&gt;</span>
+<span class="k">using namespace</span> nvcuda::wmma;
+
+<span class="k">__global__</span> <span class="t2">void</span> <span class="f">tc_matmul</span>(<span class="k">const</span> half* A, <span class="k">const</span> half* B, <span class="t2">float</span>* C, <span class="t2">int</span> N) {
+    <span class="c">// Fragments are distributed across all 32 lanes of the warp.</span>
+    fragment&lt;matrix_a, <span class="n2">16</span>,<span class="n2">16</span>,<span class="n2">16</span>, half, row_major&gt; a_frag;
+    fragment&lt;matrix_b, <span class="n2">16</span>,<span class="n2">16</span>,<span class="n2">16</span>, half, col_major&gt; b_frag;
+    fragment&lt;accumulator, <span class="n2">16</span>,<span class="n2">16</span>,<span class="n2">16</span>, <span class="t2">float</span>&gt; acc_frag;   <span class="c">// FP32 accumulate</span>
+
+    <span class="f">fill_fragment</span>(acc_frag, <span class="n2">0.0f</span>);
+
+    <span class="k">for</span> (<span class="t2">int</span> k = <span class="n2">0</span>; k &lt; N; k += <span class="n2">16</span>) {
+        <span class="f">load_matrix_sync</span>(a_frag, A + k, N);
+        <span class="f">load_matrix_sync</span>(b_frag, B + k, N);
+        <span class="c">// 16x16x16 = 8192 FLOPs issued as ONE warp instruction.</span>
+        <span class="f">mma_sync</span>(acc_frag, a_frag, b_frag, acc_frag);
+    }
+    <span class="f">store_matrix_sync</span>(C, acc_frag, N, mem_row_major);
+}</pre>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">Mixed precision, stated precisely</span>
+        Inputs are low precision (FP16/BF16/FP8); the <b>accumulator is FP32</b>. This is what makes reduced precision safe: individual products are coarse, but the running sum — where error would otherwise compound across thousands of terms — is kept wide. "Mixed precision" means exactly this split, not uniformly lower precision.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Alignment requirements</span>
+        Tensor cores engage only when tile dimensions are multiples of the native MMA shape (typically 16, or 8 for some formats) and operands meet alignment rules. A GEMM with <code>K = 4095</code> can silently fall back to CUDA cores and run <b>an order of magnitude slower</b>. Pad dimensions to multiples of 16 — for FP8 on Hopper, prefer multiples of 32.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10 ================= -->
+  <section class="sec" id="s10">
+    <div class="sec-head">
+      <div class="sec-num">10</div>
+      <div>
+        <h2>Numeric formats</h2>
+        <p>Every bit removed from a number doubles potential throughput and halves memory traffic. The entire discipline is deciding which bits are safe to remove.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Recall the three-part structure from section 2: sign, exponent, mantissa. The exponent buys <strong>dynamic range</strong> — the span between the largest and smallest representable magnitude. The mantissa buys <strong>precision</strong> — how finely adjacent values are separated. Formats differ almost entirely in how they split a fixed bit budget between the two.</p>
+
+      <div class="plate">
+        <canvas id="fmtCanvas" width="2200" height="980"></canvas>
+        <div class="plate-badge">BIT LAYOUTS · SIGN / EXPONENT / MANTISSA</div>
+        <div class="plate-cap"><b>Where the bits go</b>
+        Note BF16 against FP16: identical width, but BF16 keeps all eight of FP32's exponent bits and sacrifices mantissa — preserving range at the cost of precision, which is the correct trade for training.</div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Format</th><th>Bits (S/E/M)</th><th>Max value</th><th>Decimal digits</th><th>H100 TFLOPS</th><th>Primary use</th></tr></thead>
+          <tbody>
+            <tr><td><b>FP64</b></td><td class="num">1 / 11 / 52</td><td class="num">1.8e308</td><td class="num">~15.9</td><td class="num">34</td><td>Scientific simulation</td></tr>
+            <tr><td><b>FP32</b></td><td class="num">1 / 8 / 23</td><td class="num">3.4e38</td><td class="num">~7.2</td><td class="num">67</td><td>Baseline, accumulators</td></tr>
+            <tr><td><b>TF32</b></td><td class="num">1 / 8 / 10</td><td class="num">3.4e38</td><td class="num">~3.3</td><td class="num">495</td><td>Drop-in FP32 replacement</td></tr>
+            <tr><td><b>BF16</b></td><td class="num">1 / 8 / 7</td><td class="num">3.4e38</td><td class="num">~2.4</td><td class="num">990</td><td><span class="tag t-g">Training standard</span></td></tr>
+            <tr><td><b>FP16</b></td><td class="num">1 / 5 / 10</td><td class="num">65,504</td><td class="num">~3.3</td><td class="num">990</td><td>Training w/ loss scaling</td></tr>
+            <tr><td><b>FP8 E4M3</b></td><td class="num">1 / 4 / 3</td><td class="num">448</td><td class="num">~1.2</td><td class="num">1979</td><td>Forward pass, weights</td></tr>
+            <tr><td><b>FP8 E5M2</b></td><td class="num">1 / 5 / 2</td><td class="num">57,344</td><td class="num">~0.9</td><td class="num">1979</td><td>Gradients (needs range)</td></tr>
+            <tr><td><b>FP4 E2M1</b></td><td class="num">1 / 2 / 1</td><td class="num">6</td><td class="num">~0.3</td><td class="num">—<s> (B200: 9P dense)</s></td><td>Blackwell inference</td></tr>
+            <tr><td><b>INT8</b></td><td class="num">integer</td><td class="num">127</td><td class="num">exact</td><td class="num">3958 TOPS</td><td>Quantised inference</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Why BF16 displaced FP16 for training</h3>
+      <p>FP16 has only five exponent bits, capping its maximum at 65,504 and — more dangerously — underflowing to zero below about 6e-5. Gradients in deep networks routinely fall below that threshold, vanishing silently and stalling training. The historical workaround, <strong>loss scaling</strong>, multiplies the loss by a large constant to lift gradients into representable range, then divides it out before the optimiser step.</p>
+      <p>BF16 solves this by construction. It keeps FP32's full eight-bit exponent, so it has identical dynamic range and cannot underflow where FP32 would not. It pays with mantissa bits — roughly two decimal digits of precision — which turns out to matter far less for gradient descent than range does. Conversion to and from FP32 is also trivial: truncate or zero-pad the low 16 bits.</p>
+
+      <div class="note key">
+        <span class="note-t">The governing rule</span>
+        <b>Range matters more than precision in training; precision matters more in inference.</b> Training accumulates many small updates and must not lose them to underflow. Inference performs a fixed forward pass over a known activation distribution, where values can be calibrated into a narrow range and represented coarsely.
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">Two FP8 formats, deliberately</span>
+        E4M3 (more mantissa) suits forward activations and weights, whose values cluster in a known range. E5M2 (more exponent) suits gradients, which span many orders of magnitude. Hopper's Transformer Engine tracks per-tensor statistics at runtime and selects the format and scaling factor automatically — the format choice is a property of the tensor, not the layer.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Quantisation is not free</span>
+        Reduced precision multiplies theoretical FLOPS but does nothing for a memory-bound kernel except halve its bytes — and if you must convert formats on the fly, the conversion itself costs bandwidth. Confirm a kernel is compute-bound (section 11) before assuming lower precision will speed it up.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 11 ================= -->
+  <section class="sec" id="s11">
+    <div class="sec-head">
+      <div class="sec-num">11</div>
+      <div>
+        <h2>The roofline model</h2>
+        <p>One chart that tells you the maximum performance any kernel can achieve on any machine, and — more usefully — which of the two resources is stopping you.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Williams, Waterman and Patterson formalised this in 2009, and it remains the most useful single diagram in performance engineering. The reasoning is simple. A kernel with arithmetic intensity <code>I</code> running on hardware with peak bandwidth <code>B</code> can, at best, supply data fast enough to sustain <code>I × B</code> FLOP/s. It also cannot exceed the machine's peak arithmetic rate <code>P</code>. Actual attainable performance is therefore the smaller of the two:</p>
+      <div class="math-block" data-math="\text{Attainable FLOP/s}=\min\bigl(\,P_{\text{peak}},\;\;I\times B_{\text{peak}}\,\bigr)"></div>
+      <p>Plotted on logarithmic axes this produces a slanted line that rises with intensity, then flattens into a horizontal ceiling. The corner where they meet is the <strong>ridge point</strong>, and it is a property of the hardware alone:</p>
+      <div class="math-block" data-math="I_{\text{ridge}}=\frac{P_{\text{peak}}}{B_{\text{peak}}}\qquad\text{H100 BF16: }\frac{990\times10^{12}}{3.35\times10^{12}}\approx 295\ \frac{\text{FLOP}}{\text{byte}}"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Interactive roofline — drag the marker, switch hardware</h4>
+          <div class="ctl">
+            <button class="btn on" data-gpu="h100">H100</button>
+            <button class="btn" data-gpu="a100">A100</button>
+            <button class="btn" data-gpu="b200">B200</button>
+            <button class="btn" data-gpu="v100">V100</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="roofline"></div>
+          <div class="ctl" style="margin-top:12px">
+            <label>Arithmetic intensity</label>
+            <input type="range" id="aiSlider" min="-2" max="4" step="0.01" value="0.7">
+            <span class="chip" id="aiVal">5.0 FLOP/byte</span>
+          </div>
+          <div class="readout">
+            <div class="ro-i"><div class="ro-l">Ridge point</div><div class="ro-v" id="rfRidge">295</div></div>
+            <div class="ro-i"><div class="ro-l">Attainable</div><div class="ro-v" id="rfPerf">16.8 TF</div></div>
+            <div class="ro-i"><div class="ro-l">% of peak</div><div class="ro-v" id="rfPct">1.7%</div></div>
+            <div class="ro-i"><div class="ro-l">Regime</div><div class="ro-v" id="rfRegime">Memory-bound</div></div>
+            <div class="ro-i"><div class="ro-l">Limiting resource</div><div class="ro-v" id="rfLimit">HBM bandwidth</div></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Reading the diagnosis</h3>
+      <p>The model turns a vague question ("why is my kernel slow?") into a decision with two branches. Locate your kernel's intensity on the horizontal axis; compare it to the ridge point.</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-h"><div class="ico">←</div><h4>Left of the ridge: memory-bound</h4></div>
+          <p>You are limited by bandwidth. Extra FLOPS are worthless. <strong>Fix by raising intensity:</strong> fuse adjacent kernels to avoid round trips, tile into shared memory for reuse, use smaller data types to move fewer bytes, and improve coalescing so no fetched byte is wasted.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="ico">→</div><h4>Right of the ridge: compute-bound</h4></div>
+          <p>You are limited by arithmetic. Moving data faster changes nothing. <strong>Fix by raising throughput:</strong> engage tensor cores, drop to a lower-precision format, exploit structured sparsity, and remove instruction-level inefficiency such as divergence or register spills.</p>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">The ridge keeps moving right</span>
+        Compute has grown far faster than bandwidth for two decades. The V100's BF16-equivalent ridge sat near 139 FLOP/byte; the H100's is about 295; in FP8 terms it passes 590. <b>Kernels that were comfortably compute-bound on older hardware become memory-bound on newer hardware without a line changing.</b> This single trend explains why kernel fusion, FlashAttention, and KV-cache compression became urgent — the hardware moved beneath the software.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Where the simple model misleads</span>
+        The basic roofline assumes perfect caching and infinite parallelism. A kernel far below the roof is often limited by something the chart does not show: insufficient occupancy to hide latency, warp divergence, atomic contention, or L2 thrash. Treat the roofline as an <b>upper bound and a first diagnosis</b>, then confirm with a profiler such as Nsight Compute.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 12 ================= -->
+  <section class="sec" id="s12">
+    <div class="sec-head">
+      <div class="sec-num">12</div>
+      <div>
+        <h2>GEMM — the ideal workload</h2>
+        <p>General matrix multiply is the operation GPUs are effectively designed around. Following how a fast GEMM is built explains most of what a fast kernel does in general.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p><strong>GEMM</strong> computes <code>C ← αAB + βC</code>. It is the computational core of dense layers, attention projections, convolutions after transformation, and most classical linear algebra. On a well-tuned implementation it reaches 80–95% of a GPU's theoretical peak — a level almost no other operation approaches.</p>
+
+      <h3>The hierarchy of tiling</h3>
+      <p>A production GEMM tiles the problem at every level of the memory hierarchy simultaneously, with each level's tile sized to that level's capacity. The pattern mirrors the hardware hierarchy from section 4 exactly.</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Tile level</th><th>Typical size</th><th>Lives in</th><th>Computed by</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><b>Block tile</b></td><td class="num">128×128×32</td><td>Shared memory</td><td>Thread block</td><td>Cut HBM traffic ~100×</td></tr>
+            <tr><td><b>Warp tile</b></td><td class="num">64×64×32</td><td>Register fragments</td><td>Warp</td><td>Feed tensor cores</td></tr>
+            <tr><td><b>Thread tile</b></td><td class="num">8×8</td><td>Registers</td><td>Thread</td><td>Maximise per-thread reuse</td></tr>
+            <tr><td><b>MMA tile</b></td><td class="num">16×8×16</td><td>Tensor core</td><td>Hardware</td><td>Native instruction shape</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Software pipelining</h3>
+      <p>Tiling alone leaves the arithmetic units idle during each tile load. The remedy is <strong>double buffering</strong>: while the tensor cores compute on tile <code>k</code>, the memory system asynchronously fetches tile <code>k+1</code> into a second shared-memory buffer. Compute and data movement overlap, and the load latency disappears behind useful work.</p>
+      <p>Hopper made this a first-class hardware feature. The <strong>Tensor Memory Accelerator</strong> (TMA) performs asynchronous multidimensional copies from global to shared memory without consuming registers or occupying threads in an address-generation loop — a single thread issues the descriptor and the copy engine handles the rest.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>pipelined.cu — overlap the fetch with the math</span></div>
+        <pre><span class="k">__shared__</span> <span class="t2">float</span> buf[<span class="n2">2</span>][TILE][TILE];   <span class="c">// two stages</span>
+
+<span class="f">load_tile</span>(buf[<span class="n2">0</span>], <span class="n2">0</span>);                     <span class="c">// prologue: prime the pipe</span>
+<span class="f">__syncthreads</span>();
+
+<span class="k">for</span> (<span class="t2">int</span> k = <span class="n2">0</span>; k &lt; nTiles; ++k) {
+    <span class="t2">int</span> cur = k &amp; <span class="n2">1</span>, nxt = cur ^ <span class="n2">1</span>;
+
+    <span class="c">// Issue the NEXT load asynchronously — does not block.</span>
+    <span class="k">if</span> (k + <span class="n2">1</span> &lt; nTiles)
+        <span class="f">cp_async</span>(buf[nxt], tilePtr(k + <span class="n2">1</span>));
+
+    <span class="c">// Compute on the CURRENT tile while that load is in flight.</span>
+    <span class="f">mma_accumulate</span>(acc, buf[cur]);
+
+    <span class="f">cp_async_wait</span>();               <span class="c">// now the next tile has landed</span>
+    <span class="f">__syncthreads</span>();
+}
+<span class="c">// Memory latency is hidden behind arithmetic, not added to it.</span></pre>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">Why GEMM hits peak and your kernel does not</span>
+        GEMM has <code>O(n³)</code> arithmetic over <code>O(n²)</code> data — intensity that grows without bound as the problem grows. Almost nothing else does. Element-wise operations are stuck at <code>O(n)</code> over <code>O(n)</code>, permanently memory-bound no matter how they are written. <b>The shape of the algorithm, not the quality of the code, sets the ceiling.</b>
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Wave quantisation</span>
+        A GEMM is decomposed into thread blocks distributed across SMs. If it produces 140 blocks on a 132-SM device, the machine runs one full wave then a second wave of 8 blocks — the second wave costs as much wall-clock time as the first while using 6% of the chip. <b>Efficiency drops to about 53%.</b> Batch sizes and tile shapes should be chosen so block counts land near a multiple of the SM count.
+      </div>
+    </div>
+  </section>
+  <!-- ================= 13 ================= -->
+  <section class="sec" id="s13">
+    <div class="sec-head">
+      <div class="sec-num">13</div>
+      <div>
+        <h2>FlashAttention — a case study</h2>
+        <p>Everything so far, applied to one operation. FlashAttention changes no mathematics and computes an exact result; it simply refuses to write the intermediate to memory.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Attention, the core operation of the transformer, is defined as:</p>
+      <div class="math-block" data-math="\text{Attention}(Q,K,V)=\text{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V"></div>
+      <p>Implemented literally, this materialises the matrix <code>S = QKᵀ</code>, which has shape <code>N×N</code> for sequence length <code>N</code>. At <code>N = 8192</code> in BF16 that single intermediate occupies <strong>128 MB per attention head</strong> — written to HBM, read back for the softmax, written again, and read once more for the multiplication by <code>V</code>.</p>
+      <p>The arithmetic is <code>O(N²d)</code>; the memory traffic is <code>O(N²)</code>. Intensity is roughly <code>d</code> — about 64 or 128 — which sits far to the <em>left</em> of the H100's ridge point of 295. Standard attention is decisively <strong>memory-bound</strong>, and the GPU spends most of its time moving a matrix it does not need to keep.</p>
+
+      <div class="plate">
+        <canvas id="flashCanvas" width="2200" height="800"></canvas>
+        <div class="plate-badge">STANDARD vs. TILED · HBM TRAFFIC</div>
+        <div class="plate-cap"><b>The intermediate that never exists</b>
+        Top: the full N×N score matrix round-trips to HBM three times. Bottom: FlashAttention streams tiles through SRAM, computing softmax incrementally and writing only the final output.</div>
+      </div>
+
+      <h3>The insight: never materialise S</h3>
+      <p>The obstacle is the softmax, which appears to require a full row before it can normalise — every element of the row must be seen to compute the denominator. The resolution is the <strong>online softmax</strong>: maintain a running maximum and a running sum, and rescale accumulated results whenever a new tile reveals a larger maximum.</p>
+      <div class="math-block" data-math="m^{(j)}=\max\bigl(m^{(j-1)},\,\tilde m_j\bigr),\qquad \ell^{(j)}=e^{\,m^{(j-1)}-m^{(j)}}\ell^{(j-1)}+e^{\,\tilde m_j-m^{(j)}}\tilde\ell_j"></div>
+      <p>The correction factor <code>e^(m_old − m_new)</code> retroactively fixes every previously accumulated value when the maximum shifts. The result is <strong>numerically identical</strong> to standard softmax — this is exact attention, not an approximation.</p>
+
+      <div class="code">
+        <div class="code-bar"><i></i><span>flash_attention.py — the tiled loop, in outline</span></div>
+        <pre><span class="c"># Q, K, V: [N, d].  Tiles sized to fit SRAM (~228 KB per SM).</span>
+O = zeros(N, d); l = zeros(N); m = full(N, -inf)
+
+<span class="k">for</span> j <span class="k">in</span> range(<span class="n2">0</span>, N, B_c):              <span class="c"># outer: blocks of K, V</span>
+    K_j = K[j:j+B_c]; V_j = V[j:j+B_c]   <span class="c"># HBM -> SRAM, once</span>
+
+    <span class="k">for</span> i <span class="k">in</span> range(<span class="n2">0</span>, N, B_r):          <span class="c"># inner: blocks of Q</span>
+        Q_i = Q[i:i+B_r]
+
+        S_ij = Q_i @ K_j.T / sqrt(d)     <span class="c"># stays in SRAM — never stored</span>
+
+        m_new = maximum(m[i], S_ij.max(axis=-<span class="n2">1</span>))
+        P_ij  = exp(S_ij - m_new)
+        <span class="c"># Rescale prior accumulation to the new maximum.</span>
+        alpha = exp(m[i] - m_new)
+        l[i]  = alpha * l[i] + P_ij.sum(axis=-<span class="n2">1</span>)
+        O[i]  = alpha * O[i] + P_ij @ V_j
+
+        m[i] = m_new
+
+O = O / l[:, <span class="k">None</span>]                       <span class="c"># single normalisation at the end</span>
+<span class="c"># HBM traffic: O(N*d) instead of O(N^2). Result: bit-exact.</span></pre>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Property</th><th>Standard attention</th><th>FlashAttention</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td><b>HBM traffic</b></td><td class="num">O(N² + Nd)</td><td class="num">O(N²d²/M)</td><td><span class="tag t-g">~9× less</span></td></tr>
+            <tr><td><b>Memory footprint</b></td><td class="num">O(N²)</td><td class="num">O(N)</td><td><span class="tag t-g">linear</span></td></tr>
+            <tr><td><b>Arithmetic</b></td><td class="num">O(N²d)</td><td class="num">O(N²d) + recompute</td><td><span class="tag t-a">slightly more</span></td></tr>
+            <tr><td><b>Exactness</b></td><td>exact</td><td>exact</td><td><span class="tag t-g">identical</span></td></tr>
+            <tr><td><b>Wall-clock (N=8k)</b></td><td class="num">baseline</td><td class="num">2–4× faster</td><td><span class="tag t-g">large win</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">The transferable lesson</span>
+        FlashAttention performs <b>more</b> arithmetic than the standard implementation — it recomputes parts of the attention matrix in the backward pass rather than storing them — and is substantially faster anyway. On memory-bound problems, <b>trading extra computation for less data movement is almost always the right trade</b>. This is the single most useful heuristic in modern GPU optimisation.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 14 ================= -->
+  <section class="sec" id="s14">
+    <div class="sec-head">
+      <div class="sec-num">14</div>
+      <div>
+        <h2>Occupancy and launch configuration</h2>
+        <p>Registers, shared memory, and block size compete for one fixed budget. Tuning them is arithmetic, not guesswork.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>Each SM can host at most 64 warps, 2,048 threads, 32 blocks, 64 K registers and 228 KB of shared memory. A kernel's resource demands determine which of these binds first, and that limit sets the achieved occupancy.</p>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Occupancy calculator — find the binding constraint</h4>
+          <div class="ctl">
+            <label>Block size</label><input type="range" id="occBlock" min="32" max="1024" step="32" value="256"><span class="chip" id="occBlockV">256</span>
+            <label>Registers/thread</label><input type="range" id="occReg" min="16" max="255" step="1" value="40"><span class="chip" id="occRegV">40</span>
+            <label>Shared mem/block</label><input type="range" id="occSmem" min="0" max="65536" step="1024" value="8192"><span class="chip" id="occSmemV">8 KB</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="occCanvas" width="1800" height="300"></canvas>
+          <div class="readout">
+            <div class="ro-i"><div class="ro-l">Blocks / SM</div><div class="ro-v" id="occBlocks">8</div></div>
+            <div class="ro-i"><div class="ro-l">Warps / SM</div><div class="ro-v" id="occWarps">64</div></div>
+            <div class="ro-i"><div class="ro-l">Occupancy</div><div class="ro-v" id="occPct">100%</div></div>
+            <div class="ro-i"><div class="ro-l">Limited by</div><div class="ro-v" id="occLim">None</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">Higher occupancy is not the objective</span>
+        Occupancy measures capacity to hide latency, not speed. A kernel holding many values in registers may run at 25% occupancy and outperform a 100%-occupancy version that spills to local memory. <b>Volkov demonstrated in 2010 that low-occupancy kernels with high instruction-level parallelism frequently win.</b> Optimise for time, and treat occupancy as a diagnostic.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Register spilling</span>
+        Exceed the per-thread register budget and the compiler moves variables to "local" memory — which is physically <b>global memory</b>, hundreds of cycles away, despite the name. A kernel that spills can lose an order of magnitude. Compile with <code>-Xptxas -v</code> to see register counts and spill stores per kernel; treat any spill in a hot loop as a defect.
+      </div>
+
+      <div class="grid g3">
+        <div class="card"><div class="card-h"><div class="ico">1</div><h4>Block size 128–256</h4></div><p>Divisible by 32, large enough to amortise launch and barrier cost, small enough to divide the SM evenly. Start at 256 and measure.</p></div>
+        <div class="card"><div class="card-h"><div class="ico">2</div><h4>Grid ≥ 4× SM count</h4></div><p>Gives the scheduler enough blocks to balance load and absorb wave quantisation. Below one block per SM the chip is idle by construction.</p></div>
+        <div class="card"><div class="card-h"><div class="ico">3</div><h4>Cap registers deliberately</h4></div><p><code>__launch_bounds__</code> tells the compiler your target occupancy so it budgets registers accordingly instead of optimising one warp in isolation.</p></div>
+      </div>
+    </div>
+  </section>
+  <!-- ================= 15 ================= -->
+  <section class="sec" id="s15">
+    <div class="sec-head">
+      <div class="sec-num">15</div>
+      <div>
+        <h2>Multi-GPU scale-out</h2>
+        <p>Frontier models exceed any single device's memory by orders of magnitude. Splitting them across hundreds of GPUs turns the interconnect into the new bottleneck.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p>A 405-billion-parameter model in BF16 requires 810 GB for weights alone. Training state — gradients plus Adam's two optimiser moments — typically multiplies that by roughly six, reaching several terabytes before a single activation is stored. No single GPU comes close, so the model must be partitioned, and partitioning means communication.</p>
+
+      <div class="plate">
+        <canvas id="nvlCanvas" width="2200" height="860"></canvas>
+        <div class="plate-badge">NVL72 TOPOLOGY · 72 GPUS, ALL-TO-ALL VIA NVSWITCH</div>
+        <div class="plate-cap"><b>One rack as one accelerator</b>
+        Every GPU reaches every other at full NVLink bandwidth through the switch fabric — no hop penalty, no topology-aware placement required within the domain.</div>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Interconnect</th><th>Bandwidth (per GPU)</th><th>Scope</th><th>Relative to HBM</th></tr></thead>
+          <tbody>
+            <tr><td><b>HBM3e (on-package)</b></td><td class="num">8,000 GB/s</td><td>Local device</td><td class="num">1×</td></tr>
+            <tr><td><b>NVLink 5</b></td><td class="num">1,800 GB/s</td><td>Up to 72 GPUs</td><td class="num">0.23×</td></tr>
+            <tr><td><b>NVLink 4</b></td><td class="num">900 GB/s</td><td>Up to 8–256 GPUs</td><td class="num">0.11×</td></tr>
+            <tr><td><b>PCIe Gen5 ×16</b></td><td class="num">128 GB/s</td><td>Host / non-NVLink</td><td class="num">0.016×</td></tr>
+            <tr><td><b>InfiniBand NDR</b></td><td class="num">50 GB/s</td><td>Across nodes</td><td class="num">0.006×</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The four parallelism strategies</h3>
+      <p>Each splits a different axis of the computation, and each stresses a different part of the network. Production runs at scale combine all four, an arrangement usually called 4D parallelism.</p>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-h"><div class="ico">D</div><h4>Data parallel</h4></div>
+          <p>Every GPU holds a full model replica and processes a different micro-batch. Gradients are averaged with an <strong>all-reduce</strong> each step.</p>
+          <p><strong>Communication:</strong> <code>2×</code> parameter bytes per step. <strong>Limit:</strong> the model must fit on one device.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="ico">T</div><h4>Tensor parallel</h4></div>
+          <p>Individual weight matrices are split across GPUs; each computes a slice of every layer. Requires an all-reduce <em>within</em> each layer.</p>
+          <p><strong>Communication:</strong> very high, twice per layer. <strong>Limit:</strong> keep inside one NVLink domain — typically ≤8 GPUs.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="ico">P</div><h4>Pipeline parallel</h4></div>
+          <p>Layers are assigned to different GPUs in sequence; micro-batches flow through the stages like an assembly line.</p>
+          <p><strong>Communication:</strong> low — activations at stage boundaries only. <strong>Limit:</strong> pipeline "bubbles" idle stages at the start and end of each batch.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="ico">E</div><h4>Expert parallel (MoE)</h4></div>
+          <p>Different experts of a mixture-of-experts layer live on different GPUs; tokens are routed to their selected experts and back.</p>
+          <p><strong>Communication:</strong> two all-to-all exchanges per MoE layer. <strong>Limit:</strong> load imbalance when routing is skewed.</p>
+        </div>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">Ring all-reduce</span>
+        The standard gradient-averaging algorithm arranges GPUs in a ring and moves <code>2(N−1)/N</code> times the data per GPU — <b>asymptotically independent of GPU count</b>. This bandwidth-optimality is why data-parallel training scales to thousands of devices instead of collapsing under a central-server bottleneck.
+      </div>
+
+      <div class="note trap">
+        <span class="note-t">Where scaling actually dies</span>
+        Tensor parallelism across a slow link is the classic failure. Inside an NVLink domain it is nearly free; spanning nodes over InfiniBand, the per-layer all-reduce becomes 30× more expensive and can consume more time than the arithmetic it enables. <b>Map the parallelism strategy onto the physical topology</b> — tensor within a node, pipeline and data across nodes.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 17 ================= -->
+  <section class="sec" id="s17">
+    <div class="sec-head"><div class="sec-num">17</div><div><h2>Programming models and their boundaries</h2><p>CUDA is one way to express GPU work. Pick the highest level that gives the control your bottleneck actually needs.</p></div></div>
+    <div class="sec-body">
+      <div class="tw"><table><thead><tr><th>Layer</th><th>You express</th><th>Best first use</th><th>What you still need to know</th></tr></thead><tbody>
+        <tr><td><b>PyTorch / JAX</b></td><td>Tensor operations and model structure</td><td>Most training and inference</td><td>Shapes, dtypes, allocation, synchronization</td></tr>
+        <tr><td><b>Compiled graphs</b></td><td>Regions of tensor code</td><td>Fusion and repeatable shapes</td><td>Graph breaks, dynamic control flow, generated kernels</td></tr>
+        <tr><td><b>Triton</b></td><td>Blocked tensor programs</td><td>Custom pointwise, reduction, and fused kernels</td><td>Layouts, masks, occupancy, benchmarking</td></tr>
+        <tr><td><b>CUDA C++ / HIP</b></td><td>Threads, blocks, memory, synchronization</td><td>Specialized algorithms and libraries</td><td>All sections of this handbook</td></tr>
+        <tr><td><b>Vendor libraries</b></td><td>High-level calls such as GEMM and convolution</td><td>Established operations</td><td>Layouts, algorithm choice, workspace, data movement</td></tr>
+      </tbody></table></div>
+      <h3>The launch geometry</h3><p>A CUDA kernel is a function run by a <strong>grid</strong> of thread blocks. A block resides on one SM; threads in a block can synchronize and share shared memory. Blocks must not assume an execution order. A global index maps each thread to its element, but grid-stride loops make the same kernel handle small and very large arrays.</p>
+      <div class="code"><div class="code-bar"><i></i><span>CUDA C++ — bounds-safe grid-stride vector transform</span></div><pre><span class="k">__global__</span> <span class="t2">void</span> saxpy(<span class="t2">float</span> a, <span class="t2">const float</span>* x, <span class="t2">float</span>* y, <span class="t2">size_t</span> n) {
+  <span class="t2">size_t</span> i = blockIdx.x * blockDim.x + threadIdx.x;
+  <span class="t2">size_t</span> stride = blockDim.x * gridDim.x;
+  <span class="k">for</span> (; i &lt; n; i += stride) y[i] = a * x[i] + y[i];
+}
+<span class="c">// Launch with a measured block size; check errors at the call boundary.</span></pre></div>
+      <div class="note key"><span class="note-t">Start with a library call</span>For matrix multiplication, attention, convolution, FFTs, and collectives, a tuned library is usually the baseline to beat. A custom kernel earns its maintenance cost only after a profile identifies a hot operation and the existing implementation cannot exploit a specific property of the workload.</div>
+    </div>
+  </section>
+
+  <!-- ================= 18 ================= -->
+  <section class="sec" id="s18">
+    <div class="sec-head"><div class="sec-num">18</div><div><h2>Model memory planning</h2><p>Before choosing a device or a batch size, write down every allocation. Parameters are only the first line.</p></div></div>
+    <div class="sec-body">
+      <h3>Inference: weights, KV cache, and workspace</h3><p>For a model with <code>P</code> parameters stored at <code>b</code> bytes each, ideal weight storage is <code>P × b</code>. Autoregressive transformers also retain key and value tensors for every active sequence. For a simplified decoder with <code>L</code> layers, <code>H<sub>KV</sub></code> KV heads, head dimension <code>d</code>, batch <code>B</code>, context <code>T</code>, and <code>b<sub>KV</sub></code> bytes per value:</p>
+      <div class="math-block" data-math="M_{KV}=2\,B\,T\,L\,H_{KV}\,d\,b_{KV}"></div>
+      <p>The factor of two stores keys and values. Grouped-query attention lowers <code>H<sub>KV</sub></code>, while quantized KV caches lower <code>b<sub>KV</sub></code>. Both reduce memory bandwidth demand during decoding as well as capacity use.</p>
+      <div class="tw"><table><thead><tr><th>Inference allocation</th><th>Why it exists</th><th>Typical control</th></tr></thead><tbody>
+        <tr><td><b>Weights</b></td><td>Learned parameters</td><td>Model size, quantization, sharding</td></tr>
+        <tr><td><b>KV cache</b></td><td>Prior-token keys and values</td><td>Context, concurrency, GQA, KV dtype</td></tr>
+        <tr><td><b>Activations / workspaces</b></td><td>Current forward pass and kernels</td><td>Batching, kernel algorithm, fusion</td></tr>
+        <tr><td><b>Runtime / allocator slack</b></td><td>Framework, fragmentation, communication</td><td>Reserve headroom; inspect a memory snapshot</td></tr>
+      </tbody></table></div>
+      <h3>Training adds optimizer state</h3><p>Mixed-precision Adam commonly keeps low-precision weights and gradients plus FP32 master weights, first moments, and second moments. The exact multiplier depends on the optimizer, precision policy, and sharding, so use a ledger instead of memorizing one universal number. Activations often dominate for large batch and sequence sizes; activation checkpointing exchanges additional recomputation for a lower peak.</p>
+      <div class="note warn"><span class="note-t">Capacity is not usable capacity</span>A calculation that lands exactly at device capacity will fail in practice. Leave explicit headroom for workspaces, allocator fragmentation, communication buffers, and variations in sequence length. Measure peak allocated and reserved memory during a representative run.</div>
+    </div>
+  </section>
+
+  <!-- ================= 19 ================= -->
+  <section class="sec" id="s19">
+    <div class="sec-head"><div class="sec-num">19</div><div><h2>Profiling is a scientific workflow</h2><p>Measure the whole workload, locate the limiting operation, form one hypothesis, change one factor, and re-measure.</p></div></div>
+    <div class="sec-body">
+      <div class="grid g3"><div class="card"><div class="card-h"><div class="ico">1</div><h4>Establish a baseline</h4></div><p>Record inputs, model version, precision, warmup, device clocks, batch policy, and end-to-end latency. Include data loading and transfers if users experience them.</p></div><div class="card"><div class="card-h"><div class="ico">2</div><h4>Trace before micro-optimizing</h4></div><p>Use a timeline profiler to see CPU gaps, kernels, memory copies, synchronization, communication, and queue time. A fast kernel cannot fix an idle GPU.</p></div><div class="card"><div class="card-h"><div class="ico">3</div><h4>Inspect one hot kernel</h4></div><p>Use a kernel profiler to compare achieved occupancy, memory throughput, tensor-core utilization, stalls, and the appropriate roofline.</p></div></div>
+      <h3>Benchmark asynchronous execution correctly</h3><p>Kernel launches normally return before GPU work completes. Warm up first to populate caches and trigger compilation. Time with GPU events or synchronize around a measured region; do not accidentally measure only CPU dispatch. Report distributions across repeated runs, not one favorable number.</p>
+      <div class="code"><div class="code-bar"><i></i><span>PyTorch — event-based GPU timing</span></div><pre><span class="k">for</span> _ <span class="k">in</span> range(20): fn()                 <span class="c"># warm up compilation and allocators</span>
+start = torch.cuda.Event(enable_timing=<span class="k">True</span>)
+end = torch.cuda.Event(enable_timing=<span class="k">True</span>)
+start.record(); fn(); end.record()
+torch.cuda.synchronize()
+milliseconds = start.elapsed_time(end)</pre></div>
+      <div class="note trap"><span class="note-t">Do not optimize the wrong clock</span>For a server, measure request queueing, retrieval, network, tokenization, prefill, decode, and streaming separately. A kernel-only speedup can be invisible when another stage dominates the user-visible path.</div>
+    </div>
+  </section>
+
+  <!-- ================= 20 ================= -->
+  <section class="sec" id="s20">
+    <div class="sec-head"><div class="sec-num">20</div><div><h2>A practical kernel optimization order</h2><p>Work from algorithmic waste toward instruction-level detail. The profiler should choose the next step.</p></div></div>
+    <div class="sec-body">
+      <ol><li><strong>Remove unnecessary work.</strong> Use a better algorithm, exploit symmetry or sparsity only when it is real, and avoid materializing intermediates.</li><li><strong>Keep data resident.</strong> Fuse compatible operations, reuse tiles, and avoid host-device round trips.</li><li><strong>Make access regular.</strong> Coalesce global memory accesses and avoid shared-memory bank conflicts.</li><li><strong>Use the right math path.</strong> Align layouts and dtypes so matrix operations reach tensor cores where accuracy permits.</li><li><strong>Expose enough concurrency.</strong> Avoid tiny grids, excessive dependencies, and resource use that prevents latency hiding.</li><li><strong>Then tune the implementation.</strong> Adjust tile shape, vector width, pipeline stages, and launch configuration against measured bottlenecks.</li></ol>
+      <div class="tw"><table><thead><tr><th>Symptom</th><th>First evidence to inspect</th><th>Likely next move</th></tr></thead><tbody>
+        <tr><td>Near HBM roofline, low FLOPS</td><td>Bytes per output, cache hit rate</td><td>Reuse, fuse, compress, change algorithm</td></tr>
+        <tr><td>Low tensor-core utilization</td><td>Shapes, dtype, layout, library selection</td><td>Align dimensions; use a supported GEMM path</td></tr>
+        <tr><td>Long gaps between kernels</td><td>Timeline and CPU activity</td><td>Batch, compile, pipeline, remove synchronization</td></tr>
+        <tr><td>High local-memory traffic</td><td>Compiler report and kernel counters</td><td>Reduce register pressure or retile</td></tr>
+        <tr><td>Slow multi-GPU step</td><td>Collective timeline and link topology</td><td>Overlap communication; revise sharding placement</td></tr>
+      </tbody></table></div>
+      <div class="note key"><span class="note-t">Validate every speedup</span>Keep a correctness test and a representative benchmark next to the optimized path. A faster kernel that changes dtype behavior, drops masked elements, or only wins on a toy shape is not a production improvement.</div>
+    </div>
+  </section>
+
+  <!-- ================= 21 ================= -->
+  <section class="sec" id="s21">
+    <div class="sec-head"><div class="sec-num">21</div><div><h2>Correctness, numerical checks, and debugging</h2><p>GPU programs can produce plausible output while reading the wrong address, racing, overflowing, or silently changing precision.</p></div></div>
+    <div class="sec-body">
+      <h3>Start with a reference</h3><p>Implement a small, clear CPU or high-precision reference and test multiple shapes, including zero-sized, non-multiple tile sizes, odd strides, and boundary masks. Compare with absolute and relative tolerances appropriate to the dtype and reduction depth. Exact equality is often inappropriate for floating-point reductions because summation order changes rounding.</p>
+      <div class="grid g2"><div class="card"><div class="card-h"><div class="ico">M</div><h4>Memory safety</h4></div><p>Out-of-bounds reads and writes, invalid device pointers, and use-after-free errors can corrupt later operations. A memory checker helps isolate the offending launch.</p></div><div class="card"><div class="card-h"><div class="ico">R</div><h4>Race conditions</h4></div><p>Threads writing shared locations need a defined synchronization or atomic protocol. A race can disappear when logging or changing block size.</p></div><div class="card"><div class="card-h"><div class="ico">N</div><h4>Numerical failures</h4></div><p>Check inputs and outputs for NaN and infinity. Investigate the first non-finite value rather than only lowering the learning rate.</p></div><div class="card"><div class="card-h"><div class="ico">A</div><h4>Asynchronous errors</h4></div><p>Kernel failures may surface at a later synchronization. Check launch status at clear boundaries during development.</p></div></div>
+      <div class="note warn"><span class="note-t">Determinism is conditional</span>Atomic reductions, library algorithms, distributed collectives, and floating-point reassociation can make runs vary slightly. Reproducibility requires recording seeds, versions, device settings, data order, and deterministic-mode tradeoffs; it is not guaranteed by setting one seed.</div>
+    </div>
+  </section>
+
+  <!-- ================= 22 ================= -->
+  <section class="sec" id="s22">
+    <div class="sec-head"><div class="sec-num">22</div><div><h2>Data movement, streams, and overlap</h2><p>GPUs are accelerators in a larger system. The transfer path can decide whether acceleration is worthwhile.</p></div></div>
+    <div class="sec-body">
+      <p>Host RAM and device memory are distinct on many systems. Pageable host memory often needs a staging copy before DMA; pinned host memory can permit direct asynchronous transfer but consumes a resource the operating system cannot page. Transfer only what is needed, keep intermediate tensors on-device, and batch small operations where latency dominates.</p>
+      <div class="tw"><table><thead><tr><th>Mechanism</th><th>What it gives</th><th>Dependency to make explicit</th></tr></thead><tbody>
+        <tr><td><b>Default stream</b></td><td>Ordered work submission</td><td>Operations execute in stream order; host may continue</td></tr>
+        <tr><td><b>Multiple streams</b></td><td>Potential copy/compute or kernel overlap</td><td>Events must protect data produced in another stream</td></tr>
+        <tr><td><b>Pinned memory</b></td><td>Asynchronous host-device transfers</td><td>Lifetime and system-memory pressure</td></tr>
+        <tr><td><b>Peer-to-peer / collective</b></td><td>Direct device exchange where supported</td><td>Topology, permissions, and synchronization</td></tr>
+      </tbody></table></div>
+      <p>Overlap only helps when independent copy and compute engines, available bandwidth, and a real dependency graph allow it. Copying the next batch while computing the current batch is useful; launching two kernels that saturate the same resource merely contends.</p>
+      <div class="note trap"><span class="note-t">Avoid accidental synchronization</span>Reading a CUDA tensor value on the CPU, converting it to a Python scalar, or timing without events can force the host to wait. These are sometimes necessary boundaries; make them intentional and visible in the profile.</div>
+    </div>
+  </section>
+
+  <!-- ================= 23 ================= -->
+  <section class="sec" id="s23">
+    <div class="sec-head"><div class="sec-num">23</div><div><h2>Training and inference are different workloads</h2><p>The same model can be compute-bound during one phase and memory-bound during another.</p></div></div>
+    <div class="sec-body">
+      <div class="grid g2"><div class="card"><div class="card-h"><div class="ico">T</div><h4>Training</h4></div><p>Forward and backward passes use large matrix operations and process many tokens together. Gradients, optimizer state, activation storage, and inter-GPU synchronization matter. Throughput per training token and time-to-target quality are useful measures.</p></div><div class="card"><div class="card-h"><div class="ico">I</div><h4>Autoregressive inference</h4></div><p>Prefill processes an input prompt in parallel; decode produces one token per active sequence at a time and repeatedly reads weights and the KV cache. Batch scheduling, cache capacity, first-token latency, and token-to-token latency matter.</p></div></div>
+      <h3>Serving choices are quality and systems choices</h3><p>Continuous batching combines requests over time to raise utilization, but queues and fairness policies affect latency. Quantization reduces weight traffic and capacity but must be evaluated for task quality and outliers. Speculative decoding can trade additional model work for fewer expensive target-model steps when acceptance is high. Prefix caching only helps when prompts genuinely share a stable prefix and cache keys are isolated by tenant and version.</p>
+      <div class="note key"><span class="note-t">Report the right latency</span>For interactive generation, distinguish queue time, time to first token, output token rate, total completion time, and tail percentiles. Aggregate tokens per second can improve while an individual user waits longer.</div>
+    </div>
+  </section>
+
+  <!-- ================= 24 ================= -->
+  <section class="sec" id="s24">
+    <div class="sec-head"><div class="sec-num">24</div><div><h2>The GPU field checklist</h2><p>A compact sequence for deciding what to do next when a workload is slow, too large, or hard to scale.</p></div></div>
+    <div class="sec-body">
+      <div class="grid g2"><div class="card"><div class="card-h"><div class="ico">A</div><h4>Before implementation</h4></div><p>State inputs, outputs, dtypes, dimensions, correctness tolerance, target hardware, and the expected data movement. Estimate FLOPs, bytes, working-set memory, and whether the work has enough independent elements.</p></div><div class="card"><div class="card-h"><div class="ico">B</div><h4>Before optimization</h4></div><p>Build a reference and baseline. Profile end-to-end. Identify the dominant stage and classify it: compute, memory, launch/CPU gap, capacity, or communication. Write the hypothesis before changing code.</p></div><div class="card"><div class="card-h"><div class="ico">C</div><h4>Before scale-out</h4></div><p>Measure one device first. Select data, tensor, pipeline, or expert parallelism based on model shape and physical topology. Budget collective volume and check that the workload is balanced.</p></div><div class="card"><div class="card-h"><div class="ico">D</div><h4>Before a performance claim</h4></div><p>Name the model, shape, precision, sparsity, hardware, software versions, warmup, metric, and error tolerance. Include a baseline and state whether the number is end-to-end or kernel-only.</p></div></div>
+      <div class="note key"><span class="note-t">The governing question</span>What resource does this workload consume first: arithmetic, memory bandwidth, capacity, link bandwidth, or time waiting for another component? The answer determines the optimization. Everything in this handbook is a way to measure or change that answer.</div>
+    </div>
+  </section>
+
+  <!-- ================= 16 ================= -->
+  <section class="sec" id="s16">
+    <div class="sec-head">
+      <div class="sec-num">16</div>
+      <div>
+        <h2>Generational spec sheet</h2>
+        <p>Eight years of datacentre silicon, and the trend lines that matter more than any single row.</p>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="tw">
+        <table>
+          <thead><tr><th>Specification</th><th>V100</th><th>A100</th><th>H100 SXM</th><th>B200</th></tr></thead>
+          <tbody>
+            <tr><td><b>Architecture</b></td><td>Volta</td><td>Ampere</td><td>Hopper</td><td>Blackwell</td></tr>
+            <tr><td><b>Year</b></td><td class="num">2017</td><td class="num">2020</td><td class="num">2022</td><td class="num">2024</td></tr>
+            <tr><td><b>Process</b></td><td class="num">TSMC 12nm</td><td class="num">TSMC 7nm</td><td class="num">TSMC 4N</td><td class="num">TSMC 4NP</td></tr>
+            <tr><td><b>Transistors</b></td><td class="num">21.1 B</td><td class="num">54.2 B</td><td class="num">80 B</td><td class="num">208 B <s>(2 dies)</s></td></tr>
+            <tr><td><b>SMs</b></td><td class="num">80</td><td class="num">108</td><td class="num">132</td><td class="num">144</td></tr>
+            <tr><td><b>FP32</b></td><td class="num">15.7 TF</td><td class="num">19.5 TF</td><td class="num">67 TF</td><td class="num">75 TF</td></tr>
+            <tr><td><b>BF16 tensor, dense</b></td><td class="num">125 TF <s>(FP16)</s></td><td class="num">312 TF</td><td class="num">990 TF</td><td class="num">2.25 PF</td></tr>
+            <tr><td><b>FP8 tensor, dense</b></td><td class="num">—</td><td class="num">—</td><td class="num">1,979 TF</td><td class="num">4.5 PF</td></tr>
+            <tr><td><b>FP4 tensor, dense</b></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">9 PF</td></tr>
+            <tr><td><b>Memory</b></td><td class="num">32 GB HBM2</td><td class="num">80 GB HBM2e</td><td class="num">80 GB HBM3</td><td class="num">180 GB HBM3e</td></tr>
+            <tr><td><b>Bandwidth</b></td><td class="num">900 GB/s</td><td class="num">2,039 GB/s</td><td class="num">3,350 GB/s</td><td class="num">8,000 GB/s</td></tr>
+            <tr><td><b>L2 cache</b></td><td class="num">6 MB</td><td class="num">40 MB</td><td class="num">50 MB</td><td class="num">126 MB</td></tr>
+            <tr><td><b>NVLink</b></td><td class="num">300 GB/s</td><td class="num">600 GB/s</td><td class="num">900 GB/s</td><td class="num">1,800 GB/s</td></tr>
+            <tr><td><b>TDP</b></td><td class="num">300 W</td><td class="num">400 W</td><td class="num">700 W</td><td class="num">1,000 W</td></tr>
+            <tr><td><b>Ridge point</b> <s>(BF16, dense)</s></td><td class="num">139</td><td class="num">153</td><td class="num">295</td><td class="num">281</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4>Growth rates — compute against bandwidth, 2017 → 2024</h4>
+          <div class="ctl"><span class="sub">log scale · normalised to V100 = 1</span></div>
+        </div>
+        <div class="panel-body"><div id="trendChart"></div></div>
+      </div>
+
+      <div class="note key">
+        <span class="note-t">The divergence that shapes everything</span>
+        Between V100 and B200, dense tensor throughput at comparable 16-bit precision rose about <b>18×</b> (125 TF FP16 → 2.25 PF BF16) while memory bandwidth rose about <b>8.9×</b>. The compute-to-bandwidth balance still shifts, but precision and sparsity assumptions change the story materially. Fusion, recomputation, FlashAttention, and KV-cache compression remain valuable because they reduce data movement, which does not scale at the same rate as arithmetic.
+      </div>
+
+      <div class="note warn">
+        <span class="note-t">Reading vendor numbers honestly</span>
+        Headline FLOPS figures often assume <b>structured sparsity</b> (a 2× multiplier requiring a compatible zero pattern) and the narrowest supported format. NVIDIA's DGX B200 specification explicitly labels 144 PFLOPS FP4 as sparse and 72 PFLOPS as dense for the eight-GPU system. This table uses the corresponding <b>dense per-GPU</b> values: 9 PF FP4, 4.5 PF FP8, and 2.25 PF BF16. Always check precision, sparsity, and whether a number is per GPU, package, or system.
+      </div>
+
+      <div class="foot">
+        <p><strong>Sources.</strong> Specifications drawn from NVIDIA architecture whitepapers and datasheets, and from independent microbenchmark studies whose measured latencies differ from vendor documentation. Latency figures are measured, not specified, and vary with access pattern and clock state.</p>
+        <div class="foot-srcs">
+          <a href="https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html">NVIDIA Hopper Tuning Guide</a>
+          <a href="https://arxiv.org/pdf/2402.13499">Benchmarking and Dissecting the Hopper GPU Architecture</a>
+          <a href="https://arxiv.org/pdf/2507.10789">Dissecting Blackwell with Microbenchmarks</a>
+          <a href="https://arxiv.org/pdf/2208.11174">Demystifying the Ampere Architecture</a>
+          <a href="https://arxiv.org/pdf/2307.08691">FlashAttention-2</a>
+          <a href="https://docs.nersc.gov/tools/performance/roofline/">NERSC — Roofline Performance Model</a>
+        </div>
+        <p style="margin-top:18px;font-size:.74rem;color:var(--ink-4)">ai-everything / hardware / 01 · Reference edition · Twenty-four sections · Rendered visuals generated procedurally in-page.</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /wrap -->
+</main>
+</div><!-- /shell -->
+
+
+
+
+
+
+
+
+
+<script>
+/* ============================================================
+   PROCEDURAL SILICON RENDERER
+   Draws photographic-style die shots on canvas: substrate,
+   metal layers, emissive interconnect, HBM stacks, bloom.
+   No external image assets — nothing to 404.
+   ============================================================ */
+(function(){
+  function rng(seed){let s=seed>>>0;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
+
+  // ---- shared helpers -------------------------------------------------
+  function lerp(a,b,t){return a+(b-a)*t}
+  function rr(ctx,x,y,w,h,r){
+    r=Math.min(r,w/2,h/2);ctx.beginPath();
+    ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+  }
+  function glow(ctx,x,y,r,c,a){
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,c.replace('ALPHA',a));g.addColorStop(1,c.replace('ALPHA',0));
+    ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
+  }
+
+  // ---- SM block: the repeating functional unit ------------------------
+  function drawSM(ctx,x,y,w,h,rand,hue,t,idx){
+    // base metal
+    const g=ctx.createLinearGradient(x,y,x,y+h);
+    g.addColorStop(0,'#1a2436');g.addColorStop(.5,'#141d2c');g.addColorStop(1,'#0f1622');
+    ctx.fillStyle=g;rr(ctx,x,y,w,h,1.5);ctx.fill();
+    ctx.strokeStyle='rgba(120,150,190,.13)';ctx.lineWidth=.6;ctx.stroke();
+
+    // sub-block texture — register file / tensor core lanes
+    const rows=4,cols=6, pw=(w-4)/cols, ph=(h-4)/rows;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const v=rand();
+      if(v<.14)continue;
+      const bx=x+2+c*pw, by=y+2+r*ph;
+      ctx.fillStyle= v>.86?'rgba(150,190,240,.20)': v>.6?'rgba(90,120,165,.13)':'rgba(60,84,120,.10)';
+      ctx.fillRect(bx,by,pw-1.1,ph-1.1);
+    }
+    // emissive activity — a pulse that travels across the die
+    const phase=(t*0.00055 + idx*0.021)%1;
+    const act=Math.max(0,Math.sin(phase*Math.PI*2))**7;
+    if(act>0.015){
+      ctx.fillStyle=`hsla(${hue},92%,66%,${act*0.5})`;
+      rr(ctx,x,y,w,h,1.5);ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='lighter';
+      glow(ctx,x+w/2,y+h/2,w*1.5,`hsla(${hue},95%,60%,ALPHA)`,act*0.30);
+      ctx.restore();
+    }
+  }
+
+  // ---- HBM stack ------------------------------------------------------
+  function drawHBM(ctx,x,y,w,h,rand,t,side){
+    const g=ctx.createLinearGradient(x,y,x+w,y+h);
+    g.addColorStop(0,'#232f42');g.addColorStop(.45,'#1a2434');g.addColorStop(1,'#131b28');
+    ctx.fillStyle=g;rr(ctx,x,y,w,h,2.5);ctx.fill();
+    ctx.strokeStyle='rgba(140,170,210,.22)';ctx.lineWidth=.8;ctx.stroke();
+    // stacked die layers (HBM is a 3D stack — show the laminations)
+    const L=8, lh=h/L;
+    for(let i=0;i<L;i++){
+      ctx.fillStyle=`rgba(${lerp(46,86,i/L)|0},${lerp(62,112,i/L)|0},${lerp(88,150,i/L)|0},.42)`;
+      ctx.fillRect(x+1.5,y+i*lh+1,w-3,lh-1.4);
+      ctx.fillStyle='rgba(10,16,26,.5)';ctx.fillRect(x+1.5,y+i*lh+lh-1.4,w-3,.9);
+    }
+    // TSV micro-bumps
+    for(let i=0;i<26;i++){
+      const bx=x+3+rand()*(w-6), by=y+3+rand()*(h-6);
+      ctx.fillStyle='rgba(190,215,245,.30)';ctx.fillRect(bx,by,1.1,1.1);
+    }
+    // bandwidth shimmer toward the die
+    const p=(t*0.0011+(side?0.5:0))%1;
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    glow(ctx,side? x : x+w, y+h*p, 34,'hsla(158,90%,58%,ALPHA)',.30);
+    ctx.restore();
+  }
+
+  // ---- interconnect traces -------------------------------------------
+  function drawTraces(ctx,x,y,w,h,rand,t,n,hue){
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<n;i++){
+      const yy=y+rand()*h;
+      const seg=3+((rand()*3)|0);
+      let px=x;
+      ctx.beginPath();ctx.moveTo(px,yy);
+      let cy=yy;
+      for(let s=0;s<seg;s++){
+        const nx=px+(w/seg)*(0.6+rand()*0.7);
+        if(rand()>.55){cy+=(rand()-.5)*14;ctx.lineTo(px,cy)}
+        ctx.lineTo(Math.min(nx,x+w),cy);px=nx;
+      }
+      const flow=(t*0.0007+i*0.13)%1;
+      ctx.strokeStyle=`hsla(${hue},88%,62%,${0.03+0.16*Math.max(0,Math.sin(flow*Math.PI*2))**4})`;
+      ctx.lineWidth=.7;ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ---- MAIN: full package render --------------------------------------
+  function renderDie(cv,t){
+    const ctx=cv.getContext('2d'), W=cv.width, H=cv.height, rand=rng(20260907);
+    // substrate
+    const bg=ctx.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0,'#070b13');bg.addColorStop(.5,'#050810');bg.addColorStop(1,'#04070c');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // package fibre texture
+    for(let i=0;i<2600;i++){
+      ctx.fillStyle=`rgba(${100+rand()*90|0},${125+rand()*80|0},${165+rand()*80|0},${rand()*0.035})`;
+      ctx.fillRect(rand()*W,rand()*H,1.4,1.4);
+    }
+    // ambient rim light
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    glow(ctx,W*0.5,H*0.44,W*0.62,'hsla(200,70%,50%,ALPHA)',.11);
+    ctx.restore();
+
+    const M=76;                       // outer margin
+    const hbmW=118, gap=30;
+    const dieX=M+hbmW*2+gap*2, dieW=W-2*(M+hbmW*2+gap*2), dieY=M+18, dieH=H-2*(M+18);
+
+    // --- HBM stacks: 4 left, 4 right
+    for(let s=0;s<4;s++){
+      const sh=(dieH-3*14)/4, sy=dieY+s*(sh+14);
+      drawHBM(ctx,M,sy,hbmW,sh,rand,t,0);
+      drawHBM(ctx,M+hbmW+gap,sy,hbmW,sh,rand,t,0);
+      drawHBM(ctx,W-M-hbmW,sy,hbmW,sh,rand,t,1);
+      drawHBM(ctx,W-M-hbmW*2-gap,sy,hbmW,sh,rand,t,1);
+    }
+
+    // --- two compute dies with a bridge between them
+    const bridge=26, halfW=(dieW-bridge)/2;
+    [0,1].forEach(d=>{
+      const dx=dieX+d*(halfW+bridge);
+      // die substrate
+      const dg=ctx.createLinearGradient(dx,dieY,dx+halfW,dieY+dieH);
+      dg.addColorStop(0,'#101a29');dg.addColorStop(.5,'#0c1420');dg.addColorStop(1,'#0a1119');
+      ctx.fillStyle=dg;rr(ctx,dx,dieY,halfW,dieH,5);ctx.fill();
+      ctx.strokeStyle='rgba(130,165,205,.30)';ctx.lineWidth=1.1;ctx.stroke();
+
+      // GPC clusters of SMs
+      const padX=16,padY=16;
+      const cols=8, rows=9;
+      const cw=(halfW-padX*2)/cols, ch=(dieH-padY*2-46)/rows;
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        drawSM(ctx,dx+padX+c*cw+1.2,dieY+padY+r*ch+1.2,cw-2.4,ch-2.4,rand,
+               158, t, r*cols+c + d*72);
+      }
+      // L2 cache strip along the inner edge
+      const lx = d===0 ? dx+halfW-13 : dx+5;
+      const lg=ctx.createLinearGradient(lx,0,lx+8,0);
+      lg.addColorStop(0,'rgba(70,120,180,.30)');lg.addColorStop(1,'rgba(40,75,120,.16)');
+      ctx.fillStyle=lg;ctx.fillRect(lx,dieY+padY,8,dieH-padY*2-46);
+      // NVLink / PHY pads along the bottom
+      for(let i=0;i<26;i++){
+        ctx.fillStyle=`rgba(150,180,220,${.10+rand()*.16})`;
+        ctx.fillRect(dx+padX+i*((halfW-padX*2)/26), dieY+dieH-38, (halfW-padX*2)/26-2.5, 24);
+      }
+      drawTraces(ctx,dx+padX,dieY+padY,halfW-padX*2,dieH-padY*2-46,rand,t,54,158);
+    });
+
+    // --- die-to-die bridge (the 10 TB/s link)
+    const bx=dieX+halfW, bg2=ctx.createLinearGradient(bx,0,bx+bridge,0);
+    bg2.addColorStop(0,'rgba(30,48,72,.9)');bg2.addColorStop(.5,'rgba(52,80,116,.95)');
+    bg2.addColorStop(1,'rgba(30,48,72,.9)');
+    ctx.fillStyle=bg2;ctx.fillRect(bx,dieY,bridge,dieH);
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<16;i++){
+      const p=((t*0.0016)+i/16)%1, yy=dieY+p*dieH;
+      glow(ctx,bx+bridge/2,yy,30,'hsla(165,95%,60%,ALPHA)',.34);
+      ctx.fillStyle='rgba(190,255,225,.55)';ctx.fillRect(bx+2,yy-.8,bridge-4,1.6);
+    }
+    ctx.restore();
+
+    // --- micro-bump field around the package edge
+    for(let i=0;i<520;i++){
+      const ex=rand()*W, ey=rand()*H;
+      if(ex>M-14&&ex<W-M+14&&ey>dieY-14&&ey<dieY+dieH+14)continue;
+      ctx.fillStyle=`rgba(150,180,215,${.05+rand()*.14})`;
+      ctx.beginPath();ctx.arc(ex,ey,1.5+rand()*1.1,0,7);ctx.fill();
+    }
+    // vignette
+    const vg=ctx.createRadialGradient(W/2,H/2,H*0.30,W/2,H/2,W*0.72);
+    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.62)');
+    ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  }
+
+  // ---- animation driver (pauses off-screen / on reduced-motion) --------
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animate(cv,fn){
+    let vis=true,raf=null;
+    new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis&&!raf&&!reduce)loop()},{threshold:.02}).observe(cv);
+    function loop(){ if(!vis||reduce){raf=null;return} fn(cv,performance.now()); raf=requestAnimationFrame(loop) }
+    fn(cv,0); if(!reduce) loop();
+  }
+  const die=document.getElementById('dieCanvas');
+  if(die) animate(die,renderDie);
+  window.__gpuvis={rng,rr,glow,animate,lerp};
+})();
+</script>
+<script>
+/* ============================================================
+   INTERACTIVE LAYER — canvas renderers, D3 roofline, KaTeX.
+   Every visual degrades to a static frame under reduced-motion.
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',function(){
+  const V=window.__gpuvis||{};
+  const rng=V.rng||function(s){let x=s>>>0;return()=>{x^=x<<13;x>>>=0;x^=x>>17;x^=x<<5;x>>>=0;return x/4294967296}};
+  const rr=V.rr, glow=V.glow, animate=V.animate, lerp=V.lerp||((a,b,t)=>a+(b-a)*t);
+  const G='#00c98a', GD='#007a4d', BL='#4aa3e8', AM='#e0a44a', RD='#e05a5a', VI='#a98ae8';
+
+  function C(id){const c=document.getElementById(id);return c?[c,c.getContext('2d')]:[null,null]}
+  function bgPlate(ctx,W,H){
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'#070b13');g.addColorStop(1,'#04070c');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  function label(ctx,x,y,t,c,sz,al){
+    ctx.fillStyle=c||'#8fa3ba';ctx.font=(sz||20)+'px ui-monospace,Menlo,monospace';
+    ctx.textAlign=al||'left';ctx.fillText(t,x,y);ctx.textAlign='left';
+  }
+
+  /* ---------- 01 · transistor budget floorplan ---------- */
+  (function(){
+    const [cv,ctx]=C('budgetCanvas'); if(!cv)return;
+    function draw(){
+      const W=cv.width,H=cv.height,rand=rng(77);
+      bgPlate(ctx,W,H);
+      const pad=70, cw=(W-pad*3)/2, chh=H-pad*2-40;
+      // ---- CPU side
+      function panel(x,title,sub){
+        ctx.strokeStyle='rgba(140,170,210,.25)';ctx.lineWidth=1.2;
+        rr(ctx,x,pad,cw,chh,7);ctx.stroke();
+        label(ctx,x+4,pad-24,title,'#e6edf5',26);
+        label(ctx,x+4,pad-2,sub,'#7d8fa4',17);
+      }
+      panel(pad,'CPU CORE','~10% arithmetic, ~90% control + cache');
+      // control blocks
+      const cb=[['BRANCH PREDICT',.06,.05,.42,.16],['OUT-OF-ORDER ENGINE',.06,.23,.42,.20],
+                ['REGISTER RENAME',.06,.45,.42,.13],['L1 / L2 / L3 CACHE',.06,.60,.88,.33],
+                ['DECODE',.50,.05,.44,.16],['SCHEDULER',.50,.23,.44,.20],['LOAD/STORE',.50,.45,.44,.13]];
+      cb.forEach(([t,fx,fy,fw,fh])=>{
+        const x=pad+cw*fx,y=pad+chh*fy,w=cw*fw,h=chh*fh;
+        const isCache=t.indexOf('CACHE')>-1;
+        ctx.fillStyle=isCache?'rgba(40,90,150,.30)':'rgba(70,85,105,.28)';
+        rr(ctx,x,y,w,h,4);ctx.fill();
+        ctx.strokeStyle=isCache?'rgba(90,160,230,.4)':'rgba(130,150,175,.3)';ctx.lineWidth=.9;ctx.stroke();
+        label(ctx,x+10,y+h/2+6,t,isCache?'#8ec5f0':'#a8b6c8',16);
+      });
+      // the tiny ALU island
+      const ax=pad+cw*.06,ay=pad+chh*.945,aw=cw*.88,ah=chh*.045;
+      ctx.fillStyle='rgba(0,201,138,.55)';rr(ctx,ax,ay-ah,aw,ah,3);ctx.fill();
+      label(ctx,ax+10,ay-ah/2+5,'ALU / FPU  ← all the arithmetic','#0b1a14',15);
+
+      // ---- GPU side
+      const gx=pad*2+cw;
+      panel(gx,'GPU SM ARRAY','~80% arithmetic, thin control, small cache');
+      const cols=14, rows=11, gw=(cw-16)/cols, gh=(chh-58)/rows;
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        const x=gx+8+c*gw,y=pad+8+r*gh;
+        ctx.fillStyle=`rgba(0,201,138,${.26+rand()*.30})`;
+        rr(ctx,x+1,y+1,gw-2,gh-2,2);ctx.fill();
+        ctx.fillStyle='rgba(4,8,14,.55)';ctx.fillRect(x+1,y+gh-4,gw-2,2);
+      }
+      // thin control strip + small cache
+      ctx.fillStyle='rgba(70,85,105,.45)';rr(ctx,gx+8,pad+chh-46,cw-16,15,3);ctx.fill();
+      label(ctx,gx+14,pad+chh-35,'WARP SCHEDULERS (thin)','#a8b6c8',14);
+      ctx.fillStyle='rgba(40,90,150,.35)';rr(ctx,gx+8,pad+chh-28,cw-16,22,3);ctx.fill();
+      label(ctx,gx+14,pad+chh-13,'L2 CACHE (small per-thread)','#8ec5f0',14);
+
+      // legend
+      const ly=H-26;
+      [['ARITHMETIC','rgba(0,201,138,.6)'],['CACHE','rgba(40,90,150,.5)'],['CONTROL','rgba(90,105,125,.5)']]
+      .forEach(([t,c],i)=>{const x=pad+i*220;ctx.fillStyle=c;ctx.fillRect(x,ly-11,15,11);label(ctx,x+22,ly-1,t,'#7d8fa4',15)});
+    }
+    draw();
+  })();
+
+  /* ---------- 04 · hierarchy ---------- */
+  (function(){
+    const [cv,ctx]=C('hierCanvas'); if(!cv)return;
+    function draw(cv,t){
+      const W=cv.width,H=cv.height,rand=rng(31);
+      bgPlate(ctx,W,H);
+      const lv=[['DEVICE — 1× GPU',1,'#4aa3e8'],['GPC — 8 clusters',8,'#00c98a'],
+                ['SM — 132 total',18,'#e0a44a'],['PARTITION — 4 per SM',36,'#a98ae8']];
+      const rowH=(H-90)/4;
+      lv.forEach(([name,n,col],i)=>{
+        const y=50+i*rowH, bw=(W-160)/n;
+        label(ctx,80,y-12,name,'#9fb0c4',19);
+        for(let k=0;k<n;k++){
+          const x=80+k*bw;
+          const pulse=Math.max(0,Math.sin(t*0.0012 - i*0.5 - k*0.06))**6;
+          ctx.fillStyle=col.replace(')',`,${.14+pulse*.5})`).replace('#','rgba(')
+            .replace(/^rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/,(m,r,g,b)=>
+              `rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)}`);
+          rr(ctx,x+2,y,bw-4,rowH-34,3);ctx.fill();
+          ctx.strokeStyle=col+'44';ctx.lineWidth=.8;ctx.stroke();
+        }
+      });
+      // connectors
+      ctx.strokeStyle='rgba(140,170,210,.18)';ctx.lineWidth=1;
+      for(let i=0;i<3;i++){const y=50+i*rowH+rowH-34;
+        ctx.beginPath();ctx.moveTo(W/2,y);ctx.lineTo(W/2,y+16);ctx.stroke()}
+    }
+    (animate||((c,f)=>f(c,0)))(cv,draw);
+  })();
+
+  /* ---------- 05 · warp divergence ---------- */
+  (function(){
+    const [cv,ctx]=C('divCanvas'); if(!cv)return;
+    let mode='uniform';
+    const out={a:document.getElementById('divActive'),p:document.getElementById('divPass'),
+               u:document.getElementById('divUtil'),w:document.getElementById('divWaste')};
+    function masks(){
+      if(mode==='uniform') return [Array.from({length:32},()=>1)];
+      if(mode==='split') return [Array.from({length:32},(_,i)=>i<16?1:0),
+                                 Array.from({length:32},(_,i)=>i<16?0:1)];
+      const r=rng(9),pat=Array.from({length:32},()=>(r()*4)|0);
+      return [0,1,2,3].map(g=>pat.map(v=>v===g?1:0));
+    }
+    function draw(){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const M=masks(), lanes=32, lw=(W-140)/lanes, ph=54;
+      label(ctx,70,34,'WARP LANES  0 → 31','#7d8fa4',18);
+      M.forEach((m,pi)=>{
+        const y=56+pi*(ph+12);
+        label(ctx,20,y+ph/2+6,'P'+(pi+1),'#5f6d80',16);
+        m.forEach((on,i)=>{
+          const x=70+i*lw;
+          ctx.fillStyle= on? 'rgba(0,201,138,.72)':'rgba(48,58,72,.5)';
+          rr(ctx,x+1.5,y,lw-3,ph,3);ctx.fill();
+          if(!on){ctx.strokeStyle='rgba(224,90,90,.3)';ctx.lineWidth=1;
+            ctx.beginPath();ctx.moveTo(x+5,y+8);ctx.lineTo(x+lw-6,y+ph-8);ctx.stroke()}
+        });
+        const act=m.reduce((a,b)=>a+b,0);
+        label(ctx,W-58,y+ph/2+6,act+'/32',act===32?'#00c98a':'#e0a44a',16,'right');
+      });
+      const tot=M.reduce((a,m)=>a+m.reduce((x,y)=>x+y,0),0), cyc=M.length*32;
+      const first=M[0].reduce((a,b)=>a+b,0);
+      if(out.a)out.a.textContent=first+' / 32';
+      if(out.p)out.p.textContent=M.length;
+      if(out.u)out.u.textContent=Math.round(tot/cyc*100)+'%';
+      if(out.w)out.w.textContent=(cyc-tot);
+    }
+    document.querySelectorAll('[data-div]').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('[data-div]').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');mode=b.dataset.div;draw();
+    }));
+    draw();
+  })();
+
+  /* ---------- 06 · latency hiding ---------- */
+  (function(){
+    const [cv,ctx]=C('latCanvas'); if(!cv)return;
+    const sl=document.getElementById('warpSlider');
+    const o={v:document.getElementById('warpVal'),u:document.getElementById('latUtil'),
+             s:document.getElementById('latStall'),d:document.getElementById('latVerdict')};
+    const COMP=4, MEM=28;                  // cycles: compute burst vs memory wait
+    function draw(){
+      const n=+sl.value, W=cv.width;
+      // Shrink the canvas to the rows actually in use — no dead space at low warp counts.
+      const rowH=26, H=Math.max(150, 54 + n*(rowH+3) + 56);
+      cv.height=H;
+      bgPlate(ctx,W,H);
+      const total=120, cw=(W-150)/total, rh=rowH;
+      const busy=new Array(total).fill(0);
+      for(let w=0;w<n;w++){
+        const y=54+w*(rh+3); if(y+rh>H-34)break;
+        label(ctx,18,y+rh/2+5,'W'+w,'#5f6d80',14);
+        let c=w*COMP;                       // stagger warp starts
+        while(c<total){
+          for(let k=0;k<COMP&&c+k<total;k++){
+            ctx.fillStyle='rgba(0,201,138,.8)';
+            ctx.fillRect(140+(c+k)*cw,y,cw-1,rh);busy[c+k]=1;
+          }
+          c+=COMP;
+          for(let k=0;k<MEM&&c+k<total;k++){
+            ctx.fillStyle='rgba(48,58,72,.55)';
+            ctx.fillRect(140+(c+k)*cw,y,cw-1,rh);
+          }
+          c+=MEM;
+        }
+      }
+      // ALU occupancy strip
+      const by=H-26;
+      label(ctx,18,by+10,'ALU','#7d8fa4',14);
+      for(let c=0;c<total;c++){
+        ctx.fillStyle=busy[c]?'rgba(0,201,138,.9)':'rgba(224,90,90,.35)';
+        ctx.fillRect(140+c*cw,by,cw-1,16);
+      }
+      const util=Math.min(100,Math.round(busy.reduce((a,b)=>a+b,0)/total*100));
+      if(o.v)o.v.textContent=n;
+      if(o.u)o.u.textContent=util+'%';
+      if(o.s)o.s.textContent=(100-util)+'%';
+      if(o.d){o.d.textContent= util>92?'Saturated':util>60?'Partially hidden':'Latency-bound';
+        o.d.style.color= util>92?'#007a4d':util>60?'#9a6700':'#b4232c';}
+    }
+    sl.addEventListener('input',draw);draw();
+  })();
+
+  /* ---------- 07 · memory hierarchy ---------- */
+  (function(){
+    const [cv,ctx]=C('memCanvas'); if(!cv)return;
+    function draw(cv,t){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const tiers=[['REGISTERS','16 MB',1,'500 TB/s',1.0],
+                   ['SHARED / L1','228 KB per SM',23,'130 TB/s',.78],
+                   ['L2 CACHE','50 MB',200,'7 TB/s',.5],
+                   ['HBM3 GLOBAL','80 GB',500,'3.35 TB/s',.34],
+                   ['HOST DRAM','system','10000','64 GB/s',.14]];
+      const maxL=Math.log10(10000), rowH=(H-120)/tiers.length;
+      tiers.forEach(([n,cap,lat,bw,bright],i)=>{
+        const y=70+i*rowH, w=(Math.log10(+lat)+1)/(maxL+1)*(W-460)+150;
+        const g=ctx.createLinearGradient(180,0,180+w,0);
+        g.addColorStop(0,`rgba(0,201,138,${bright*.85})`);
+        g.addColorStop(1,`rgba(0,120,200,${bright*.35})`);
+        ctx.fillStyle=g;rr(ctx,180,y,w,rowH-22,5);ctx.fill();
+        // flow shimmer
+        const p=((t*0.0006)+i*.17)%1;
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        if(glow)glow(ctx,180+p*w,y+(rowH-22)/2,44,'hsla(160,95%,62%,ALPHA)',.28*bright);
+        ctx.restore();
+        label(ctx,170,y+(rowH-22)/2+7,n,'#e6edf5',20,'right');
+        label(ctx,195,y+(rowH-22)/2+7,cap,'#04120c',18);
+        label(ctx,W-60,y+(rowH-22)/2+7,(lat==10000?'~10000+':'~'+lat)+' cy','#9fb0c4',18,'right');
+        label(ctx,W-230,y+(rowH-22)/2+7,bw,'#6f8296',17,'right');
+      });
+      label(ctx,180,44,'← LATENCY (log scale) →','#5f6d80',17);
+      label(ctx,W-60,44,'ACCESS COST','#5f6d80',17,'right');
+    }
+    (animate||((c,f)=>f(c,0)))(cv,draw);
+  })();
+
+  /* ---------- 08 · coalescing ---------- */
+  (function(){
+    const [cv,ctx]=C('coalCanvas'); if(!cv)return;
+    let pat='coalesced';
+    const o={t:document.getElementById('coalTx'),b:document.getElementById('coalBytes'),
+             u:document.getElementById('coalUsed'),e:document.getElementById('coalEff')};
+    function addr(i){
+      if(pat==='coalesced')return i;
+      if(pat==='strided')return i*8;
+      const r=rng(1234+i);return (r()*256)|0;
+    }
+    function draw(){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const SECT=256, sw=(W-120)/64;
+      const touched=new Set(), A=[];
+      for(let i=0;i<32;i++){const a=addr(i)%SECT;A.push(a);touched.add(Math.floor(a/8))}
+      // memory sectors
+      label(ctx,60,36,'MEMORY — 32-BYTE SECTORS','#7d8fa4',18);
+      for(let s=0;s<32;s++){
+        const x=60+s*(sw*2);
+        const hit=touched.has(s);
+        ctx.fillStyle=hit?'rgba(74,163,232,.5)':'rgba(40,50,64,.45)';
+        rr(ctx,x+2,52,sw*2-4,44,3);ctx.fill();
+        if(hit){ctx.strokeStyle='rgba(120,190,255,.55)';ctx.lineWidth=1;ctx.stroke()}
+      }
+      // lanes + rays
+      label(ctx,60,150,'WARP LANES','#7d8fa4',18);
+      A.forEach((a,i)=>{
+        const lx=60+i*((W-120)/32)+((W-120)/64);
+        const sx=60+Math.floor(a/8)*(sw*2)+sw;
+        ctx.strokeStyle= pat==='coalesced'?'rgba(0,201,138,.35)':
+                         pat==='strided'?'rgba(224,164,74,.32)':'rgba(224,90,90,.30)';
+        ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(lx,170);ctx.lineTo(sx,98);ctx.stroke();
+        ctx.fillStyle= pat==='coalesced'?'rgba(0,201,138,.8)':
+                       pat==='strided'?'rgba(224,164,74,.75)':'rgba(224,90,90,.7)';
+        rr(ctx,lx-((W-120)/32)/2+2,172,((W-120)/32)-4,40,3);ctx.fill();
+      });
+      const tx=touched.size, bytes=tx*32, used=128;
+      if(o.t)o.t.textContent=tx;
+      if(o.b)o.b.textContent=bytes;
+      if(o.u)o.u.textContent=used;
+      if(o.e){const e=Math.round(used/bytes*100);o.e.textContent=e+'%';
+        o.e.style.color=e>90?'#007a4d':e>40?'#9a6700':'#b4232c'}
+    }
+    document.querySelectorAll('[data-pat]').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('[data-pat]').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');pat=b.dataset.pat;draw();
+    }));
+    draw();
+  })();
+
+  /* ---------- 09 · tensor core MMA ---------- */
+  (function(){
+    const [cv,ctx]=C('tcCanvas'); if(!cv)return;
+    function draw(cv,t){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const N=8, cell=42, ox=150, oy=140;
+      function mat(x,y,name,col,phase){
+        label(ctx,x,y-22,name,'#9fb0c4',20);
+        for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+          const a=.18+.55*Math.max(0,Math.sin(t*0.0016+phase+(r+c)*0.35))**3;
+          ctx.fillStyle=col.replace('A',a.toFixed(3));
+          rr(ctx,x+c*cell,y+r*cell,cell-3,cell-3,2);ctx.fill();
+        }
+      }
+      mat(ox,oy,'A  (M×K)','rgba(0,201,138,A)',0);
+      label(ctx,ox+N*cell+34,oy+N*cell/2,'×','#7d8fa4',34);
+      mat(ox+N*cell+70,oy,'B  (K×N)','rgba(74,163,232,A)',1.2);
+      label(ctx,ox+2*(N*cell)+104,oy+N*cell/2,'+','#7d8fa4',34);
+      mat(ox+2*(N*cell)+140,oy,'C  accum','rgba(169,138,232,A)',2.1);
+      label(ctx,ox+3*(N*cell)+174,oy+N*cell/2,'=','#7d8fa4',34);
+      mat(ox+3*(N*cell)+210,oy,'D  (FP32)','rgba(224,164,74,A)',3.0);
+
+      label(ctx,ox,oy+N*cell+48,'ONE INSTRUCTION  ·  ONE WARP  ·  32 LANES COOPERATE','#5f6d80',19);
+      label(ctx,ox,oy+N*cell+76,'Inputs FP16/BF16/FP8   →   accumulator always FP32','#00c98a',19);
+    }
+    (animate||((c,f)=>f(c,0)))(cv,draw);
+  })();
+
+  /* ---------- 10 · bit layouts ---------- */
+  (function(){
+    const [cv,ctx]=C('fmtCanvas'); if(!cv)return;
+    function draw(){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const F=[['FP64',1,11,52],['FP32',1,8,23],['TF32',1,8,10],['BF16',1,8,7],
+               ['FP16',1,5,10],['FP8 E4M3',1,4,3],['FP8 E5M2',1,5,2],['FP4 E2M1',1,2,1]];
+      const TOP=86, BOT=150;                 // leave room for header + caption
+      const unit=(W-360)/64, rowH=(H-TOP-BOT)/F.length;
+      F.forEach(([n,s,e,m],i)=>{
+        const y=TOP+i*rowH, x0=220, tot=s+e+m;
+        label(ctx,205,y+22,n,'#e6edf5',21,'right');
+        let x=x0;
+        [[s,'rgba(224,90,90,.75)','S'],[e,'rgba(74,163,232,.7)','EXPONENT '+e],
+         [m,'rgba(0,201,138,.65)','MANTISSA '+m]].forEach(([bits,col,lb])=>{
+          const w=bits*unit;
+          ctx.fillStyle=col;rr(ctx,x,y,w-2,30,2);ctx.fill();
+          if(w>90)label(ctx,x+w/2,y+20,lb,'#04120c',15,'center');
+          // bit ticks
+          for(let b=1;b<bits;b++){ctx.fillStyle='rgba(4,8,14,.35)';ctx.fillRect(x+b*unit,y,1,30)}
+          x+=w;
+        });
+        label(ctx,x+14,y+21,tot+' bits','#7d8fa4',17);
+      });
+      label(ctx,220,52,'← RANGE (exponent)          PRECISION (mantissa) →','#5f6d80',18);
+    }
+    draw();
+  })();
+
+  /* ---------- 13 · flash attention traffic ---------- */
+  (function(){
+    const [cv,ctx]=C('flashCanvas'); if(!cv)return;
+    function draw(cv,t){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      function lane(y,title,steps,col,bad){
+        label(ctx,70,y-16,title,'#e6edf5',22);
+        const bw=(W-560)/steps.length;
+        steps.forEach(([lb,heavy],i)=>{
+          const x=70+i*(bw+18);
+          const p=Math.max(0,Math.sin(t*0.0013-i*0.5))**4;
+          ctx.fillStyle=heavy?`rgba(224,90,90,${.28+p*.42})`:`rgba(0,201,138,${.26+p*.42})`;
+          rr(ctx,x,y,bw,70,5);ctx.fill();
+          ctx.strokeStyle=heavy?'rgba(224,90,90,.4)':'rgba(0,201,138,.4)';ctx.lineWidth=1;ctx.stroke();
+          label(ctx,x+bw/2,y+42,lb,'#e6edf5',17,'center');
+          if(i<steps.length-1){
+            ctx.strokeStyle='rgba(140,170,210,.3)';ctx.beginPath();
+            ctx.moveTo(x+bw+3,y+35);ctx.lineTo(x+bw+15,y+35);ctx.stroke();
+          }
+        });
+        label(ctx,W-70,y+42,bad,bad.indexOf('O(N²')>-1?'#e05a5a':'#00c98a',21,'right');
+      }
+      lane(150,'STANDARD ATTENTION — three HBM round trips',
+        [['Q·Kᵀ',0],['write S',1],['read S',1],['softmax',0],['write P',1],['read P',1],['P·V',0]],
+        RD,'O(N²) HBM');
+      lane(450,'FLASHATTENTION — tiles stay in SRAM',
+        [['load tile',0],['Q·Kᵀ SRAM',0],['online softmax',0],['accum O',0],['next tile',0],['write O',0]],
+        G,'O(N) HBM');
+      // divider
+      ctx.strokeStyle='rgba(140,170,210,.15)';ctx.beginPath();
+      ctx.moveTo(70,350);ctx.lineTo(W-70,350);ctx.stroke();
+      label(ctx,70,720,'RED = round trip to HBM        GREEN = stays on-chip','#5f6d80',18);
+    }
+    (animate||((c,f)=>f(c,0)))(cv,draw);
+  })();
+
+  /* ---------- 14 · occupancy ---------- */
+  (function(){
+    const [cv,ctx]=C('occCanvas'); if(!cv)return;
+    const eb=document.getElementById('occBlock'),er=document.getElementById('occReg'),
+          es=document.getElementById('occSmem');
+    if(!eb)return;
+    const o={b:document.getElementById('occBlockV'),r:document.getElementById('occRegV'),
+             s:document.getElementById('occSmemV'),bl:document.getElementById('occBlocks'),
+             w:document.getElementById('occWarps'),p:document.getElementById('occPct'),
+             l:document.getElementById('occLim')};
+    function draw(){
+      const bs=+eb.value, rpt=+er.value, sm=+es.value;
+      const MAXW=64, MAXT=2048, MAXB=32, REGS=65536, SMEM=233472;
+      const wpb=Math.ceil(bs/32);
+      const byThread=Math.floor(MAXT/bs);
+      const byBlock=MAXB;
+      const byReg=Math.floor(REGS/(Math.ceil(rpt*32/256)*256*wpb))||0;
+      const bySmem=sm>0?Math.floor(SMEM/sm):99;
+      const byWarp=Math.floor(MAXW/wpb);
+      const lim=Math.max(0,Math.min(byThread,byBlock,byReg,bySmem,byWarp));
+      const warps=Math.min(MAXW,lim*wpb), occ=Math.round(warps/MAXW*100);
+      const names=[['Threads',byThread],['Blocks',byBlock],['Registers',byReg],
+                   ['Shared mem',bySmem],['Warp slots',byWarp]];
+      const binding=names.reduce((a,b)=>b[1]<a[1]?b:a);
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const bw=(W-200)/names.length;
+      names.forEach(([n,v],i)=>{
+        const x=100+i*bw, h=Math.min(1,v/12)*(H-120);
+        const isB=n===binding[0];
+        ctx.fillStyle=isB?'rgba(224,90,90,.65)':'rgba(0,201,138,.45)';
+        rr(ctx,x,H-60-h,bw-24,h,4);ctx.fill();
+        label(ctx,x+(bw-24)/2,H-34,n,isB?'#e05a5a':'#7d8fa4',17,'center');
+        label(ctx,x+(bw-24)/2,H-70-h,v>90?'∞':v,'#e6edf5',20,'center');
+      });
+      label(ctx,100,40,'BLOCKS PER SM ALLOWED BY EACH RESOURCE — lowest wins','#7d8fa4',18);
+      if(o.b)o.b.textContent=bs;
+      if(o.r)o.r.textContent=rpt;
+      if(o.s)o.s.textContent=(sm/1024).toFixed(0)+' KB';
+      if(o.bl)o.bl.textContent=lim;
+      if(o.w)o.w.textContent=warps;
+      if(o.p){o.p.textContent=occ+'%';o.p.style.color=occ>=75?'#007a4d':occ>=40?'#9a6700':'#b4232c'}
+      if(o.l)o.l.textContent=binding[0];
+    }
+    [eb,er,es].forEach(e=>e.addEventListener('input',draw));draw();
+  })();
+
+  /* ---------- 15 · NVL72 topology ---------- */
+  (function(){
+    const [cv,ctx]=C('nvlCanvas'); if(!cv)return;
+    function draw(cv,t){
+      const W=cv.width,H=cv.height;bgPlate(ctx,W,H);
+      const cx=W/2, cy=H/2+20, R=Math.min(W,H)*0.36, N=72;
+      // switch core
+      ctx.save();ctx.globalCompositeOperation='lighter';
+      if(glow)glow(ctx,cx,cy,190,'hsla(200,90%,58%,ALPHA)',.30);
+      ctx.restore();
+      ctx.fillStyle='rgba(20,40,66,.9)';rr(ctx,cx-110,cy-42,220,84,8);ctx.fill();
+      ctx.strokeStyle='rgba(90,170,240,.55)';ctx.lineWidth=1.4;ctx.stroke();
+      label(ctx,cx,cy+7,'NVSWITCH FABRIC','#bfe0ff',22,'center');
+      // GPUs
+      for(let i=0;i<N;i++){
+        const a=(i/N)*Math.PI*2 - Math.PI/2;
+        const x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
+        const p=Math.max(0,Math.sin(t*0.0018 - i*0.16))**5;
+        ctx.strokeStyle=`rgba(0,201,138,${.05+p*.5})`;ctx.lineWidth=.9;
+        ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(cx+Math.cos(a)*118,cy+Math.sin(a)*54);ctx.stroke();
+        ctx.fillStyle=`rgba(0,201,138,${.35+p*.55})`;
+        rr(ctx,x-13,y-9,26,18,3);ctx.fill();
+      }
+      label(ctx,70,96,'72 GPUs · single NVLink domain','#9fb0c4',22);
+      label(ctx,70,126,'1.8 TB/s per GPU · all-to-all, no hop penalty','#5f6d80',19);
+      label(ctx,W-70,96,'130 TB/s aggregate','#00c98a',22,'right');
+    }
+    (animate||((c,f)=>f(c,0)))(cv,draw);
+  })();
+
+  /* ---------- 11 · D3 ROOFLINE ---------- */
+  (function(){
+    if(typeof d3==='undefined')return;
+    const el=document.getElementById('roofline'); if(!el)return;
+    const GPUS={
+      h100:{n:'H100 SXM',P:989.4e12,B:3.35e12,c:'#007a4d'},
+      a100:{n:'A100 80GB',P:312e12,B:2.039e12,c:'#1668b3'},
+      b200:{n:'B200',P:2250e12,B:8.0e12,c:'#5b3fa8'},
+      v100:{n:'V100',P:125e12,B:0.9e12,c:'#9a6700'}
+    };
+    let cur='h100';
+    const KERNELS=[{n:'Vector add',I:0.083},{n:'Dot product',I:0.25},{n:'Mat–vec',I:0.5},
+                   {n:'Attention (naive)',I:64},{n:'Conv 3×3',I:120},
+                   {n:'GEMM n=1024',I:171},{n:'GEMM n=8192',I:1365}];
+    const M={t:22,r:26,b:52,l:74}, W=980-M.l-M.r, H=430-M.t-M.b;
+    const svg=d3.select(el).append('svg')
+      .attr('viewBox',`0 0 ${W+M.l+M.r} ${H+M.t+M.b}`).style('width','100%');
+    const g=svg.append('g').attr('transform',`translate(${M.l},${M.t})`);
+    const x=d3.scaleLog().domain([0.01,10000]).range([0,W]);
+    const y=d3.scaleLog().range([H,0]);
+    const gx=g.append('g').attr('transform',`translate(0,${H})`);
+    const gy=g.append('g');
+    const grid=g.append('g').attr('class','grid');
+    const roofPath=g.append('path').attr('fill','none').attr('stroke-width',2.4);
+    const shadeMem=g.append('path').attr('opacity',.07);
+    const ridgeLine=g.append('line').attr('stroke-dasharray','4 4').attr('stroke','#9aa1ad');
+    const ridgeLbl=g.append('text').attr('font-size',10).attr('fill','#6b7280')
+      .attr('font-family','ui-monospace,monospace');
+    const kg=g.append('g');
+    const marker=g.append('circle').attr('r',6).attr('fill','#0d1117').attr('stroke','#fff').attr('stroke-width',2);
+    const mLine=g.append('line').attr('stroke','#0d1117').attr('stroke-dasharray','3 3').attr('opacity',.5);
+    g.append('text').attr('x',W/2).attr('y',H+40).attr('text-anchor','middle')
+      .attr('font-size',11).attr('fill','#6b7280').attr('font-family','ui-monospace,monospace')
+      .text('ARITHMETIC INTENSITY  (FLOP / byte)');
+    g.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-54)
+      .attr('text-anchor','middle').attr('font-size',11).attr('fill','#6b7280')
+      .attr('font-family','ui-monospace,monospace').text('ATTAINABLE  TFLOP/s');
+
+    const sl=document.getElementById('aiSlider');
+    const out={i:document.getElementById('aiVal'),r:document.getElementById('rfRidge'),
+               p:document.getElementById('rfPerf'),c:document.getElementById('rfPct'),
+               g:document.getElementById('rfRegime'),l:document.getElementById('rfLimit')};
+
+    function perf(I,d){return Math.min(d.P,I*d.B)}
+    function render(){
+      const d=GPUS[cur], ridge=d.P/d.B;
+      y.domain([d.P/1e12*0.0006,d.P/1e12*1.6]);
+      gx.call(d3.axisBottom(x).ticks(6,'~g')).selectAll('text')
+        .attr('font-size',10).attr('fill','#6b7280').attr('font-family','ui-monospace,monospace');
+      gy.call(d3.axisLeft(y).ticks(5,'~g')).selectAll('text')
+        .attr('font-size',10).attr('fill','#6b7280').attr('font-family','ui-monospace,monospace');
+      gx.selectAll('path,line').attr('stroke','#cdd2da');
+      gy.selectAll('path,line').attr('stroke','#cdd2da');
+      grid.selectAll('line').remove();
+      grid.selectAll('line').data(y.ticks(5)).enter().append('line')
+        .attr('x1',0).attr('x2',W).attr('y1',v=>y(v)).attr('y2',v=>y(v))
+        .attr('stroke','#eceef1').attr('stroke-width',1);
+
+      const pts=d3.range(-2,4.02,.02).map(e=>Math.pow(10,e))
+        .map(I=>[x(I),y(perf(I,d)/1e12)]);
+      roofPath.attr('d',d3.line()(pts)).attr('stroke',d.c);
+      shadeMem.attr('d',d3.area().x(p=>p[0]).y0(H).y1(p=>p[1])(pts)).attr('fill',d.c);
+      ridgeLine.attr('x1',x(ridge)).attr('x2',x(ridge)).attr('y1',0).attr('y2',H);
+      ridgeLbl.attr('x',x(ridge)+6).attr('y',14).text('ridge '+Math.round(ridge));
+
+      const kd=kg.selectAll('g.k').data(KERNELS);
+      const ke=kd.enter().append('g').attr('class','k');
+      ke.append('circle').attr('r',3.4);
+      ke.append('text').attr('font-size',9.5).attr('font-family','ui-monospace,monospace');
+      const km=ke.merge(kd);
+      km.select('circle').attr('cx',k=>x(k.I)).attr('cy',k=>y(perf(k.I,d)/1e12))
+        .attr('fill',k=>k.I<ridge?'#b4232c':'#007a4d');
+      km.select('text').attr('x',k=>x(k.I)+6).attr('y',k=>y(perf(k.I,d)/1e12)-6)
+        .attr('fill','#3d4451').text(k=>k.n);
+
+      const I=Math.pow(10,+sl.value), p=perf(I,d);
+      marker.attr('cx',x(I)).attr('cy',y(p/1e12));
+      mLine.attr('x1',x(I)).attr('x2',x(I)).attr('y1',y(p/1e12)).attr('y2',H);
+      const memBound=I<ridge;
+      if(out.i)out.i.textContent=(I<1?I.toFixed(3):I<100?I.toFixed(1):Math.round(I))+' FLOP/byte';
+      if(out.r)out.r.textContent=Math.round(ridge);
+      if(out.p)out.p.textContent=(p/1e12>=1000?(p/1e15).toFixed(1)+' PF':(p/1e12).toFixed(1)+' TF');
+      if(out.c)out.c.textContent=(p/d.P*100).toFixed(1)+'%';
+      if(out.g){out.g.textContent=memBound?'Memory-bound':'Compute-bound';
+        out.g.style.color=memBound?'#b4232c':'#007a4d'}
+      if(out.l)out.l.textContent=memBound?'HBM bandwidth':'Peak FLOPS';
+    }
+    sl.addEventListener('input',render);
+    document.querySelectorAll('[data-gpu]').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('[data-gpu]').forEach(z=>z.classList.remove('on'));
+      b.classList.add('on');cur=b.dataset.gpu;render();
+    }));
+    render();
+  })();
+
+  /* ---------- 16 · trend chart ---------- */
+  (function(){
+    if(typeof d3==='undefined')return;
+    const el=document.getElementById('trendChart'); if(!el)return;
+    const data=[
+      {gen:'V100',yr:2017,compute:125,bw:900,ridge:139},
+      {gen:'A100',yr:2020,compute:312,bw:2039,ridge:153},
+      {gen:'H100',yr:2022,compute:990,bw:3350,ridge:295},
+      {gen:'B200',yr:2024,compute:2250,bw:8000,ridge:281}];
+    const M={t:20,r:120,b:46,l:64},W=980-M.l-M.r,H=330-M.t-M.b;
+    const svg=d3.select(el).append('svg')
+      .attr('viewBox',`0 0 ${W+M.l+M.r} ${H+M.t+M.b}`).style('width','100%');
+    const g=svg.append('g').attr('transform',`translate(${M.l},${M.t})`);
+    const x=d3.scalePoint().domain(data.map(d=>d.gen)).range([0,W]).padding(.5);
+    const y=d3.scaleLog().domain([.8,200]).range([H,0]);
+    g.selectAll('line.gr').data(y.ticks(4)).enter().append('line')
+      .attr('x1',0).attr('x2',W).attr('y1',v=>y(v)).attr('y2',v=>y(v)).attr('stroke','#eceef1');
+    g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(x))
+      .selectAll('text').attr('font-size',11).attr('fill','#3d4451').attr('font-family','ui-monospace,monospace');
+    g.append('g').call(d3.axisLeft(y).ticks(4,'~g')).selectAll('text')
+      .attr('font-size',10).attr('fill','#6b7280').attr('font-family','ui-monospace,monospace');
+    g.selectAll('path.domain,g line').attr('stroke','#cdd2da');
+    const series=[['compute','#007a4d','Tensor FLOPS'],['bw','#1668b3','Bandwidth'],['ridge','#b4232c','Ridge point']];
+    series.forEach(([k,c,lb])=>{
+      const base=data[0][k];
+      const ln=d3.line().x(d=>x(d.gen)).y(d=>y(d[k]/base));
+      g.append('path').datum(data).attr('d',ln).attr('fill','none').attr('stroke',c).attr('stroke-width',2.2);
+      g.selectAll('c'+k).data(data).enter().append('circle')
+        .attr('cx',d=>x(d.gen)).attr('cy',d=>y(d[k]/base)).attr('r',4).attr('fill',c);
+      const last=data[data.length-1];
+      g.append('text').attr('x',W+8).attr('y',y(last[k]/base)+4).attr('font-size',10.5)
+        .attr('fill',c).attr('font-family','ui-monospace,monospace')
+        .text(lb+'  '+(last[k]/base).toFixed(1)+'×');
+    });
+  })();
+
+  /* ---------- KaTeX ---------- */
+  function typeset(){
+    if(typeof katex==='undefined')return;
+    document.querySelectorAll('[data-math]').forEach(e=>{
+      try{katex.render(e.dataset.math,e,{displayMode:true,throwOnError:false})}catch(_){}
+    });
+  }
+  if(typeof katex!=='undefined')typeset(); else window.addEventListener('load',typeset);
+
+  /* ---------- nav scrollspy + progress ---------- */
+  (function(){
+    const links=[...document.querySelectorAll('.rail-nav a')];
+    const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const crumb=document.getElementById('crumb'), prog=document.getElementById('prog');
+    function upd(){
+      const y=scrollY+120; let idx=0;
+      secs.forEach((s,i)=>{if(s.offsetTop<=y)idx=i});
+      links.forEach((a,i)=>a.classList.toggle('on',i===idx));
+      if(crumb&&secs[idx])crumb.textContent=links[idx].textContent.replace(/^\d+/,'').trim().toLowerCase();
+      if(prog)prog.style.width=Math.min(100,scrollY/(document.body.scrollHeight-innerHeight)*100)+'%';
+    }
+    addEventListener('scroll',upd,{passive:true});upd();
+  })();
+});
+  /* Canvas renderers settle after parsing. Re-apply deep links once the
+     document has reached its final layout, so section links never land on
+     an earlier diagram. */
+  function restoreHashPosition(){
+    const target=decodeURIComponent(location.hash.slice(1));
+    if(target) document.getElementById(target)?.scrollIntoView({block:'start'});
+  }
+  window.addEventListener('hashchange',()=>setTimeout(restoreHashPosition,0));
+  window.addEventListener('load',()=>{
+    [0,250,900].forEach(delay=>setTimeout(restoreHashPosition,delay));
+  },{once:true});
+</script>
+</body>
+</html>

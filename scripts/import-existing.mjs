@@ -1,0 +1,11 @@
+import {build} from 'esbuild';
+import {writeFile, mkdir} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+await mkdir('src/content',{recursive:true});
+await build({stdin:{contents:`export {contentMap} from '../frontier-ai/src/content/index.ts'; export {topics} from '../frontier-ai/src/data/topics.ts';`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',outfile:'research/imported.mjs'});
+const {contentMap,topics}=await import(pathToFileURL(process.cwd()+'/research/imported.mjs'));
+const group={foundations:'language',architectures:'language','post-training':'training',safety:'safety',agents:'agents',multimodal:'multimodal',systems:'production',craft:'research'};
+const papers=['1706.03762','2203.15556',null,'2101.03961','2312.00752','2205.14135','2405.21060','2203.02155','2305.18290','2408.03314','2212.08073',null,'2211.09110',null,'2310.01405','2210.03629','2308.08155','2005.11401','2103.00020','2006.11239','1910.02054','2309.06180',null];
+const result=topics.map((t,i)=>({...t,group:group[t.track],level:'Advanced',origin:'Frontier reference',prerequisites:t.track==='foundations'?['neural-networks','linear-algebra']:['transformer-architecture'],sources:papers[i]?[['Primary research paper','https://arxiv.org/abs/'+papers[i]]]:[],html:contentMap[t.id].html.replace(/<h1>[\s\S]*?<\/h1>/,'').replace(/<h2>(\d+\.\d+)\s*/g,'<h2>').replace(/Nearly every frontier language model in production today is a decoder-only transformer\./,'Many widely used language models use a decoder-only transformer.').replace(/<table>/g,'<div class="table-scroll"><table>').replace(/<\/table>/g,'</table></div>')}));
+await writeFile('src/content/frontier.json',JSON.stringify(result,null,2));
+console.log(`Preserved ${result.length} full chapters.`);

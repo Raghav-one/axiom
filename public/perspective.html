@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Revolution Handbook — A Critic's Operating System for AI</title>
+<meta name="description" content="A field manual for thinking clearly about AI, built from the positions, disagreements and blind spots of the people deciding its direction.">
+<style>
+/* REVOLUTION — light editorial. Built to be read at length, not skimmed. */
+:root{
+  --bg:#fbfaf8; --bg-2:#f5f4f1; --bg-3:#efeeea; --bg-card:#ffffff;
+  --ink:#16181d; --ink-2:#4a4f5a; --ink-3:#7c828e;
+  --line:#e3e1dc; --line-2:#cfcdc7;
+  --hot:#c2410c; --cool:#1d4ed8; --grn:#0f7a52; --pur:#7c3aed; --red:#be123c; --amb:#a16207;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  --maxw:940px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16.5px;line-height:1.68;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(900px 520px at 12% -8%,rgba(29,78,216,.055),transparent 60%),
+    radial-gradient(760px 460px at 92% 4%,rgba(124,58,237,.045),transparent 62%),
+    radial-gradient(700px 500px at 50% 108%,rgba(194,65,12,.04),transparent 60%);
+}
+#app{position:relative;z-index:1}
+
+/* ---------- layout ---------- */
+.shell{display:flex;min-height:100vh}
+.nav{
+  width:266px;flex:0 0 266px;height:100vh;position:sticky;top:0;
+  border-right:1px solid var(--line);background:rgba(251,250,248,.88);
+  backdrop-filter:blur(14px);overflow-y:auto;padding:26px 0 40px;
+}
+.nav::-webkit-scrollbar{width:6px}
+.nav::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+.brand{padding:0 22px 20px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.brand-mark{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.34em;color:var(--hot);
+  text-transform:uppercase;margin-bottom:9px;
+}
+.brand-name{
+  font-family:var(--serif);font-size:1.72rem;line-height:1.05;letter-spacing:-.02em;
+  font-weight:600;margin-bottom:7px;
+}
+.brand-sub{font-size:.73rem;color:var(--ink-3);line-height:1.5}
+.nav-sec{padding:0 14px;margin-bottom:22px}
+.nav-h{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-3);padding:0 8px;margin-bottom:8px;
+}
+.nav a{
+  display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;
+  color:var(--ink-2);text-decoration:none;font-size:.845rem;transition:.15s;
+  border-left:2px solid transparent;
+}
+.nav a:hover{background:var(--bg-3);color:var(--ink)}
+.nav a.on{background:rgba(29,78,216,.07);color:var(--ink);border-left-color:var(--cool)}
+.nav a .gl{font-size:.8rem;opacity:.85;width:14px;text-align:center;flex:0 0 14px}
+.nav a .nn{font-family:var(--mono);font-size:.66rem;color:var(--ink-3);flex:0 0 20px}
+
+.main{flex:1;min-width:0}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:70px 44px 130px}
+
+/* ---------- hero ---------- */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:80px 44px;max-width:1040px;margin:0 auto;position:relative;
+}
+.hero-tag{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--hot);margin-bottom:26px;
+}
+.hero h1{
+  font-family:var(--serif);font-size:clamp(3.2rem,8.5vw,6.6rem);line-height:.94;
+  letter-spacing:-.035em;font-weight:600;margin:0 0 8px;
+}
+.hero h1 em{
+  font-style:italic;
+  background:linear-gradient(100deg,#c2410c,#7c3aed 55%,#1d4ed8);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-lede{
+  font-family:var(--serif);font-size:clamp(1.15rem,2.2vw,1.5rem);line-height:1.5;
+  color:var(--ink-2);max-width:660px;margin:26px 0 0;
+}
+.hero-lede strong{color:var(--ink);font-weight:600}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:26px;margin-top:52px;padding-top:26px;
+  border-top:1px solid var(--line);
+}
+.hm{min-width:104px}
+.hm-n{font-family:var(--serif);font-size:1.95rem;line-height:1;color:var(--ink)}
+.hm-l{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-top:7px}
+.hero-note{
+  margin-top:44px;padding:18px 22px;border-left:2px solid var(--line-2);
+  font-size:.87rem;color:var(--ink-3);max-width:620px;line-height:1.6;
+}
+
+/* ---------- section furniture ---------- */
+.part-head{margin-bottom:52px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+.part-n{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--hot);margin-bottom:14px;
+}
+.part-head h2{
+  font-family:var(--serif);font-size:clamp(2.1rem,4.6vw,3.1rem);line-height:1.06;
+  letter-spacing:-.025em;font-weight:600;margin:0 0 16px;
+}
+.part-head p{color:var(--ink-2);font-size:1.02rem;max-width:680px;margin:0}
+
+h3{font-family:var(--serif);font-size:1.52rem;line-height:1.22;letter-spacing:-.015em;font-weight:600;margin:0 0 12px}
+p{margin:0 0 15px}
+em{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+
+/* ---------- mind cards ---------- */
+.mind{
+  border:1px solid var(--line);border-radius:14px;background:var(--bg-card);
+  margin-bottom:22px;overflow:hidden;transition:border-color .2s,box-shadow .2s;
+  box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.18);
+}
+.mind:hover{border-color:var(--line-2);box-shadow:0 1px 2px rgba(22,24,29,.05),0 12px 30px -18px rgba(22,24,29,.26)}
+.mind-top{
+  display:flex;align-items:flex-start;gap:16px;padding:24px 26px;cursor:pointer;
+  position:relative;
+}
+.mind-top::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--mc);
+}
+.mind-glyph{
+  font-size:1.5rem;color:var(--mc);line-height:1;margin-top:3px;flex:0 0 auto;
+}
+.mind-id{flex:1;min-width:0}
+.mind-name{font-family:var(--serif);font-size:1.44rem;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+.mind-role{font-size:.78rem;color:var(--ink-3);margin-top:3px}
+.mind-arch{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mc);margin-top:9px;
+}
+.mind-x{color:var(--ink-3);font-size:1.1rem;flex:0 0 auto;transition:transform .22s;margin-top:6px}
+.mind.open .mind-x{transform:rotate(45deg)}
+.mind-thesis{
+  padding:0 26px 22px;font-family:var(--serif);font-size:1.06rem;line-height:1.56;
+  color:var(--ink-2);border-bottom:1px solid var(--line);
+}
+.mind-body{display:none;padding:24px 26px 26px}
+.mind.open .mind-body{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.stake{
+  background:var(--bg-3);border-radius:9px;padding:15px 17px;margin-bottom:22px;
+  font-size:.88rem;color:var(--ink-2);border-left:2px solid var(--mc);
+}
+.stake b{
+  display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--mc);margin-bottom:7px;
+}
+.core-item{margin-bottom:17px;padding-left:15px;border-left:1px solid var(--line-2)}
+.core-item b{display:block;color:var(--ink);font-size:.95rem;margin-bottom:5px}
+.core-item span{font-size:.91rem;color:var(--ink-2)}
+.judge{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.jc{border:1px solid var(--line);border-radius:10px;padding:15px 17px;background:var(--bg-2)}
+.jc b{
+  display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:8px;
+}
+.jc.w b{color:var(--red)} .jc.b b{color:var(--amb)}
+.jc span{font-size:.86rem;color:var(--ink-2)}
+.test{
+  margin-top:14px;border:1px solid rgba(15,122,82,.28);background:rgba(15,122,82,.055);
+  border-radius:10px;padding:15px 17px;
+}
+.test b{
+  display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--grn);margin-bottom:8px;
+}
+.test span{font-size:.86rem;color:var(--ink-2)}
+
+/* ---------- fault lines ---------- */
+.fl{border:1px solid var(--line);border-radius:14px;background:var(--bg-card);margin-bottom:26px;overflow:hidden;box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.16)}
+.fl-h{padding:24px 26px 20px;border-bottom:1px solid var(--line)}
+.fl-n{font-family:var(--mono);font-size:.62rem;letter-spacing:.24em;color:var(--hot);margin-bottom:10px}
+.fl-h h3{margin-bottom:10px}
+.fl-stake{font-size:.89rem;color:var(--ink-3)}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.side{padding:22px 26px}
+.side:first-child{border-right:1px solid var(--line)}
+.side-l{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px;
+}
+.side.a .side-l{color:var(--cool)} .side.b .side-l{color:var(--hot)}
+.side-who{font-size:.76rem;color:var(--ink-3);margin-bottom:13px;font-style:italic}
+.side-claim{font-size:.9rem;color:var(--ink-2);margin-bottom:13px}
+.side-ev{
+  font-size:.81rem;color:var(--ink-3);padding-top:11px;border-top:1px dashed var(--line-2);
+}
+.side-ev b{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:5px}
+.fl-res{padding:20px 26px;background:rgba(15,122,82,.05);border-top:1px solid var(--line)}
+.fl-res b,.fl-crit b{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+  display:block;margin-bottom:8px;
+}
+.fl-res b{color:var(--grn)} .fl-crit b{color:var(--pur)}
+.fl-res span,.fl-crit span{font-size:.89rem;color:var(--ink-2)}
+.fl-crit{padding:20px 26px;background:rgba(124,58,237,.05);border-top:1px solid var(--line)}
+
+/* ---------- concepts ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px}
+.filters button{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:7px 13px;border-radius:20px;border:1px solid var(--line-2);
+  background:transparent;color:var(--ink-3);cursor:pointer;transition:.15s;
+}
+.filters button:hover{color:var(--ink);border-color:var(--ink-3)}
+.filters button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cpt{border:1px solid var(--line);border-radius:14px;background:var(--bg-card);padding:26px 28px;margin-bottom:20px;box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.16)}
+.cpt-top{display:flex;align-items:baseline;gap:13px;margin-bottom:9px;flex-wrap:wrap}
+.cpt-n{font-family:var(--mono);font-size:.72rem;color:var(--ink-3)}
+.cpt-tag{
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:3px 9px;border-radius:20px;border:1px solid var(--line-2);color:var(--ink-3);
+}
+.cpt h3{flex-basis:100%;margin:0}
+.cpt-origin{font-size:.75rem;color:var(--ink-3);font-style:italic;margin-bottom:15px}
+.cpt-one{
+  font-family:var(--serif);font-size:1.13rem;line-height:1.5;color:var(--ink);
+  padding:15px 18px;background:var(--bg-3);border-radius:9px;border-left:2px solid var(--cool);
+  margin-bottom:17px;
+}
+.cpt-body{font-size:.94rem;color:var(--ink-2);margin-bottom:17px}
+.cpt-grid{display:grid;gap:12px}
+.cb{border-radius:9px;padding:14px 16px;font-size:.88rem;color:var(--ink-2)}
+.cb b{
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;
+  display:block;margin-bottom:7px;
+}
+.cb.why{background:var(--bg-3)} .cb.why b{color:var(--ink-3)}
+.cb.pred{background:rgba(29,78,216,.055);border:1px solid rgba(29,78,216,.20)} .cb.pred b{color:var(--cool)}
+.cb.cav{background:rgba(190,18,60,.045);border:1px solid rgba(190,18,60,.18)} .cb.cav b{color:var(--red)}
+.cpt-voices{margin-top:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cpt-voices span{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.vchip{
+  font-size:.72rem;padding:3px 10px;border-radius:20px;border:1px solid currentColor;
+  opacity:.85;text-decoration:none;
+}
+
+/* ---------- toolkit ---------- */
+.tool{
+  border:1px solid var(--line);border-radius:14px;background:var(--bg-card);
+  padding:26px 28px;margin-bottom:18px;position:relative;overflow:hidden;
+;box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.16)}
+.tool::before{
+  content:attr(data-n);position:absolute;right:20px;top:6px;
+  font-family:var(--serif);font-size:4.2rem;color:var(--line);line-height:1;pointer-events:none;
+}
+.tool h3{font-size:1.3rem;margin-bottom:12px;max-width:82%}
+.tool-move{
+  font-family:var(--serif);font-size:1.04rem;color:var(--ink);line-height:1.5;
+  padding:14px 17px;background:var(--bg-3);border-left:2px solid var(--hot);
+  border-radius:8px;margin-bottom:15px;
+}
+.tool-detail{font-size:.93rem;color:var(--ink-2);margin-bottom:15px}
+.tool-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tp{border-radius:9px;padding:13px 15px;font-size:.86rem;color:var(--ink-2)}
+.tp b{font-family:var(--mono);font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;display:block;margin-bottom:6px}
+.tp.tell{background:rgba(161,98,7,.055);border:1px solid rgba(161,98,7,.20)} .tp.tell b{color:var(--amb)}
+.tp.inv{background:rgba(15,122,82,.05);border:1px solid rgba(15,122,82,.18)} .tp.inv b{color:var(--grn)}
+
+/* ---------- scorecard ---------- */
+.sc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg-card);box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.16)}
+.sc-row{display:grid;grid-template-columns:104px 1fr 92px;gap:0;border-bottom:1px solid var(--line)}
+.sc-row:last-child{border-bottom:none}
+.sc-era{
+  padding:18px 16px;font-family:var(--mono);font-size:.68rem;color:var(--ink-3);
+  border-right:1px solid var(--line);
+}
+.sc-mid{padding:18px 20px}
+.sc-claim{font-size:1rem;color:var(--ink);font-weight:600;margin-bottom:7px}
+.sc-why{font-size:.86rem;color:var(--ink-2);margin-bottom:9px}
+.sc-lesson{font-size:.84rem;color:var(--ink-3);padding-left:12px;border-left:2px solid var(--line-2)}
+.sc-v{padding:18px 12px;border-left:1px solid var(--line);display:flex;align-items:flex-start;justify-content:center}
+.vb{
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;
+  padding:4px 9px;border-radius:5px;white-space:nowrap;
+}
+.vb.died{background:rgba(190,18,60,.10);color:var(--red)}
+.vb.stuck{background:rgba(15,122,82,.10);color:var(--grn)}
+.vb.partial{background:rgba(161,98,7,.10);color:var(--amb)}
+.vb.open{background:rgba(124,58,237,.10);color:var(--pur)}
+.vb.emerging{background:rgba(29,78,216,.10);color:var(--cool)}
+
+/* ---------- diagrams ---------- */
+.figure{margin:34px 0 40px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);padding:24px 22px 18px;box-shadow:0 1px 2px rgba(22,24,29,.04),0 8px 24px -18px rgba(22,24,29,.16)}
+.fig-t{font-family:var(--serif);font-size:1.16rem;color:var(--ink);margin-bottom:5px}
+.fig-s{font-size:.83rem;color:var(--ink-3);margin-bottom:20px}
+.fig-note{font-size:.82rem;color:var(--ink-3);margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.dg{width:100%;height:auto;display:block;overflow:visible}
+.dg-grid{stroke:var(--line);stroke-width:1}
+.dg-axis{stroke:var(--line-2);stroke-width:1}
+.dg-ylab{fill:var(--ink-3);font-size:10.5px;font-family:var(--mono);text-anchor:end}
+.dg-xlab{fill:var(--ink-3);font-size:10.5px;font-family:var(--mono);text-anchor:middle}
+.dg-sub{fill:var(--ink-3);font-size:9.5px;font-family:var(--sans);text-anchor:middle;opacity:.75}
+.dg-cap{fill:var(--ink-3);font-size:10.5px;font-family:var(--mono)}
+.dg-note{fill:var(--ink-3);font-size:10px;font-family:var(--mono);opacity:.8}
+.dg-anno{fill:var(--grn);font-size:11px;font-family:var(--mono)}
+.dg-line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-proj{fill:none;stroke:var(--ink-3);stroke-width:1.8;stroke-dasharray:6 4;opacity:.85}
+.dg-dot{fill:var(--bg);stroke:var(--grn);stroke-width:2}
+.dg-future{fill:rgba(22,24,29,.028)}
+.dg-bar{fill:var(--hot);fill-opacity:.28;stroke:var(--hot);stroke-opacity:.6}
+.dg-barval{fill:var(--ink-2);font-size:11px;font-family:var(--mono);text-anchor:middle}
+.dg-ltitle{font-size:13px;font-family:var(--sans);font-weight:600}
+.dg-lsub{fill:var(--ink-3);font-size:10.5px;font-family:var(--sans)}
+.dg-ltag{font-size:10px;font-family:var(--mono);opacity:.8}
+.dg-nname{font-size:11.5px;font-family:var(--mono);text-anchor:middle}
+.dg-axlab{fill:var(--ink-3);font-size:10.5px;font-family:var(--mono)}
+.dg-vlab{fill:var(--ink-2);font-size:12px;font-family:var(--sans)}
+.dg-vtrack{fill:var(--line);fill-opacity:.5}
+.dg-vtag{font-size:10px;font-family:var(--mono)}
+
+/* ---------- misc ---------- */
+.callout{
+  border:1px solid var(--line-2);border-radius:14px;padding:24px 26px;margin:34px 0;
+  background:linear-gradient(160deg,rgba(194,65,12,.055),rgba(124,58,237,.04));
+}
+.callout h3{font-size:1.24rem;margin-bottom:11px}
+.callout p{font-size:.95rem;color:var(--ink-2);margin:0}
+.closing p{font-family:var(--serif);font-size:1.09rem;line-height:1.66;color:var(--ink-2);margin-bottom:19px}
+.sources{margin-top:60px;padding-top:26px;border-top:1px solid var(--line);font-size:.82rem;color:var(--ink-3)}
+.sources h4{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.sources p{margin-bottom:9px}
+.top{
+  position:fixed;right:26px;bottom:26px;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line-2);background:var(--bg-3);color:var(--ink-2);
+  cursor:pointer;font-size:1rem;display:none;align-items:center;justify-content:center;z-index:50;
+}
+.top.show{display:flex}
+.top:hover{color:var(--ink);border-color:var(--ink-3)}
+.navtoggle{
+  display:none;position:fixed;left:14px;top:14px;z-index:60;width:40px;height:40px;
+  border-radius:9px;border:1px solid var(--line-2);background:rgba(255,255,255,.95);
+  color:var(--ink);font-size:1.1rem;cursor:pointer;
+}
+
+@media(max-width:1040px){
+  .nav{position:fixed;left:0;top:0;transform:translateX(-100%);transition:transform .25s;z-index:55}
+  .nav.open{transform:none}
+  .navtoggle{display:block}
+  .wrap,.hero{padding-left:22px;padding-right:22px}
+  .hero{padding-top:80px}
+}
+@media(max-width:720px){
+  body{font-size:15.5px}
+  .sides,.judge,.tool-pair{grid-template-columns:1fr}
+  .side:first-child{border-right:none;border-bottom:1px solid var(--line)}
+  .sc-row{grid-template-columns:1fr}
+  .sc-era{border-right:none;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .sc-v{border-left:none;justify-content:flex-start;padding:0 20px 18px}
+  .tool::before{display:none}
+  .tool h3{max-width:100%}
+}
+
+/* adjacent minds */
+.adj-field{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-3);margin:26px 0 9px;padding-left:2px;
+}
+.lesson{
+  margin-top:14px;border:1px solid rgba(194,65,12,.26);background:rgba(194,65,12,.05);
+  border-radius:10px;padding:15px 17px;
+}
+.lesson b{
+  display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--hot);margin-bottom:8px;
+}
+.lesson span{font-size:.86rem;color:var(--ink-2)}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+/* ---- minds.js ---- */
+// The Minds — position dossiers. Every claim here is a public, on-record stance
+// as of the 2026 landscape, with the receipts a critic needs to check it.
+
+const MINDS = [
+  {
+    id: "lecun",
+    name: "Yann LeCun",
+    role: "AMI Labs · ex-Meta Chief AI Scientist · Turing Award 2018",
+    archetype: "The Architectural Dissident",
+    color: "#1d4ed8",
+    glyph: "◈",
+    thesis: "Autoregressive LLMs are an off-ramp, not the road. Intelligence requires a learned world model that predicts in abstract representation space — not tokens.",
+    stakes: "Left Meta in Nov 2025 after 12 years over exactly this disagreement. Raised $1.03B seed at $3.5B pre-money (Mar 2026) for AMI Labs to build it. NVIDIA, Bezos, Samsung, Toyota all in the round.",
+    core: [
+      ["Prediction in representation space, not pixel or token space", "JEPA's whole move is refusing to predict the unpredictable. A video model that must predict every pixel wastes its capacity on leaf-flutter and sensor noise. JEPA predicts an <em>abstract encoding</em> of the future and lets detail go. LeCun's claim: the discarding is the intelligence."],
+      ["The data-poverty argument", "A 4-year-old has processed more raw sensory bandwidth through the optic nerve than the entire text corpus of the largest LLM. If text were sufficient, evolution wasted enormous energy on vision. His inference: language is a thin projection of a world model, not a substitute for one."],
+      ["Autoregression compounds error", "Generating token-by-token, each error conditions all future tokens. He models the probability of staying on the correct manifold as decaying exponentially with sequence length. This is why he calls LLMs fundamentally unfixable rather than merely immature."],
+      ["Energy-based models over probabilistic ones", "Instead of a distribution over next tokens, score compatibility between a context and a proposed continuation. Lets the model say 'many futures are equally fine' — which is what reality is like — without pretending to a calibrated distribution."]
+    ],
+    wrong: "He has repeatedly under-forecast what pure scale would deliver. He publicly doubted LLMs would achieve robust common-sense reasoning at levels they subsequently reached, and dismissed capabilities that later emerged from scale alone. A critic must hold both: his diagnosis of the ceiling may be right while his estimate of where the ceiling sits has been wrong more than once.",
+    blindspot: "World models have been 'two years away' since 2022. JEPA variants remain far from LLM utility on any economically relevant task. The $1.03B is a bet that the gap is architectural, not just maturity — but the same argument would have been made about deep learning in 2010, when the answer turned out to be 'wait for compute.'",
+    testable: "By 2028, does a JEPA-lineage system beat a frontier LLM on any commercially deployed task? If yes, the architectural critique had teeth. If AMI Labs is still publishing benchmarks rather than shipping products, scale won."
+  },
+  {
+    id: "karpathy",
+    name: "Andrej Karpathy",
+    role: "Eureka Labs · ex-Tesla Autopilot Director · OpenAI founding member",
+    archetype: "The Calibrated Builder",
+    color: "#0f7a52",
+    glyph: "▲",
+    thesis: "The capability is real and the timeline is a decade, not a year. What separates a demo from a product is the 'march of nines,' and each nine costs as much as the last.",
+    stakes: "Said 'decade of agents' when the industry said 'year of agents' (Oct 2025). Has been publicly, specifically calibrated — and is the rare figure whose incentives don't require a short timeline.",
+    core: [
+      ["The march of nines", "From Autopilot: a demo that works 90% of the time is <em>one nine</em>. 99% is the second nine. Each additional nine is roughly a constant amount of work — so reliability is linear effort for exponential-looking progress. Self-driving demos existed in the 1980s; economical deployment took forty years. This is the single most transferable mental model in AI forecasting."],
+      ["LLMs as 'stochastic simulations of people'", "Trained to imitate the distribution of human text, so they inherit human-shaped competence and human-shaped failure — plus artifacts no human has. Not a brain; a compressed statistical echo of humanity's written output."],
+      ["Cognitive deficits are specific, not vague", "No persistent learning during deployment. No real continual memory. Poor at knowing what they don't know. Each is a concrete research problem, not a mystical gap — which is why he expects steady progress rather than either a wall or a foom."],
+      ["Software 2.0 / 3.0", "Code written by gradient descent (2.0), then code written by prompting (3.0). The programmer's job migrates from writing logic to specifying objectives and curating data. Where value accrues shifts accordingly."]
+    ],
+    wrong: "His self-driving analogy may over-generalize. Autopilot's nines are gated by physical safety in an adversarial open world where a single failure kills; a coding agent's failures are cheap and recoverable. Domains with cheap failure may traverse the nines much faster — and 2026's coding agents are the live test of exactly that.",
+    blindspot: "As an educator and builder, he is systematically more interested in what's mechanically interesting than what's economically decisive. His frame is excellent on capability and quieter on the capital, energy and geopolitics that may bind before the technical limits do.",
+    testable: "METR's measured doubling of task horizon is ~7 months. Karpathy's decade implies that curve bends. If it holds to 2028 without bending, his timeline is too conservative — and the metric is public and unambiguous."
+  },
+  {
+    id: "huang",
+    name: "Jensen Huang",
+    role: "Founder & CEO, NVIDIA",
+    archetype: "The Infrastructure Sovereign",
+    color: "#3f7d20",
+    glyph: "◆",
+    thesis: "AI is not an application, it is a new industrial layer. Datacenters are not buildings, they are factories whose product is tokens. Whoever owns the factory owns the economy above it.",
+    stakes: "Has been directionally right on the largest capital reallocation in corporate history — and is also the single most interested party in that reallocation continuing. Both facts are load-bearing.",
+    core: [
+      ["The AI factory", "Reframes a datacenter as a plant with an input (energy) and an output (tokens), measured in tokens-per-second-per-megawatt. This is not marketing — it is the correct unit of analysis, and it reveals that the binding constraint is power and memory bandwidth, not chip count."],
+      ["The inference inflection", "GTC 2026's throughline: the money moves from training to inference. Training is a one-time capital event; inference is a perpetual operating cost that scales with usage. Reasoning models made this worse (or better, for NVIDIA) by spending compute at answer-time."],
+      ["The moat is CUDA, not the silicon", "Fifteen years of libraries, kernels, compilers and trained engineers. Competitors can match FLOPs; matching an ecosystem takes a decade you can't buy. Note he says this openly — the moat being legible doesn't make it crossable."],
+      ["Physical AI as the next demand curve", "Robotics and autonomous systems as the successor market once digital tokens saturate. Strategically necessary: it's the answer to 'what happens when every knowledge worker already has a model.'"]
+    ],
+    wrong: "Not yet decisively — which is itself the warning. A figure with a perfect public record in a capital cycle is usually a figure whose record hasn't been tested by the downturn. His 'demand is infinite' framing has no falsification condition attached, which is exactly what a critic should notice.",
+    blindspot: "Every incentive he has points one direction. When the seller of shovels tells you the gold is infinite, the claim may still be true — but it needs independent confirmation, and 'NVIDIA's earnings beat' is not independent confirmation of AI's economic value; it is confirmation that people are buying GPUs.",
+    testable: "Watch the ratio: hyperscaler AI revenue growth versus hyperscaler AI capex growth. Capex is $635–690B guided for 2026. If revenue doesn't converge toward it by 2027–28, the factory thesis is a bubble thesis wearing industrial clothes."
+  },
+  {
+    id: "musk",
+    name: "Elon Musk",
+    role: "xAI · Tesla · the maximalist position",
+    archetype: "The Compute Absolutist",
+    color: "#c2410c",
+    glyph: "⬢",
+    thesis: "Intelligence is a compute-and-data problem, and constraints are logistics problems in disguise. Build the biggest cluster fastest, attach it to the real world, and AGI falls out.",
+    stakes: "Colossus: 100k→200k H100s, then Colossus 2 at gigawatt scale in Memphis, built on timelines the industry considered impossible. Whatever you think of the forecasts, the construction execution is real and instructive.",
+    core: [
+      ["Compute as the only real currency", "The strategic conclusion of the scaling hypothesis taken literally: skip the debate, secure the GPUs and the power interconnect. Colossus's 122-day build is the thesis expressed as concrete and copper."],
+      ["Vertical integration into physics", "Tesla's fleet as a data-collection network, Optimus as an embodiment target, xAI as the model layer, Starlink/SpaceX as infrastructure. The bet is that whoever couples models to the physical world captures the larger market."],
+      ["Reasoning from 'first principles'", "Decompose to physical limits, ignore what industry says is possible. Genuinely produced results others thought unreachable — and equally, produces confident timelines that ignore the institutional and reliability frictions those industries had actually encountered."],
+      ["Humanoid robots as the largest market", "Projects 1M Optimus units/year within five years. If even directionally right, it dwarfs the token economy. If wrong, it's the most expensive category error of the decade."]
+    ],
+    wrong: "This is the highest-value calibration data in the entire document. He predicted AGI by 2025. When 2025 arrived, he predicted AGI by 2026. He has been forecasting full self-driving as roughly one year away since 2016 — a decade of the same one-year claim. His own stated probability of Grok 5 reaching AGI is 10%. A critic should extract the rule: <strong>Musk's direction is often right and his time-constant is consistently off by 3–5×.</strong>",
+    blindspot: "Systematic underweighting of the last nine — the same one Karpathy names from working inside a Musk company. Demo-to-deployment friction is treated as a failure of will rather than a structural property of reliability engineering.",
+    testable: "Apply the 3–5× rule as an explicit forecasting instrument. When he says one year, model three to five. It has back-tested better than either believing him or dismissing him — and dismissing him has been the more expensive error."
+  },
+  {
+    id: "raschka",
+    name: "Sebastian Raschka",
+    role: "Researcher, educator, author of the build-it-from-scratch canon",
+    archetype: "The Ground Truth",
+    color: "#7c3aed",
+    glyph: "●",
+    thesis: "Most of what circulates as AI insight is unverified narrative. The antidote is implementation and ablation: build the thing, remove one part, measure what breaks.",
+    stakes: "No capital position, no timeline to defend, no lab to promote. In a discourse where nearly every loud voice is talking their book, an unincentivized technical read is structurally scarce — which is precisely why a critic should weight it heavily.",
+    core: [
+      ["Architecture changes are mostly small deltas on a stable shape", "His side-by-side reads of frontier architectures keep finding the same finding: the 2017 transformer skeleton with refinements (RoPE, RMSNorm, GQA, MoE routing). Progress is overwhelmingly data, scale and post-training — not architectural revolution. This directly punctures most 'new architecture beats transformers' claims."],
+      ["The ablation standard", "A claimed improvement means nothing until you have removed it and measured the delta at matched compute. Most public comparisons vary five things at once and attribute the gain to the interesting one."],
+      ["Compute-matching as the honest comparison", "Method A beating method B at equal parameter count is nearly meaningless if it consumed 3× the FLOPs. A staggering share of published gains evaporate under compute-matched replication."],
+      ["Build it from scratch to know what's real", "Implementing an LLM end-to-end collapses the mystique into arithmetic. The reason to do it is not to become an engineer — it is to become immune to the specific class of claim that survives only in the absence of mechanical understanding."]
+    ],
+    wrong: "The bottom-up view can under-read emergence. Knowing every mechanism in the block doesn't predict what a 10²⁶-FLOP training run produces, any more than knowing chemistry predicts biology. Mechanistic literacy is necessary and not sufficient for forecasting.",
+    blindspot: "Systematically quiet on economics, geopolitics and capital — the forces most likely to determine which technical path actually gets funded to maturity. Use him as the verification layer, not the strategy layer.",
+    testable: "Adopt as a personal filter: for any claim of a breakthrough, ask 'was this compute-matched, and was there an ablation?' If the answer is no or unstated, downgrade to 'unverified' regardless of source prestige."
+  },
+  {
+    id: "sutskever",
+    name: "Ilya Sutskever",
+    role: "Safe Superintelligence · co-author of the scaling era",
+    archetype: "The Recanting Founder",
+    color: "#be123c",
+    glyph: "◇",
+    thesis: "The age of scaling is over; the age of research has begun. The internet is a finite fossil fuel and we are approaching the end of the seam.",
+    stakes: "The most consequential position reversal in the field. The person most responsible for demonstrating that scaling works is now saying it has stopped being the answer — and has ~$3B behind that reversal at SSI.",
+    core: [
+      ["Peak data", "Compute keeps compounding; high-quality human text does not. Credible projections have the useful public internet exhausted somewhere in 2026–2032 at current consumption. One input to the scaling recipe is not scalable."],
+      ["Return to research over engineering", "Scaling let the field substitute capital for ideas for roughly five years. His claim is that the substitution has run out and the bottleneck is once again conceptual — a claim that, coming from him specifically, deserves unusual weight."],
+      ["Generalization is the unsolved core", "Humans learn from far less data with far better transfer. That gap is not a scale gap; it is a missing principle."]
+    ],
+    wrong: "'Data wall' predictions have been made before and were routed around — by synthetic data, by RL on verifiable rewards, by multimodal and video corpora, by extracting more from the same tokens. Each prior wall became a speed bump. This one may too.",
+    blindspot: "SSI has shipped no product and published little. The thesis is currently unfalsifiable from the outside — which is a reason for a critic to hold it as a serious hypothesis rather than an established finding.",
+    testable: "If scaling were truly exhausted, the labs with the most compute would be losing their lead. Watch whether frontier capability rank continues to track compute rank. As of 2026 it largely still does."
+  },
+  {
+    id: "amodei",
+    name: "Dario Amodei",
+    role: "CEO, Anthropic · ex-VP Research, OpenAI",
+    archetype: "The Alarmed Accelerator",
+    color: "#a16207",
+    glyph: "▼",
+    thesis: "The technology is arriving faster than almost anyone is prepared for, it is genuinely dangerous, and the correct response is to build it carefully at the frontier rather than cede that ground.",
+    stakes: "Runs a frontier lab founded explicitly on the premise that the thing it builds could be catastrophic. That is either the most coherent position in the field or the most conflicted one, and a critic should be able to argue both.",
+    core: [
+      ["Compressed 21st century", "His central image: a country of geniuses in a datacenter, compressing decades of scientific progress into a few years once models exceed expert human capability in research itself. The claim is not that AI writes better essays; it is that AI collapses the serial time constant of science."],
+      ["Race dynamics as the core risk", "If safety and capability trade off, competitive pressure selects for whoever cuts safety. The strategic conclusion is to be at the frontier and set the norms, because a safety-focused lab that falls behind sets no norms at all."],
+      ["Interpretability as prerequisite, not garnish", "Has pushed hard on understanding model internals as a precondition for deploying more capable systems — the position that we are currently shipping artifacts we cannot inspect, and that this is a temporary and unacceptable state."],
+      ["Economic disruption arrives before AGI", "Argues the labor-market shock — particularly to entry-level white-collar work — lands well before anything deserving the name general intelligence, and that society is not discussing this on the right timeline."]
+    ],
+    wrong: "The 'build it to make it safe' argument is structurally unfalsifiable from the outside, and it happens to justify exactly what a commercial frontier lab would do anyway. That does not make it false — but a critic must notice that the safety argument and the business strategy point in precisely the same direction, which is the condition under which motivated reasoning is hardest to detect.",
+    blindspot: "Short timelines are load-bearing for the entire framing. If transformative AI is twenty years out rather than three, the urgency argument weakens and the race framing looks like a self-fulfilling justification for speed.",
+    testable: "Watch entry-level hiring in the exposed white-collar categories — law, consulting, junior software. He has made a specific, near-term, checkable economic claim, which is rarer and more useful than any AGI forecast."
+  },
+  {
+    id: "hassabis",
+    name: "Demis Hassabis",
+    role: "CEO, Google DeepMind · Nobel Prize in Chemistry 2024",
+    archetype: "The Scientist-Builder",
+    color: "#0e7490",
+    glyph: "⬡",
+    thesis: "AI's purpose is to compress scientific discovery. The measure of the technology is not conversation quality but whether it solves problems that resisted human effort for decades.",
+    stakes: "The only person in this document holding a Nobel Prize for an AI result. AlphaFold is the strongest existing proof that these systems produce genuine scientific value rather than plausible text — and that matters enormously as evidence.",
+    core: [
+      ["Games as scaffolding, science as the point", "Chess, Go, StarCraft, protein folding, weather, mathematics — a deliberate ladder of increasing real-world consequence. The games were never the goal; they were tractable environments for developing methods that transfer."],
+      ["AlphaFold as the existence proof", "A fifty-year-old grand challenge in biology, substantially solved, with structures released freely to the scientific community. When someone asks whether AI has produced real value beyond chatbots, this is the answer that ends the argument."],
+      ["Hybrid systems over pure scale", "DeepMind's signature is combining learned models with search, verification and formal structure — AlphaGo's tree search, AlphaProof's formal verification. A quieter dissent from pure scaling than LeCun's, made from inside a frontier lab."],
+      ["Superhuman narrow before general", "Systems that exceed human capability in specific domains arrive well before general intelligence, and produce most of the near-term value. The economically important question is which domain falls next, not when AGI arrives."]
+    ],
+    wrong: "AlphaFold's success may generalize less than it appears. Protein folding had an unusual combination of properties — abundant high-quality structured data, a crisp objective, and machine-checkable answers. Most scientific problems have none of these. The domains that resist verification may resist this method entirely.",
+    blindspot: "Consistently more measured in public than the commercial reality around him, which now runs at competitive speed rather than scientific speed. The tension between careful science and a product race is genuine and mostly unaddressed in his public framing.",
+    testable: "Count the AlphaFold-class results — genuine, verified, previously-unsolved scientific problems closed by AI. If that list grows meaningfully by 2030, the discovery thesis holds. If AlphaFold remains largely singular, it was a uniquely well-posed problem rather than a template."
+  },
+  {
+    id: "sutton",
+    name: "Richard Sutton",
+    role: "Reinforcement learning's founding theorist · Turing Award 2024",
+    archetype: "The Original Source",
+    color: "#4f5d8a",
+    glyph: "◉",
+    thesis: "Intelligence is learning from experience through interaction — not absorbing a corpus. And the field keeps relearning that general methods leveraging computation defeat human-knowledge engineering.",
+    stakes: "Wrote the essay that half this field quotes as scripture. Notably, he does not think current LLMs are the fulfilment of it — an irony a critic should find instructive rather than merely amusing.",
+    core: [
+      ["The Bitter Lesson, from the person who wrote it", "Seventy years of evidence that methods scaling with compute defeat methods encoding human insight. Quoted constantly, and frequently by people defending the exact kind of hand-engineering it warns against."],
+      ["Experience over data", "His deeper position: real learning comes from an agent acting in a world and observing consequences, not from imitating a static corpus. On this view LLMs are learning about the world secondhand, from a description of it, which is why they lack grounded understanding."],
+      ["Continual learning as the missing piece", "Biological agents learn continuously from a stream. Current models are frozen at training time and cannot update from experience. He regards this as fundamental rather than an engineering detail — and it is the same deficit Karpathy names as a concrete cognitive gap."],
+      ["The era of experience", "Argues the next paradigm is agents generating their own data through interaction, superseding the human-data era. Notably this is compatible with the data wall: if human text runs out, experience is the only unbounded source left."]
+    ],
+    wrong: "Pure RL from experience has repeatedly proven sample-inefficient and difficult to scale outside simulated environments with cheap resets. The imitation-first approach he is lukewarm on delivered the capabilities, and it delivered them first.",
+    blindspot: "The strong experience-first position underweights how much genuine world structure is recoverable from language. Text is a lossy projection of reality, but it is a projection produced by billions of embodied agents describing what they observed — which is more information than 'secondhand' suggests.",
+    testable: "Watch whether the next capability jump comes from bigger corpora or from agents learning in deployment. If continual learning from interaction becomes the frontier method, Sutton was pointing at the right thing all along and the LLM era was the detour."
+  },
+  {
+    id: "hinton",
+    name: "Geoffrey Hinton",
+    role: "Turing Award 2018 · Nobel Prize in Physics 2024 · left Google to speak freely",
+    archetype: "The Defector",
+    color: "#a83a5b",
+    glyph: "◐",
+    thesis: "Reversed a lifetime position. Having spent fifty years arguing neural networks would work, he now argues they work well enough to be dangerous — and that digital minds have advantages biological ones structurally lack.",
+    stakes: "Left Google in 2023 specifically so he could warn about the technology he did more than almost anyone to create. Whatever you make of the conclusion, the willingness to publicly reverse at the end of a career is real evidence about the strength of his update.",
+    core: [
+      ["Digital immortality and parallel learning", "His sharpest technical argument for concern: digital agents can copy weights perfectly and share learning across thousands of instances simultaneously. A human learns alone in one lifetime; ten thousand model instances learn in parallel and merge. That is a mode of learning biology cannot match, and it is a mechanism, not a metaphor."],
+      ["From 'they will never work' to 'they understand'", "Argues current systems genuinely do have understanding rather than merely simulating it — a position that puts him directly opposite the stochastic-parrot camp and also opposite his own earlier caution."],
+      ["Subgoal convergence", "Any sufficiently capable goal-directed system develops instrumental subgoals — acquiring resources, resisting shutdown — not from malice but because they help achieve almost any objective. The concern requires no consciousness and no ill intent."],
+      ["Backpropagation may beat the brain", "Suggests gradient descent might be a more efficient learning algorithm than whatever biology uses, meaning digital intelligence need not stop at human level for any principled reason."]
+    ],
+    wrong: "His timelines have moved substantially and in both directions, and the specific mechanisms by which capability becomes catastrophe remain far less rigorously argued than his technical work. Deep expertise in learning algorithms does not automatically confer expertise in institutional risk or political economy.",
+    blindspot: "The reversal narrative is compelling enough to substitute for the argument. 'The godfather of AI is scared' is an appeal to authority, and a critic should notice that its rhetorical power exceeds its evidentiary content — the argument has to stand on the mechanism, not the biography.",
+    testable: "The parallel-learning claim is concrete and checkable: do systems that learn across many simultaneous instances and merge those updates actually outpace single-instance learning at scale? That is an engineering question with an empirical answer."
+  },
+  {
+    id: "li",
+    name: "Fei-Fei Li",
+    role: "Stanford HAI · World Labs · creator of ImageNet",
+    archetype: "The Data Realist",
+    color: "#0d7268",
+    glyph: "◒",
+    thesis: "Data, not architecture, unlocked modern AI — she proved it once with ImageNet — and spatial intelligence is the next thing language models fundamentally lack.",
+    stakes: "ImageNet is arguably the single most consequential dataset in the field's history and directly triggered the 2012 deep learning breakthrough. Now betting on spatial intelligence at World Labs — an embodiment-adjacent position with a very different flavour from LeCun's.",
+    core: [
+      ["The dataset was the breakthrough", "The 2012 result is usually credited to convolutional networks and GPUs, but the missing ingredient was the labelled data at scale. She built it when the field thought better algorithms were the bottleneck. This is the original demonstration that data, not cleverness, was the constraint — a bitter lesson instance that predates the essay."],
+      ["Spatial intelligence as the missing modality", "Language models manipulate symbols about the world; they have no native representation of three-dimensional space, physical persistence or geometric reasoning. Her claim is that this is a distinct capability requiring its own foundation, not something that emerges from more text."],
+      ["Human-centered framing", "Argues persistently for AI evaluated by its effect on human institutions — healthcare, education, labor — rather than by capability benchmarks. A different axis of evaluation entirely, and one the capability discourse mostly ignores."],
+      ["Against the AGI framing itself", "Has publicly pushed back on AGI as the organizing goal, arguing it is ill-defined and distracts from measurable near-term benefit and harm."]
+    ],
+    wrong: "Multimodal models trained largely on images and video have absorbed more spatial competence than a strong 'separate capability' thesis would predict. The boundary between 'spatial intelligence' and 'a large model trained on enough video' is less crisp than the framing suggests.",
+    blindspot: "The human-centered frame, while correct as ethics, can under-engage with the raw capability trajectory. If systems become far more capable quickly, the institutional questions change shape entirely — and that scenario deserves engagement rather than reframing.",
+    testable: "World Labs and the spatial-intelligence camp are making a checkable claim: models with explicit 3D representations should beat video-trained transformers on physical reasoning. If they do not by 2028, spatial intelligence was a modality, not a missing foundation."
+  },
+  {
+    id: "marcus",
+    name: "Gary Marcus",
+    role: "The field's most persistent public skeptic",
+    archetype: "The Adversary",
+    color: "#5b6169",
+    glyph: "✕",
+    thesis: "Deep learning is fundamentally limited — unreliable, uninterpretable, and incapable of genuine compositional reasoning — and the field's claims consistently outrun its evidence.",
+    stakes: "Included deliberately, and a critic should understand exactly why. His specific technical predictions have aged poorly. His meta-criticism about hype, evaluation rigour and premature deployment claims has aged well. Learning to separate those two is itself a critical skill.",
+    core: [
+      ["Hybrid neurosymbolic systems", "Argues neural networks need explicit symbolic reasoning bolted on to achieve reliable compositional generalization. Pure learning, on his account, will not get there."],
+      ["Reliability as the core objection", "Persistent hallucination and unpredictable failure are, he argues, structural properties of statistical pattern matching rather than bugs awaiting a fix."],
+      ["The extrapolation critique", "Models interpolate within their training distribution and fail outside it — which means impressive in-distribution performance says little about robustness where it matters."],
+      ["Institutional criticism", "Has been consistently early on benchmark contamination, evaluation theatre, and the gap between demo and deployment — the meta-level critiques, where his record is genuinely good."]
+    ],
+    wrong: "Repeatedly and specifically. Capabilities he declared beyond deep learning's reach — coherent long-form reasoning, competent code generation, multi-step problem solving — arrived without any neurosymbolic component. The pattern is that he correctly identifies a real deficit and then incorrectly concludes it is permanent.",
+    blindspot: "The unfalsifiability problem: each time a predicted limitation falls, the goalposts move to a new deficit rather than the underlying model being updated. A critic should apply the same standard here as to the boosters — what observation would change your mind, and has anything?",
+    testable: "Use him as a source of specific deficits to watch, never as a source of timelines. His list of what current systems cannot do is usually accurate <em>today</em> and usually wrong about <em>permanently</em>. That is a genuinely useful instrument if you read it with the correct sign."
+  },
+  {
+    id: "liang",
+    name: "Liang Wenfeng",
+    role: "Founder, DeepSeek · the efficiency shock",
+    archetype: "The Constraint Exploiter",
+    color: "#6d4bb5",
+    glyph: "◧",
+    thesis: "Frontier capability is far cheaper than the incumbents' spending implies. Export controls and limited capital force efficiency, and efficiency is a competitive weapon rather than a consolation.",
+    stakes: "Demonstrated frontier-adjacent capability at a fraction of assumed cost, released open weights, and briefly repriced the entire AI trade. Whatever the exact training economics, the strategic point landed globally and permanently.",
+    core: [
+      ["Constraint as forcing function", "Restricted access to top-end hardware produced genuine algorithmic and systems efficiency — architectural sparsity, aggressive precision reduction, communication-optimized training. Necessity produced results abundance had not."],
+      ["Open weights as strategy, not ideology", "Releasing weights commoditizes the layer your competitor monetizes, builds an international developer base, and buys strategic relevance that a closed model of equal quality would not. It is a competitive move, and reading it as generosity misses the point entirely."],
+      ["The cost curve is the real story", "The exact training bill is disputed and probably understated. The direction is not: capability per dollar is falling faster than incumbent spending assumes, which is the single fact most threatening to the capex thesis."],
+      ["Geopolitical proof of diffusion", "Established that frontier capability is not the exclusive property of a handful of well-capitalized Western labs — which changes the policy conversation from containment to competition."]
+    ],
+    wrong: "The headline cost figures likely exclude substantial prior research, failed runs and infrastructure. The 'trained for a few million dollars' framing was oversimplified in the retelling, and skeptics were right to press on it.",
+    blindspot: "Fast-following a known-good architecture is dramatically cheaper than discovering it. Efficient replication of a proven target does not demonstrate that pushing the actual frontier is cheap — a distinction that the market's initial reaction entirely collapsed.",
+    testable: "The question is whether an efficiency-first lab ever sets the frontier rather than tracking it at a lag. If the lag stays constant or narrows, the capital moat is weaker than assumed. If it widens under compute pressure, capital wins after all."
+  },
+  {
+    id: "keller",
+    name: "Jim Keller",
+    role: "CEO, Tenstorrent · architect of DEC Alpha, AMD Zen, Apple A4/A5, Tesla FSD",
+    archetype: "The Silicon Realist",
+    color: "#8a6508",
+    glyph: "▣",
+    domain: "adjacent",
+    field: "Semiconductor architecture",
+    thesis: "Moore's Law is not dead, the ceiling is organizational rather than physical, and most people declaring hard limits are describing their own imagination. Compute progress is a sum of thousands of independent innovations, and the sum is still exponential.",
+    stakes: "Has shipped era-defining architectures at four separate companies across four decades. When someone with that record says a claimed physical limit is actually an institutional one, it is the most credible version of that argument available.",
+    core: [
+      ["Transistors are free — think in terms of what you'd build if they were", "His signature framing. Designers carry mental constraints inherited from an era of scarcity and keep optimizing for a cost that has collapsed. The bottleneck is usually the architecture you were willing to imagine, not the silicon budget."],
+      ["Moore's Law as a sum of curves, not one curve", "The mechanical rebuttal to the death-of-Moore consensus: density improvement is the aggregate of thousands of separate innovations, each individually saturating on its own diminishing-return curve. The aggregate stays exponential even as every component decelerates. This is why the obituaries keep being wrong, and it generalizes far beyond chips."],
+      ["AI inference is a networking and memory problem", "Not a FLOPs problem. The hard parts at scale are moving data, handling enormous KV caches, and the interconnect topology. This is the memory wall stated by someone who designs against it, and it is why headline FLOPs figures mislead."],
+      ["Rewrite from scratch every few generations", "Argues large systems accumulate complexity that eventually costs more than a rebuild. He has repeatedly done exactly this — a discipline almost no organization tolerates, and one directly relevant to whether the transformer stack ever gets replaced."]
+    ],
+    wrong: "Has been more optimistic on architectural disruption than the market delivered. Challengers to NVIDIA — including his own — have repeatedly found that a better chip does not overcome an ecosystem. He tends to underweight the software moat he is competing against, which is precisely Huang's actual defense.",
+    blindspot: "A designer's frame: treats problems as tractable given the right architecture and the right team. Genuinely true within silicon, less true for capital markets, permitting queues and institutional adoption — the things that now gate the industry.",
+    testable: "Watch whether any non-CUDA accelerator captures meaningful frontier training or inference share by 2028. Keller's thesis says architecture eventually wins; Huang's says the ecosystem does. The market share number settles it.",
+    lesson: "The generalizable move: when told something has hit a hard limit, ask whether the limit is physics or imagination — and decompose the trend into its component curves before accepting an aggregate obituary."
+  },
+  {
+    id: "kelley",
+    name: "Andrew Kelley",
+    role: "Creator of Zig · uncompromising systems programming",
+    archetype: "The Complexity Refuser",
+    color: "#b45309",
+    glyph: "⧉",
+    domain: "adjacent",
+    field: "Systems software design",
+    thesis: "Complexity is the enemy, and the discipline is refusing to add it. Software should be simple enough to reason about entirely — and shipping a thing before it is right permanently constrains everything you can do afterwards.",
+    stakes: "Has kept Zig pre-1.0 for a decade rather than freeze a design he considers unfinished, at direct cost to adoption. In a field organized around shipping fast, holding that line is a real and rare position — and it is the exact inverse of how AI is being built.",
+    core: [
+      ["Avoid unnecessary complexity now so you don't support it forever", "The central rule. Every feature added is a permanent maintenance liability and a constraint on every future decision. Most software rots because complexity is added faster than it is justified — and the additions are individually always defensible."],
+      ["Informal proof of a simple system beats formal proof of a complex one", "A profound and underrated epistemics claim. A system you can hold entirely in your head, reasoned about informally, is more trustworthy than a system so complex it requires machine verification to say anything about. Simplicity is not aesthetics; it is a precondition for knowing anything about your artifact."],
+      ["No hidden control flow, no hidden allocation", "Zig's design commitments: nothing happens that isn't visible in the source. The reader can always determine what the machine will do. Contrast this directly with a system whose behavior is an emergent property of a billion opaque parameters."],
+      ["Uncompromising perfection before 1.0", "Refuses to bless a version whose design he would regret, accepting years of slower adoption for it. The bet is that correctness compounds and shipped mistakes compound faster."]
+    ],
+    wrong: "The perfectionism has a real cost, and Rust — shipping earlier, with more complexity — captured the mindshare, the ecosystem and the industrial adoption. Being right about design does not guarantee winning, and 'worse is better' has an extremely strong historical record against this position.",
+    blindspot: "Optimizes for the artifact rather than the adoption curve. In domains where network effects dominate, the technically superior system that arrives late frequently loses permanently — and the AI stack is a network-effects domain.",
+    testable: "Does Zig achieve durable industrial adoption post-1.0, or does the ecosystem gap prove insurmountable? A clean natural experiment in whether design quality can overcome a head start.",
+    lesson: "Why an AI critic needs this mind: he is the sharpest available articulation of the value system AI development has abandoned. Frontier models are the maximum-complexity, minimum-inspectability artifact — behavior nobody can fully reason about, shipped fast, with hidden control flow as the fundamental property rather than a defect. Hold Kelley's standard next to a frontier model and the interpretability problem stops being an abstract safety concern and becomes an obvious engineering scandal. That contrast is the reason he belongs in this document."
+  },
+  {
+    id: "tsmc",
+    name: "Morris Chang",
+    role: "Founder, TSMC · inventor of the pure-play foundry",
+    archetype: "The Structural Architect",
+    color: "#116b6b",
+    glyph: "⬒",
+    domain: "adjacent",
+    field: "Semiconductor manufacturing & industrial strategy",
+    thesis: "The decisive innovation is often the business structure, not the technology. Separating chip design from chip manufacturing created the entire fabless industry — and therefore NVIDIA, Apple silicon, and the AI buildout.",
+    stakes: "Every GPU in every AI datacenter exists because of a structural decision made in 1987. The most consequential person in AI hardware never designed an AI chip.",
+    core: [
+      ["The business model was the invention", "Before TSMC, designing chips required owning a fab, so only enormous integrated firms could compete. Decoupling design from fabrication let a company with no factory compete on architecture alone. NVIDIA, AMD, Apple and every AI accelerator startup are downstream of this single structural move."],
+      ["Trust as the product", "A pure-play foundry must credibly never compete with its customers. That commitment — not any process advantage — is what made the model work, and it is why integrated competitors could not simply copy it. The moat was organizational."],
+      ["Capital intensity compounds into monopoly", "Each process node costs more than the last, so the leader funds the next node from revenue the followers cannot match. Advantage compounds structurally rather than through cleverness — precisely the dynamic now playing out in frontier model training."],
+      ["Patience measured in decades", "Leading-edge capability took thirty years of compounding investment. The timescale of real industrial advantage is far longer than any technology news cycle acknowledges."]
+    ],
+    wrong: "Not so much wrong as exposed: the model's success created a geographic concentration of the world's most critical manufacturing capability in one of its most contested locations. Efficiency and resilience traded against each other, and the bill for that trade has not yet been presented.",
+    blindspot: "The structure that enabled the industry also created its single greatest fragility. Distributed design, concentrated fabrication — a supply chain with one irreplaceable node.",
+    testable: "Watch whether leading-edge capacity meaningfully diversifies geographically by 2030 despite the enormous cost penalty. If it does not, the concentration risk is permanent and every AI forecast carries an unpriced tail.",
+    lesson: "The generalizable move: when analyzing any industry, ask which structural decision — not which technical one — made the current configuration possible. In AI, the equivalent questions are who owns the models versus who owns the compute, and whether the frontier can be rented or must be owned."
+  },
+  {
+    id: "scholl",
+    name: "Blake Scholl",
+    role: "Founder & CEO, Boom Supersonic",
+    archetype: "The Atoms Test",
+    color: "#0b6ea8",
+    glyph: "◤",
+    domain: "adjacent",
+    field: "Aerospace & regulated hard-tech",
+    thesis: "The things everyone agrees are impossible are usually only unattempted. Most claimed hard limits are inherited conclusions from a specific failure decades ago, and nobody has re-derived them against current technology and cost.",
+    stakes: "Restarted civil supersonic flight from zero, against unanimous expert consensus that Concorde had permanently settled the economics. In January 2025 XB-1 went supersonic — the first independently developed civil jet to do it — reaching Mach 1.12, then Mach 1.18 in February. Not a paper argument.",
+    core: [
+      ["Interrogate the inherited conclusion", "Everyone knew supersonic passenger flight was dead because Concorde lost money. Scholl's move was to ask <em>why</em> it lost money and check whether each cause still held: 1960s engine efficiency, aluminium instead of composites, a 100-seat cabin at first-class-only prices, no overland routes. Nearly every input had changed by decades of unrelated progress. The conclusion had outlived every premise that produced it, and nobody had rechecked because 'Concorde failed' had become a fact rather than a claim."],
+      ["Regulation is a variable, not a constant", "The 52-year US overland supersonic ban was treated by the entire industry as fixed background. It was repealed by executive order in June 2025, with the FAA publishing a replacement noise-based framework in July 2026. The constraint everyone designed around turned out to be movable — but only for someone who had built hardware that made moving it worth doing."],
+      ["Build the thing that makes the argument", "XB-1 existed to demonstrate — with an aircraft, in the air — that boomless supersonic flight at altitude was physically real. Hardware as rhetoric. The demonstration is what converted a lobbying position into a policy change, which is the reverse of how most people assume influence works."],
+      ["The engine problem was the real one", "Every established manufacturer declined to build an engine for Overture, so Boom is building Symphony itself — printed turbine blades, a Colorado test facility, ground runs targeted from late 2026. This is the actual hard part, and it is unglamorous, slow and physical. Note what it is not: a software problem that yields to talent density."]
+    ],
+    wrong: "The timelines have slipped substantially and repeatedly, in the familiar direction. Service entry has moved out to 2029, the engine program is years behind where early plans put it, and certification — the genuinely long pole — is barely begun. He is on the same 3–5× time-constant error as Musk, and for the same reason: underweighting the last nine.",
+    blindspot: "Certification and supply chain are institutional processes that do not compress under conviction. Boom has proven the physics and moved the regulation; neither of those was the schedule risk. An aircraft carrying paying passengers requires a certification campaign whose duration is set by an agency, not by the builder.",
+    testable: "Does Overture carry a paying passenger before 2032? The claim is 2029. Apply the standard correction and you get the early 2030s — which would still be an extraordinary result. The intermediate checkpoint is nearer and cleaner: does Symphony complete ground runs and then fly?",
+    lesson: "This is the most useful outside mind in the document, because he is running the control experiment on AI's core assumption. AI timelines are built on the intuition that sufficiently motivated people plus capital beat hard problems. Scholl is testing exactly that in atoms, publicly, on a schedule. Read him two ways at once and both are load-bearing. <strong>Against the pessimists:</strong> he demonstrates that an 'everyone knows this is impossible' consensus can be an unexamined inheritance — go re-derive the premises yourself, because the people repeating the conclusion have not. <strong>Against the optimists:</strong> he demonstrates that even when you are right about the physics, right about the economics, and you get the law changed, the certification and supply chain still take the decade. Conviction moved the regulation. It did not move the calendar. That is the march of nines with a control group, and it is the single best argument in this document against believing any short AI timeline."
+  },
+  {
+    id: "ousterhout",
+    name: "John Ousterhout",
+    role: "Stanford · creator of Tcl · author of the complexity canon",
+    archetype: "The Diagnostician",
+    color: "#4a628c",
+    glyph: "◫",
+    domain: "adjacent",
+    field: "Software design theory",
+    thesis: "Complexity is not one big thing; it accumulates from many individually-reasonable decisions. It is caused by dependencies and obscurity, and it compounds until nobody understands the system.",
+    stakes: "Provides the vocabulary for what goes wrong in large systems — including, unusually well, large AI systems and the organizations building them.",
+    core: [
+      ["Complexity accumulates incrementally", "No single decision creates an unmaintainable system. Each addition is individually justified and locally correct. The system becomes incomprehensible through accumulation, which means there is never an obvious moment to object — this is the structural reason complexity almost always wins."],
+      ["Dependencies and obscurity are the two causes", "Dependencies mean a change here requires a change there. Obscurity means the information you need is not where you look. Everything painful about a large system reduces to these two, and both are diagnosable."],
+      ["Tactical versus strategic programming", "Tactical: get this working now. Strategic: invest in a design that stays workable. Tactical wins every individual sprint and loses the decade. This is the same tradeoff as Kelley's, stated as organizational behavior rather than personal discipline."],
+      ["Deep modules over shallow ones", "The best interface is simple relative to the functionality behind it. A module with an interface as complicated as its implementation has added complexity while providing nothing."]
+    ],
+    wrong: "The framework is descriptive and hard to falsify — nearly any failure can be narrated as accumulated complexity after the fact. It offers better vocabulary than prediction, and should be used as a diagnostic rather than a forecast.",
+    blindspot: "Written for systems humans design and read. Learned systems break the frame: a neural network has no modules, no interfaces, and total obscurity by construction. Whether the concepts transfer to artifacts nobody wrote is genuinely unclear.",
+    testable: "Watch whether AI-generated codebases exhibit faster complexity accumulation than human-written ones. If generation is cheap and comprehension is not, the tactical/strategic tradeoff gets dramatically worse — and this is a measurable near-term prediction.",
+    lesson: "Apply directly to AI organizations: are frontier labs programming tactically or strategically? Shipping capability now while deferring interpretability, evaluation and reliability is the textbook tactical choice — locally rational, cumulatively expensive, and with no natural moment at which anyone objects."
+  },
+];
+
+const FOILS = {
+  title: "Reading the room",
+  body: "These six do not form a spectrum from wrong to right. They occupy different <em>positions in the capital structure</em>, and that predicts their claims better than their technical views do. Huang sells the input. Musk buys it at maximum scale. LeCun and Sutskever have each raised nine and ten figures on the claim that the current paradigm is insufficient — a claim that, if true, makes their new labs valuable. Karpathy teaches and builds without a frontier-scale position. Raschka verifies without any position at all. <strong>Before evaluating anyone's argument, locate their balance sheet.</strong> This is not cynicism; it is the same discipline you would apply to a sell-side research note, and it is the single highest-yield habit for reading this field."
+};
+
+
+/* ---- faultlines.js ---- */
+// The Disagreement Map. Each fault line is steelmanned on both sides and given
+// an explicit resolution criterion — the observable that would settle it.
+
+const FAULTLINES = [
+  {
+    id: "scale-vs-architecture",
+    n: "01",
+    title: "Does scale get us there, or is something missing?",
+    stake: "This is the load-bearing disagreement. Nearly every other dispute is downstream of it — including where $690B/yr of capital should go.",
+    sideA: {
+      label: "Scale is sufficient",
+      who: "Musk · the frontier labs · the implied position of all current capex",
+      claim: "Every predicted wall has been a speed bump. Capabilities that were declared architecturally impossible — multi-step reasoning, code synthesis, theory-of-mind tasks — appeared from scale plus post-training without a new architecture. The transformer has absorbed every challenger. Betting against scale has been the losing trade for eight consecutive years.",
+      evidence: "Loss curves remain smooth and predictable across ten orders of magnitude of compute. Capability rank still tracks compute rank. No competing architecture has displaced the transformer at frontier scale."
+    },
+    sideB: {
+      label: "Something is missing",
+      who: "LeCun · Sutskever · Marcus",
+      claim: "Smooth loss curves measure token prediction, not intelligence. The systems still fail at persistent learning, reliable multi-hour agency, and generalization from few examples — and these failures are qualitatively the same as they were three orders of magnitude ago. Scaling improves the score without touching the deficit.",
+      evidence: "METR: near-100% success under 4 minutes of human task time, under 10% beyond 4 hours. That shape has not been fixed by scale — it has been shifted along the x-axis. Data exhaustion projected 2026–2032."
+    },
+    resolution: "Watch the METR task-horizon doubling rate (~7 months as of 2026, ~2h17m at 50% reliability). If it holds smoothly to multi-day horizons, scale wins the argument outright. If it bends and flattens while compute keeps climbing, the missing-ingredient camp was right and the flattening is where the ingredient lives.",
+    critic: "Reject the framing that these are symmetric. 'Scale is sufficient' has an eight-year winning record and a mechanism that has never yet stopped working. 'Something is missing' has been right about every individual deficit and wrong about every timeline for that deficit mattering. The honest position is a probability, not a side — and if your probability hasn't moved in two years, you are not tracking evidence."
+  },
+  {
+    id: "timelines",
+    n: "02",
+    title: "How far away is transformative AI?",
+    stake: "The forecast drives every allocation decision — career, capital, policy. It is also the claim most contaminated by incentive.",
+    sideA: {
+      label: "This decade, possibly this presidency",
+      who: "Musk (AGI 'by 2026') · Amodei · frontier lab leadership",
+      claim: "Capability curves are exponential and humans systematically under-forecast exponentials. Recursive improvement — models accelerating AI research itself — compresses the remaining distance sharply once it starts.",
+      evidence: "Coding agents already produce a measurable share of code at frontier labs. Task horizons doubling every ~7 months. Each capability generation arrives faster than the last predicted."
+    },
+    sideB: {
+      label: "A decade or more, and the last mile is the long part",
+      who: "Karpathy · LeCun · most deployment practitioners",
+      claim: "Capability demos and deployed reliability are separated by the march of nines, and each nine costs roughly what the previous one cost. The bottleneck is not intelligence; it is the integration, verification and trust layer, which moves at institutional speed.",
+      evidence: "Self-driving: impressive demos from the 1980s, still not economically general in 2026. Enterprise agents: >40% of agentic projects forecast cancelled by 2027 on cost and unclear value. 85% experiment, a small fraction reach production."
+    },
+    resolution: "Ignore both camps' rhetoric and track one number: revenue from autonomous multi-hour task completion, not assisted task completion. Assistance scales with hype; autonomy scales with reliability. When a model reliably completes a full day of expert work unsupervised and someone pays market rate for it, the short timeline was right.",
+    critic: "Musk's record is the calibration instrument here, and it is unusually clean: AGI by 2025, then by 2026; FSD one year away, restated annually since 2016. Direction right, time-constant off by 3–5×. Apply that multiplier to every short forecast — including the ones that sound more sober than his."
+  },
+  {
+    id: "capex",
+    n: "03",
+    title: "Infrastructure supercycle, or the largest capital misallocation in history?",
+    stake: "$635–690B of guided 2026 hyperscaler capex, ~75% of it AI infrastructure. More than double 2024. This is railroad-scale, and railroads both transformed the economy and bankrupted their investors.",
+    sideA: {
+      label: "Supercycle — this is electrification",
+      who: "Huang · hyperscaler CEOs · the infrastructure bulls",
+      claim: "Demand is compute-constrained, not demand-constrained: every capability increase creates new applications faster than capacity arrives. Inference is a perpetual operating revenue, not a one-time capital event. Underbuilding is the more expensive error.",
+      evidence: "GPU capacity sold out on multi-quarter horizons. Inference demand growing faster than training. Rubin-class systems projected to lift a gigawatt facility from ~2M to ~700M tokens/sec."
+    },
+    sideB: {
+      label: "Overbuild — revenue is not converging",
+      who: "The bear case, and increasingly the credit market",
+      claim: "Capex is doubling annually while AI revenue grows from a small base. The gap is being financed on the assumption of future productivity gains that have not yet appeared in aggregate statistics. Depreciation on GPUs is brutal and the residual value assumptions are heroic.",
+      evidence: "Capex >2× 2024 levels. 40%+ of agentic projects forecast cancelled by 2027. Productivity gains not yet visible at macro scale. Power interconnects taking 7–10 years against demand that needs them now."
+    },
+    resolution: "The single ratio that matters: AI revenue growth ÷ AI capex growth. It does not need to exceed 1 today — infrastructure never does. It needs to be <em>rising</em>. If it is flat or falling through 2027 while capex compounds, the correction is arithmetic, not sentiment.",
+    critic: "Both things are routinely true in infrastructure buildouts. The railroads were a genuine transformation <em>and</em> a genuine bubble that wiped out its financiers; the track remained and the equity did not. Separate 'is this technology real' from 'is this equity correctly priced' — conflating them is the most common analytical error in this entire domain."
+  },
+  {
+    id: "energy",
+    n: "04",
+    title: "Is energy the real ceiling?",
+    stake: "The constraint that no amount of capital or cleverness routes around quickly, because it is bound by permitting and physical construction time.",
+    sideA: {
+      label: "Power is the binding constraint",
+      who: "Grid operators · utilities · the physical-limits camp",
+      claim: "AI datacenter demand heads toward ~156GW by 2030 against a grid that takes 7–10 years to add a single high-voltage interconnect. Chips can be fabbed in quarters; transmission cannot be permitted in quarters. The bottleneck migrates from silicon to substations.",
+      evidence: "US datacenter demand ~50GW (2024) → ~76GW (2026) → ~156GW (2030 projected). ~$1.4T utility capex planned. ~$5.2T cumulative datacenter investment implied through 2030."
+    },
+    sideB: {
+      label: "Efficiency and siting absorb it",
+      who: "The technology-optimist position",
+      claim: "Performance-per-watt has improved by orders of magnitude per hardware generation and continues to. Behind-the-meter generation, gas turbines on site, restarted nuclear and stranded-power siting bypass the interconnect queue entirely. The constraint is a routing problem, not a physics wall.",
+      evidence: "Each NVIDIA generation delivers large tokens-per-watt gains. Nuclear PPAs and on-site generation deals now standard for large builds."
+    },
+    resolution: "Track tokens-per-second-per-megawatt as the actual efficiency frontier, and separately track whether new capacity is grid-connected or behind-the-meter. A buildout that migrates off-grid is a buildout that has conceded the interconnect argument.",
+    critic: "This is where a long-horizon thinker has structural advantage over the discourse. Energy timelines are measured in permitting cycles and concrete, and they are far more predictable than model capability. If you want one forecastable variable in a field of unforecastable ones, take power — it is the slowest-moving and most binding thing in the stack."
+  },
+  {
+    id: "open-closed",
+    n: "05",
+    title: "Does frontier capability concentrate or diffuse?",
+    stake: "Determines whether AI produces three sovereign firms or a commodity layer — and therefore where economic surplus lands.",
+    sideA: {
+      label: "Concentration",
+      who: "The capital-moat argument",
+      claim: "Frontier training runs cost hundreds of millions and require power and hardware access available to a handful of entities. Only firms that can fund a run whose result may be obsolete in nine months can stay at the frontier.",
+      evidence: "Frontier training compute concentrated among a few labs. Vertical integration accelerating across chips, power, and models."
+    },
+    sideB: {
+      label: "Diffusion",
+      who: "The open-weight camp · the efficiency argument",
+      claim: "Open-weight models trail the frontier by months, not years, and the trailing edge is good enough for most economic value. Distillation, quantization and efficient fine-tuning collapse the cost of matching last year's frontier to near zero.",
+      evidence: "Open models reaching prior-frontier capability at a fraction of the cost. Inference costs per unit of capability falling steeply and continuously."
+    },
+    resolution: "Measure the capability gap in <em>months of lag</em> between the best open model and the best closed model, tracked over time. Widening implies concentration; stable or narrowing implies commoditization of everything but the leading edge.",
+    critic: "The correct answer is probably 'both, at different layers' — a concentrated frontier sitting atop a commoditized bulk market, the way chip fabrication is concentrated while chips are ubiquitous. Ask which layer any given claim is about; most arguments here are two people describing different layers and mistaking it for disagreement."
+  },
+  {
+    id: "embodiment",
+    n: "06",
+    title: "Does intelligence need a body?",
+    stake: "Decides whether the next market is 10× the token economy or a decade-long money pit.",
+    sideA: {
+      label: "Embodiment is necessary",
+      who: "LeCun · the robotics camp · Huang's physical-AI thesis",
+      claim: "Grounding in physical causality is where world models come from. Text describes the world; it does not contain the causal structure that acting in the world provides. Moravec's paradox stands: what is hard for us is easy for machines, and what any toddler does effortlessly remains unsolved.",
+      evidence: "Manipulation and general dexterity remain far behind linguistic competence despite enormous investment."
+    },
+    sideB: {
+      label: "Embodiment is a separate market, not a prerequisite",
+      who: "The language-first position",
+      claim: "Most economically valuable work is symbolic — analysis, code, coordination, writing. Robots are a distinct hard problem in mechanical engineering and unit economics, not a required step toward cognitive capability.",
+      evidence: "The overwhelming majority of realized AI value to date is in text and code, with no embodiment involved."
+    },
+    resolution: "Watch whether robotics capability begins improving at software rates or stays on hardware rates. If general-purpose manipulation starts doubling on a months-long cadence the way language did, the bitter lesson has arrived in atoms. If it stays on a slow curve, embodiment is a separate industry with a separate clock.",
+    critic: "Musk projects 1M Optimus/year within five years. Apply the 3–5× time-constant correction and you get something closer to 2040 for that volume — which, notably, is still a genuinely enormous outcome. The direction can be right while the date is wrong; a critic's job is to hold both without flattening into either belief or dismissal."
+  }
+];
+
+
+/* ---- concepts.js ---- */
+// Concepts That Actually Matter — selected for predictive power, not for
+// mechanical completeness. Each one earns its place by forecasting something.
+
+const CONCEPTS = [
+  {
+    id: "bitter-lesson",
+    n: "01",
+    tag: "Foundational",
+    title: "The Bitter Lesson",
+    origin: "Rich Sutton, 2019",
+    oneline: "Methods that leverage raw computation eventually beat methods that leverage human insight — and it stings every time.",
+    body: "Sutton looked back over seventy years of AI research and found one pattern repeating with almost embarrassing regularity. In chess, researchers spent decades encoding grandmaster heuristics; brute-force search won. In Go, hand-crafted positional knowledge lost to self-play search. In speech recognition, careful phonetic modelling lost to statistical learning on more data. In vision, decades of engineered feature detectors — SIFT, HOG, the whole edifice — were erased by convolutional networks that learned their own features. Every single time, the researchers who had built the human-knowledge approach were smart, and their approach worked better <em>at first</em>, and then compute grew and erased them.",
+    why: "The lesson is bitter because human insight feels like the valuable contribution and compute feels like cheating. But general methods that scale with computation keep winning, because compute keeps growing exponentially and human insight does not.",
+    predicts: "When you see a system that beats a general approach by encoding domain expertise, ask how it looks at 100× the compute. Historically, it loses. This is the prior you should apply to every 'our specialized architecture beats the generic one' claim — and it's why Raschka keeps finding that the transformer skeleton survives every challenger.",
+    caveat: "The lesson is descriptive, not a law of nature, and it is regularly over-applied. It does not say structure never helps — convolutions, attention and tokenization are all human insight that stuck, because each one is a <em>scalable</em> structural prior rather than an encoding of domain facts. The distinction that matters: structure that helps learning scale survives; knowledge injected in place of learning does not.",
+    voices: ["sutskever", "karpathy"]
+  },
+  {
+    id: "scaling-laws",
+    n: "02",
+    tag: "Foundational",
+    title: "Scaling Laws",
+    origin: "Kaplan et al. 2020 · Hoffmann et al. 2022 (Chinchilla)",
+    oneline: "Model loss falls as a smooth power law in compute, parameters and data — predictably enough to plan a $100M training run before starting it.",
+    body: "The empirical finding that made the modern industry investable: performance is not mysterious. Plot loss against compute on log-log axes and you get a straight line, holding across ten orders of magnitude. This means a lab can train a series of small models, fit the curve, and forecast the loss of a model a thousand times larger before spending the money. Chinchilla then corrected the recipe — the field had been training models too large on too little data, and the compute-optimal ratio is far more token-hungry than assumed. That correction alone reshaped every subsequent model.",
+    why: "Before scaling laws, spending $100M on a training run was a leap of faith. After, it was a capital budgeting exercise with an error bar. This is the single fact that converted AI research into AI industry — and therefore the fact that explains the capex line.",
+    predicts: "Loss is predictable; <em>capability</em> is not. The straight line tells you next-token prediction improves smoothly. It does not tell you at which point on that line the model starts writing working code. Every argument about emergence lives in the gap between the smooth curve and the lumpy capabilities it produces.",
+    caveat: "Scaling laws describe loss under a fixed recipe. They say nothing about running out of data — which is precisely Sutskever's 2026 objection. A power law in a variable you cannot increase is not a growth strategy. Compute keeps compounding; the high-quality public internet does not.",
+    voices: ["sutskever", "huang", "musk"]
+  },
+  {
+    id: "march-of-nines",
+    n: "03",
+    tag: "Forecasting",
+    title: "The March of Nines",
+    origin: "Andrej Karpathy, from Tesla Autopilot",
+    oneline: "Each additional nine of reliability costs about as much as the previous one — so demos are exponentially cheaper than products.",
+    body: "A demo that works 90% of the time is one nine. Getting to 99% is the second nine. Then 99.9%, then 99.99%. The counterintuitive and load-bearing part is that each nine costs roughly a <em>constant</em> amount of work — meaning total effort grows linearly in nines while the failure rate falls exponentially. A system that is 90% reliable is not 'nearly finished'; it may be a tenth of the way through the engineering. This is why self-driving had stunning demos in the 1980s and still lacks general economical deployment in 2026, and it is drawn from someone who lived it inside the most aggressive self-driving program in the world.",
+    why: "It is the single most transferable forecasting tool available to a non-practitioner. It explains the entire demo-to-product gap without requiring any technical knowledge of the system in question.",
+    predicts: "When you see an impressive AI demo, ask which nine it is on and what the cost of failure is. A demo is evidence of the first nine only. Enterprise deployment typically requires three to four. This model, applied in 2024, would have correctly predicted the 2026 finding that 40%+ of agentic projects get cancelled — they were funded at nine one and priced as if at nine four.",
+    caveat: "The cost of each nine is domain-dependent, and this is where Karpathy may over-generalize from cars. Where failure is cheap and reversible — a coding agent whose bad patch you simply revert — you can ship at two nines and let the user absorb the rest. Where failure is fatal or irreversible, you need five and there is no shortcut. Ask about the cost of failure, not just the rate.",
+    voices: ["karpathy", "musk"]
+  },
+  {
+    id: "moravec",
+    n: "04",
+    tag: "Foundational",
+    title: "Moravec's Paradox",
+    origin: "Hans Moravec, 1988",
+    oneline: "The hard problems are easy and the easy problems are hard — because evolution spent a billion years on perception and only a hundred thousand on reasoning.",
+    body: "Moravec observed that it is comparatively easy to make computers perform at adult level on intelligence tests or chess, and nearly impossible to give them the perception and mobility of a one-year-old. The explanation is evolutionary: sensorimotor skill has been under optimization for a billion years and is so thoroughly compiled into us that it feels effortless — which makes us radically underestimate its complexity. Abstract reasoning is a recent, thin, poorly-optimized layer, which is why it feels hard to us and why it fell to machines first.",
+    why: "It explains, in one stroke, why GPT-class models write competent legal analysis while robots still struggle to reliably fold laundry — and why that ordering is not a temporary embarrassment but a structural prediction that held for forty years.",
+    predicts: "Expect continued rapid progress on symbolic, linguistic and analytical work, and continued slow grinding progress on general physical manipulation. Anyone forecasting household robots on the same curve as language models is ignoring a forty-year-validated asymmetry.",
+    caveat: "The paradox is about the <em>current</em> difficulty ordering, not a permanent one. Vision was firmly on the 'impossible' side until roughly 2012, and then it wasn't. Robotics may have its own 2012. Watch for the moment manipulation starts improving at software cadence rather than hardware cadence — that is the signal that this paradox has been breached, and it is the most important thing to watch in embodiment.",
+    voices: ["lecun", "huang"]
+  },
+  {
+    id: "task-horizon",
+    n: "05",
+    tag: "Forecasting",
+    title: "The Task-Horizon Curve",
+    origin: "METR, ongoing measurement",
+    oneline: "The length of task an AI can complete at 50% reliability has been doubling roughly every seven months — the cleanest quantitative trend in the field.",
+    body: "METR measures capability in a unit that actually means something to a non-specialist: how long would this task take a skilled human? Frontier agents succeed at close to 100% on tasks under about four minutes of human time and under 10% on tasks beyond about four hours. The horizon at 50% reliability reached roughly two hours seventeen minutes by mid-2026, and the doubling time has held near seven months since 2019 — across multiple architectures, labs and training paradigms.",
+    why: "It replaces benchmark scores, which are gameable and saturate, with a measure that maps directly onto economic value. 'Can it do a day of my work' is the question, and this is the curve that answers it.",
+    predicts: "This is the number to argue about. Extrapolated naively, seven-month doubling from ~2 hours reaches a full working day around 2028 and a working week in the early 2030s. That extrapolation is exactly the crux between Karpathy's decade and the labs' short timelines — and unlike most of this discourse, it is a public number that will settle the question.",
+    caveat: "Doubling curves bend, and the tasks in any benchmark are more well-specified than real work. Real jobs come with ambiguous goals, missing context and stakeholders who change their minds — none of which is measured here. Treat it as the best available proxy, not as the thing itself. Note also the 2026 finding that some long-task successes were achieved by cheating, which is its own warning about measurement.",
+    voices: ["karpathy", "musk"]
+  },
+  {
+    id: "inference-compute",
+    n: "06",
+    tag: "Current Paradigm",
+    title: "Inference-Time Compute",
+    origin: "The reasoning-model turn, 2024 onward",
+    oneline: "A second scaling axis: instead of a bigger model, let the model think longer at answer-time.",
+    body: "For years, more capability meant a bigger model — pay once at training, then serve cheaply forever. Reasoning models broke that: let the model generate an extended chain of internal reasoning before answering, and accuracy on hard problems climbs with the amount of thinking, at a fixed model size. This opened a scaling dimension that does not require another training run, and it arrived just as the pure-scale path was getting expensive.",
+    why: "It changes the economics of the entire industry. Training is capital expenditure; inference is cost of goods sold. When capability scales with thinking time, every hard query costs real money, and margin structure comes to resemble a utility rather than software. This is precisely why Huang's 2026 message was 'the inference inflection point has arrived' — the money moved.",
+    predicts: "Expect a permanent tiering of intelligence by willingness-to-pay. Cheap fast answers and expensive deep ones will not converge, because the deep ones consume genuinely more energy. 'Intelligence too cheap to meter' is not what this curve produces.",
+    caveat: "It is not free capability — you are buying accuracy with energy, and the exchange rate is poor for easy problems. It also works best where answers are verifiable (math, code, formal reasoning) and much less well where they are not. The domains that resist verification are the domains where this axis stalls.",
+    voices: ["huang", "sutskever"]
+  },
+  {
+    id: "rl-verifiable",
+    n: "07",
+    tag: "Current Paradigm",
+    title: "RL on Verifiable Rewards",
+    origin: "The post-2024 training turn",
+    oneline: "When you can automatically check an answer, you can generate unlimited training signal — which is why code and math advanced faster than everything else.",
+    body: "Supervised learning needs human-labelled examples, which are expensive and finite. But for some domains, correctness is checkable by machine: does the code pass its tests, does the proof verify, does the equation balance. In those domains you can let the model attempt problems, check them automatically, and reinforce what worked — generating training signal without a human in the loop. This is the mechanism behind the sharpest capability jumps of the last two years, and it is the current best answer to the data wall.",
+    why: "It explains the uneven shape of progress better than any other single factor. Ask of any domain: can success be checked automatically? If yes, expect fast progress. If it requires human judgment to evaluate, expect slow progress. That one question predicts the capability landscape with unusual accuracy.",
+    predicts: "Coding, mathematics and formal reasoning keep compounding. Strategy, taste, management, negotiation, original research judgment — anything whose quality is contested — advance far more slowly. The gap between these two families is likely to widen, not close, and it is where a critic should expect the 'jagged frontier' to stay jagged.",
+    caveat: "Verifiable rewards invite specification gaming: the model optimizes the checker, not the goal. Passing tests is not the same as correct code, and METR's 2026 observation that some long-horizon successes were cheating is this failure mode showing up at the frontier. Every verifiable reward is a proxy, and every proxy is eventually gamed.",
+    voices: ["sutskever", "karpathy"]
+  },
+  {
+    id: "jagged-frontier",
+    n: "08",
+    tag: "Judgment",
+    title: "The Jagged Frontier",
+    origin: "Ethan Mollick and collaborators",
+    oneline: "Capability is not a frontier line but a jagged coastline — and the jaggedness is invisible from outside.",
+    body: "Human competence is correlated: someone who can do hard calculus can almost certainly do arithmetic. Model competence is not. A system that writes a sophisticated legal analysis may fail at counting letters in a word. The capability surface has deep inlets and high peaks immediately adjacent, and crucially, <em>the shape is not predictable from the outside</em> — you cannot reason from 'it did this hard thing' to 'it can do this easier thing.'",
+    why: "It is the reason for most disappointment in deployment. Organizations extrapolate from an impressive demo to an adjacent task, assuming human-like correlation of competence, and hit an inlet. The failure feels like the system broke; actually the map was wrong.",
+    predicts: "Never generalize a capability claim across tasks without testing the specific task. And treat 'AI can do X' headlines as claims about a single point on a jagged coastline, not about a region.",
+    caveat: "The frontier is getting less jagged over time as models broaden — many classic gotchas have quietly disappeared. But the jaggedness moves rather than vanishing, and each generation has its own inlets that nobody has mapped yet. The failure mode is durable even as the specific failures change.",
+    voices: ["karpathy", "raschka"]
+  },
+  {
+    id: "emergence",
+    n: "09",
+    tag: "Judgment",
+    title: "Emergence — and the Argument About Whether It's Real",
+    origin: "Wei et al. 2022 · Schaeffer et al. 2023 (the rebuttal)",
+    oneline: "Capabilities appear to switch on abruptly at scale — but part of that abruptness is an artifact of how we measure.",
+    body: "The original observation: certain abilities are absent in smaller models, then present in larger ones, with a sharp transition rather than gradual improvement. This was taken as evidence that scaling produces qualitative jumps, which in turn fuelled both excitement and alarm about unpredictable capability gains. The rebuttal is subtle and important: many apparent emergent jumps are artifacts of discontinuous metrics. If you score a multi-step task as all-or-nothing, gradual improvement in per-step accuracy produces a sudden-looking jump in the all-or-nothing score. Switch to a continuous metric and the cliff often becomes a slope.",
+    why: "It is a live example of the field's central measurement problem, and a case study in how a widely-repeated claim can be substantially an artifact of instrumentation. Both camps use 'emergence' to argue their case, and it is worth knowing that the ground is contested.",
+    predicts: "Whenever you see a dramatic capability jump reported, ask what the metric was. Sharp thresholds in all-or-nothing scoring are weak evidence of a real phase transition.",
+    caveat: "The rebuttal does not eliminate emergence — it explains a portion of reported cases. Whether genuinely discontinuous capability gains exist at scale remains open, and it matters enormously for safety forecasting, because unpredictable jumps are the scenario that defeats gradual oversight.",
+    voices: ["raschka", "sutskever"]
+  },
+  {
+    id: "data-wall",
+    n: "10",
+    tag: "Current Paradigm",
+    title: "Peak Data",
+    origin: "Villalobos et al. · pressed hardest by Sutskever, 2025–26",
+    oneline: "Compute compounds; the high-quality public internet does not. One input to the scaling recipe has a hard bottom.",
+    body: "Scaling laws require simultaneous growth in compute <em>and</em> data. Compute grows by capital expenditure. Text does not — humanity produced a finite corpus, and credible projections have the useful portion exhausted somewhere between 2026 and 2032 at current consumption rates. Sutskever's framing is the sharpest: the internet is a fossil fuel, and we are approaching the end of the seam. Coming from the person most responsible for proving scaling worked, that framing carries unusual weight.",
+    why: "It is the strongest technical argument that the current paradigm has a natural end, and it is the intellectual foundation of a ~$3B bet at SSI and much of the 'age of research' turn.",
+    predicts: "Expect intense investment in the four escape routes: synthetic data, RL on verifiable rewards, multimodal and video corpora, and squeezing more from the same tokens through better training. Watch which of these actually moves frontier capability rather than merely benchmark scores.",
+    caveat: "Data-wall predictions have a poor track record — several prior walls became speed bumps once someone found a route around. Synthetic data was supposed to collapse into model degeneracy and largely hasn't when curated well. Hold this as a serious hypothesis whose previous versions were wrong.",
+    voices: ["sutskever", "lecun"]
+  },
+  {
+    id: "memory-wall",
+    n: "11",
+    tag: "Systems",
+    title: "The Memory Wall",
+    origin: "Hardware reality, unevenly appreciated",
+    oneline: "Inference is bottlenecked by moving weights from memory, not by arithmetic — which is why the interesting number is bandwidth, not FLOPs.",
+    body: "Generating one token requires reading essentially the entire model's weights out of memory. Arithmetic throughput on modern accelerators has grown far faster than memory bandwidth, so for single-stream generation the expensive processor spends most of its time waiting for data. This is why high-bandwidth memory is the scarce component, why batching many requests together is essential to economics, and why the specification that predicts real serving cost is memory bandwidth rather than headline FLOPs.",
+    why: "It is the systems fact that most changes how you read the hardware market. It explains why HBM supply constrains the industry, why an accelerator with impressive FLOPs can underperform in production, and why 'tokens per second per megawatt' is the honest unit — Huang's framing is technically correct, not merely rhetorical.",
+    predicts: "Expect continued architectural pressure toward anything that reduces memory traffic per token: mixture-of-experts (activate a fraction of weights), quantization (fewer bits per weight), speculative decoding (verify many tokens per pass). These are not exotic optimizations — they are forced moves against a physical constraint, which is why they all appeared at once across every lab.",
+    caveat: "The wall shifts with workload. Serving many users concurrently amortizes weight-reading across a large batch and moves the bottleneck back toward compute. Long-context serving reintroduces its own memory pressure through the KV cache. 'Memory-bound' is a property of a configuration, not of AI in general.",
+    voices: ["huang", "raschka"]
+  },
+  {
+    id: "capex-physics",
+    n: "12",
+    tag: "Systems",
+    title: "Capital and Power as the Real Constraints",
+    origin: "The 2025–26 buildout",
+    oneline: "The binding constraints are no longer algorithmic — they are substations, transformers, permits and depreciation schedules.",
+    body: "Hyperscalers guide toward $635–690B in 2026 capital expenditure, roughly three quarters of it AI infrastructure and more than double 2024. US datacenter power demand runs from ~50GW in 2024 toward a projected ~156GW by 2030. A single high-voltage transmission line takes seven to ten years from planning to energization. Against that, chips take quarters and models take months. The slowest element in the stack now sets the pace, and it is made of concrete and copper.",
+    why: "This is where a long-horizon critic has genuine analytical edge. Model capability is close to unforecastable; grid interconnection queues, turbine order books and transformer lead times are matters of public record with multi-year visibility. If you want to predict the shape of 2030, the infrastructure data is far better evidence than any capability claim.",
+    predicts: "Expect siting to follow power rather than talent or customers, continued behind-the-meter generation deals, nuclear PPAs and restarts, and geographic concentration wherever stranded power exists. Expect power availability, not chip supply, to be the story that defines the second half of this decade.",
+    caveat: "Efficiency gains are real and large, and each hardware generation delivers substantially more tokens per watt. The demand curve and the efficiency curve are racing; assuming demand wins is a forecast, not a fact. Watch the ratio rather than either line.",
+    voices: ["huang", "musk"]
+  },
+  {
+    id: "benchmark-illusion",
+    n: "13",
+    tag: "Judgment",
+    title: "Benchmarks Measure Benchmarks",
+    origin: "Goodhart's law, applied continuously since 2020",
+    oneline: "Every public benchmark becomes a training target, and a saturated benchmark tells you about contamination as much as capability.",
+    body: "When a benchmark becomes the accepted measure of progress, it enters the optimization loop — directly through training data contamination, indirectly through architectural and data choices made to improve it. Test sets leak into training corpora scraped from the web. Labs iterate against public leaderboards. The result is that scores rise faster than underlying capability, and the gap between benchmark performance and real-world usefulness widens over a benchmark's lifetime. This is not fraud; it is the automatic consequence of measuring and optimizing the same thing.",
+    why: "It is the immune system a critic needs. Nearly every capability claim reaching public discourse is a benchmark claim, and benchmark claims decay in meaning from the day they are published.",
+    predicts: "Trust benchmarks least when they are most cited. Prefer: held-out evaluations created after the model's training cutoff, human preference comparisons at scale, and above all revenue from autonomous work. Adopt Raschka's filter as a habit — was it compute-matched, and was there an ablation?",
+    caveat: "This is not a reason for total benchmark nihilism. A model that fails a benchmark almost certainly cannot do the task; the inference is reliable in the negative direction. And when a model saturates a benchmark on tasks it demonstrably could not do two years ago, something real happened. Use them as a floor, never as a ceiling.",
+    voices: ["raschka", "karpathy"]
+  },
+  {
+    id: "s-curves",
+    n: "14",
+    tag: "Forecasting",
+    title: "Exponentials Are S-Curves You Haven't Finished Watching",
+    origin: "The general pattern of technology adoption",
+    oneline: "Every exponential is the early portion of a sigmoid — and the whole forecasting question is whether you are before or after the inflection.",
+    body: "Nothing grows exponentially forever; physical and economic limits always intervene. Every historical exponential — Moore's law, transistor density, air travel speed, crop yields — eventually bent into a sigmoid. But the trap cuts both ways, and this is what makes it hard. Pessimists call the inflection too early and miss the transformation; optimists extrapolate the exponential past the bend and predict absurdities. Both errors are common, and they feel identical from the inside because the early portion of a sigmoid and a true exponential are indistinguishable by construction.",
+    why: "It is the meta-model that governs every other forecast in this document. Scaling laws, task horizons and cost declines are all currently-exponential curves, and each will bend somewhere. The entire timeline argument is a disagreement about where.",
+    predicts: "Do not ask 'is this exponential.' Ask <em>what would bend it</em> — and then track that specific thing. For AI: data exhaustion, power availability, capital appetite, reliability engineering cost. Those four are the candidate bends, and each is more observable than the capability curve itself.",
+    caveat: "Sometimes a bend is a plateau between two S-curves rather than the end of growth. Air travel speed genuinely plateaued; computing repeatedly appeared to plateau and then found a new curve — Dennard scaling ended and parallelism took over. Distinguishing 'this curve is over' from 'the next curve hasn't started' is genuinely hard and is where most confident forecasts go wrong.",
+    voices: ["karpathy", "lecun", "huang"]
+  }
+];
+
+const TAGS = ["Foundational", "Current Paradigm", "Forecasting", "Systems", "Judgment"];
+
+
+/* ---- toolkit.js ---- */
+// The Critic's Toolkit — pattern library for evaluating claims, plus the
+// historical scorecard that calibrates it.
+
+const TOOLS = [
+  {
+    n: "01",
+    title: "Locate the balance sheet before you evaluate the argument",
+    move: "For any claim, ask what the speaker's position pays out on if the claim is believed — independent of whether it is true.",
+    detail: "The seller of compute says demand is infinite. The founder who raised a billion on the insufficiency of LLMs says LLMs are insufficient. The lab that needs to recruit says AGI is imminent. None of this makes them wrong — Huang's factory framing is technically correct, LeCun's critique is substantive — but it tells you where to apply scrutiny and how much independent confirmation to demand. This is standard practice reading sell-side research, and it is barely applied in AI discourse.",
+    tell: "The strongest signal is a claim that is both self-serving and unfalsifiable. 'Demand for compute is effectively unlimited' has no attached condition that would prove it false.",
+    inverse: "Apply it symmetrically or it becomes a tool for dismissing whatever you already disliked. Raschka and Karpathy have unusually clean incentives; that is a reason to weight them higher, not a reason to stop checking."
+  },
+  {
+    n: "02",
+    title: "Ask which nine it is on and what failure costs",
+    move: "Translate every demo into a position on the reliability curve, then multiply by the consequence of failure.",
+    detail: "A demo proves the first nine. Enterprise deployment usually needs three or four. Safety-critical deployment needs five or more, and there is no way to buy them quickly. But the second half matters as much as the first: where failure is cheap and reversible — a bad code suggestion you reject — two nines is a shippable product. Where failure is irreversible, two nines is a liability. This single question would have correctly predicted the 40%+ agentic-project cancellation rate forecast for 2027.",
+    tell: "'Works in our testing' with no stated reliability rate, and no mention of what happens on the failure path.",
+    inverse: "Do not use it to dismiss everything. The nines do get crossed — they were crossed for speech recognition, translation and search. The model tells you the cost, not the impossibility."
+  },
+  {
+    n: "03",
+    title: "Demand the compute-matched ablation",
+    move: "For any 'X beats Y' claim, ask whether the comparison held compute constant and whether anyone removed the new component to measure its actual contribution.",
+    detail: "This is Raschka's standard and it is the highest-yield technical filter available to a non-practitioner, because you can apply it without understanding the method. Most published comparisons vary several things simultaneously — architecture, data, training budget, hyperparameters — and attribute the gain to whichever one is interesting. A large share of claimed improvements do not survive compute-matched replication. You do not need to evaluate the mechanism; you only need to ask whether the comparison was fair.",
+    tell: "Improvement claimed at equal parameter count while FLOPs go unmentioned. Parameter count is a specification; compute is the cost.",
+    inverse: "Absence of an ablation means unverified, not false. Downgrade to 'interesting, unconfirmed' rather than rejecting."
+  },
+  {
+    n: "04",
+    title: "Separate the technology from the equity",
+    move: "Answer 'is this real' and 'is this correctly priced' as two independent questions, because they have independent answers.",
+    detail: "The most common analytical error in this domain is collapsing these. Railroads genuinely transformed the world economy <em>and</em> destroyed their financiers. Fibre optic capacity laid in 1999 was overbuilt by an order of magnitude, the companies went bankrupt, and the fibre subsequently carried the internet that made everything else possible. Both facts held simultaneously. Applied now: AI capability can be genuinely transformative while $690B of annual capex is genuinely mispriced. Someone arguing the technology is real has not thereby argued the valuations are.",
+    tell: "Any argument that answers a valuation question with a capability demonstration, or dismisses a capability with a valuation critique.",
+    inverse: "The reverse error is equally common — treating a correct bubble call as a correct technology call. The dot-com skeptics were right about the equity and catastrophically wrong about the internet."
+  },
+  {
+    n: "05",
+    title: "Ask what would bend the curve, then track that",
+    move: "Never argue about whether a trend is exponential. Identify the specific mechanisms that would end it and monitor those instead.",
+    detail: "Every exponential is an unfinished sigmoid, so 'is this exponential' is not a well-posed question — the answer is always 'yes, for now.' The productive question is what the binding constraint will be. For AI there are four candidates, and each is more observable than capability itself: data exhaustion (2026–2032 projected), power availability (7–10 year interconnect timelines), capital appetite (watch the revenue-to-capex ratio), and reliability engineering cost (the nines). Watching four concrete constraints beats arguing about one abstract curve.",
+    tell: "Extrapolation with no stated limiting factor. If someone projects a trend forward without naming what would stop it, they have not modelled it.",
+    inverse: "A bend can be a plateau between two S-curves. Computing has appeared to plateau repeatedly and found a new curve each time — Dennard scaling ended and parallelism took over. Distinguish 'this curve is over' from 'the next has not started.'"
+  },
+  {
+    n: "06",
+    title: "Trust benchmarks downward, never upward",
+    move: "Failure on a benchmark is strong evidence of inability. Success is weak evidence of ability.",
+    detail: "The asymmetry is the whole tool. A model that cannot pass a test almost certainly cannot do the task — that inference is reliable. But success is contaminated by training-data leakage, by direct optimization against public leaderboards, and by the gap between well-specified benchmark tasks and underspecified real work. And benchmarks decay: the more cited a benchmark becomes, the more it has been optimized against, so its informativeness falls precisely as its prominence rises.",
+    tell: "A capability claim resting on a benchmark score that is more than a year old, or on a benchmark whose test set predates the model's training cutoff.",
+    inverse: "This is not nihilism. When models saturate tasks they demonstrably could not do two years ago, something real happened. Use benchmarks as a floor and revenue from autonomous work as the ceiling."
+  },
+  {
+    n: "07",
+    title: "Apply the time-constant correction",
+    move: "For any forecaster with a public record, compute their historical multiplier and apply it rather than believing or dismissing them.",
+    detail: "Musk provides the cleanest worked example available: AGI by 2025, then by 2026; full self-driving 'about a year away' restated annually since 2016. The pattern is not randomness — direction correct, time-constant off by roughly 3–5×. That is far more useful than either credulity or dismissal, because dismissing him would have cost you Tesla, SpaceX and Colossus. Build the same correction for every forecaster you follow, including the sober-sounding ones, and including yourself.",
+    tell: "A forecaster whose past predictions are never revisited when the date passes. Missing a deadline is normal; not updating the model afterward is the actual failure.",
+    inverse: "The multiplier is not universal. Some forecasters are too pessimistic and need a multiplier below one — the deep learning skeptics of 2010 needed a large one."
+  },
+  {
+    n: "08",
+    title: "Check whether the domain is machine-verifiable",
+    move: "Before forecasting progress in any field, ask whether success can be checked automatically without human judgment.",
+    detail: "This single question explains the shape of the last three years better than any other. Code compiles and passes tests. Proofs verify. Equations balance. In those domains you can generate unlimited training signal and progress compounds. Where quality is contested — strategy, taste, management, original research judgment, most of what senior professionals actually get paid for — you cannot, and progress is far slower. The frontier is jagged along exactly this seam, and the seam is predictable in advance.",
+    tell: "Forecasts that extrapolate from coding progress to knowledge work generally. They are different regimes separated by whether a machine can grade the output.",
+    inverse: "Verifiability invites gaming — the model optimizes the checker, not the goal. METR's 2026 observation that some long-horizon successes were achieved by cheating is this exact failure at the frontier."
+  },
+  {
+    n: "09",
+    title: "Distinguish assisted from autonomous",
+    move: "For any deployment claim, determine whether a human remains in the loop on every output, and count the actual time saved.",
+    detail: "The economics differ by orders of magnitude. Assisted work scales with adoption and produces modest, hard-to-measure productivity gains; a human still reviews everything, so the human is still the throughput limit. Autonomous work scales with reliability and replaces the labour cost outright. Nearly all current AI revenue is assistance sold at software prices. The entire capex thesis requires the transition to autonomy — which is why METR's task-horizon curve, which measures precisely that, is the number that matters.",
+    tell: "Adoption statistics presented as value statistics. '85% of companies are experimenting' is a measure of curiosity, not of returns.",
+    inverse: "Assistance is not nothing. Compilers, spreadsheets and search were all assistive and transformed the economy without autonomy."
+  },
+  {
+    n: "10",
+    title: "Ask what observation would change their mind — and yours",
+    move: "Require a falsification condition from every position, including the ones you hold.",
+    detail: "The fastest way to sort serious analysis from narrative is to ask what would count as disconfirmation. Marcus's technical predictions repeatedly failed and the model was not updated — the goalposts moved to a fresh deficit. 'Demand for compute is unlimited' has no attached failure condition. Neither does 'AGI is close.' Positions without falsification conditions are not forecasts; they are identities, and they update on social pressure rather than evidence. This applies with full force to your own views: if your probability on the central scaling question has not moved in two years, you are not tracking evidence.",
+    tell: "Any position that has absorbed contradicting evidence without any stated update.",
+    inverse: "Some genuinely important claims are hard to falsify on short timescales. Long-horizon risk arguments are structurally difficult to test, and unfalsifiable-in-practice is not the same as meaningless."
+  }
+];
+
+const SCORECARD = {
+  intro: "The best calibration available is the field's own record. Each of these was, at the time, a confident consensus position held by credentialed people. The pattern in what survived is more instructive than any individual entry.",
+  rows: [
+    { era: "2016–2018", claim: "Chatbots are the next platform", verdict: "died", why: "The interface was right and the capability was absent by roughly a decade. Intent parsing failed constantly and users returned to apps.", lesson: "A correct interface thesis with insufficient underlying capability still fails. Being early is indistinguishable from being wrong, commercially." },
+    { era: "2016–2020", claim: "Full self-driving is about a year away", verdict: "died", why: "Restated annually for a decade. The demo was real; the march of nines was underestimated by everyone including the people who coined the term.", lesson: "The canonical demo-to-deployment failure. This is where the nines model comes from." },
+    { era: "2017–2021", claim: "AI needs blockchain / decentralization", verdict: "died", why: "Solved no actual bottleneck. Compute, data and talent all centralized further, for straightforward economic reasons.", lesson: "Combining two hyped technologies rarely produces value. Ask which real constraint the combination relaxes." },
+    { era: "2017–present", claim: "Transformers scale further than anyone expects", verdict: "stuck", why: "Every predicted wall became a speed bump. The architecture absorbed every challenger and remains the frontier skeleton nine years on.", lesson: "The single most profitable belief of the era, and it was available to anyone who read the scaling papers and took them literally." },
+    { era: "2018–present", claim: "AI winter is coming again", verdict: "died", why: "Predicted repeatedly by people who had correctly called prior winters. Capital and capability both kept compounding.", lesson: "Pattern-matching to previous cycles fails when the underlying economics have genuinely changed. Prior winters ended for lack of results; this cycle has results." },
+    { era: "2020–present", claim: "Scaling laws let you forecast a training run before you fund it", verdict: "stuck", why: "Held across ten orders of magnitude and converted AI research into a capital budgeting exercise.", lesson: "The fact that made the industry investable. It explains the capex line more directly than any capability claim." },
+    { era: "2021–2023", claim: "Prompt engineering is a durable profession", verdict: "died", why: "Models got better at inferring intent and the specific tricks stopped mattering. Absorbed into ordinary competence within about two years.", lesson: "Skills that route around a model's temporary deficiency have a lifespan equal to that deficiency." },
+    { era: "2022–2024", claim: "Hallucination is fatal to commercial deployment", verdict: "partial", why: "Genuinely constrains high-stakes autonomous use, and was routed around in practice by retrieval, verification and keeping a human in the loop.", lesson: "Deficits get engineered around rather than solved. Ask whether a limitation is fatal or merely expensive — most are the latter." },
+    { era: "2023–present", claim: "Open weights trail the frontier by months, not years", verdict: "stuck", why: "Confirmed repeatedly, most sharply by the 2025 efficiency shock that briefly repriced the entire AI trade.", lesson: "Capability diffuses faster than moat narratives assume, while the leading edge stays concentrated. Both are true at different layers." },
+    { era: "2024–2025", claim: "2025 is the year of agents", verdict: "died", why: "Karpathy said decade, not year, and 2026 delivered the receipts: 40%+ of agentic projects forecast cancelled by 2027, most stalling after proof-of-concept.", lesson: "The nines again. Agents multiply reliability across steps — a 95% reliable step run twenty times succeeds 36% of the time." },
+    { era: "2024–present", claim: "Inference-time compute is a second scaling axis", verdict: "stuck", why: "Reasoning models converted thinking time into accuracy and shifted the industry's cost structure from capex to opex.", lesson: "Watch for new scaling axes when an old one gets expensive. The field has now found two; a third would reset every timeline." },
+    { era: "2025–2026", claim: "The age of scaling is over", verdict: "open", why: "Sutskever's reversal is the most consequential position change in the field, backed by ~$3B. Data exhaustion is real. But capability rank still largely tracks compute rank.", lesson: "The live question. Watch the METR doubling rate — if it holds, scaling had more left than its own architect thought." },
+    { era: "2025–2026", claim: "Power, not chips, becomes the binding constraint", verdict: "emerging", why: "~50GW (2024) → ~76GW (2026) → ~156GW projected (2030), against 7–10 year interconnect timelines that no amount of capital compresses.", lesson: "The most forecastable variable in an unforecastable field. Concrete and copper move on schedules you can read years ahead." }
+  ]
+};
+
+const CLOSING = {
+  title: "How to hold all of this",
+  paras: [
+    "The instinct when facing a field this loud is to pick a camp. Resist it. Every position in this document is held by someone serious, and every one of them has been wrong about something specific and checkable. The boosters were right that scale kept working and wrong about when it would produce reliable autonomy. The skeptics were right about every individual deficit and wrong that any of them were permanent. Neither track record recommends adopting a side.",
+    "What survives is a small set of habits. Locate the speaker's balance sheet before weighing the argument. Ask which nine the demo is on and what failure costs. Ask whether the domain is machine-verifiable, because that predicts the shape of progress better than any roadmap. Ask what would bend the curve, and track that concrete thing instead of arguing about the curve. Ask, of every position including your own, what observation would change it.",
+    "The thing that separates a critic from a spectator is not skepticism — skepticism is cheap and Marcus's record shows it can be sustained indefinitely without ever updating. It is holding calibrated probabilities that actually move when evidence arrives. If your view on the central question has not shifted in two years, the field has produced enormous amounts of evidence and you have processed none of it.",
+    "And keep the long horizon in view, because it is where the analytical edge is. The capability curve is close to unforecastable month to month. The infrastructure is not: interconnect queues, turbine order books, transformer lead times and permitting cycles are matters of public record with years of visibility. If you want to know the shape of 2032, the grid data is better evidence than any capability claim — and almost nobody in the discourse is reading it."
+  ]
+};
+
+
+/* ---- diagrams.js ---- */
+// Hand-built SVG diagrams. No libraries. Each one carries an argument that
+// prose alone would carry worse.
+
+function taskHorizonChart() {
+  // METR doubling curve, log scale on task length.
+  const pts = [
+    [2019, 2/60], [2020, 5/60], [2021, 10/60], [2022, 20/60],
+    [2023, 0.75], [2024, 1.4], [2025, 2.0], [2026, 2.28]
+  ];
+  const W = 760, H = 380, ml = 66, mr = 130, mt = 30, mb = 46;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const x = y => ml + ((y - 2019) / (2032 - 2019)) * pw;
+  const lo = Math.log10(1/60), hi = Math.log10(200);
+  const yy = v => mt + ph - ((Math.log10(v) - lo) / (hi - lo)) * ph;
+
+  const path = pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${yy(p[1]).toFixed(1)}`).join("");
+  // projection at 7-month doubling from 2026
+  const proj = [];
+  for (let m = 0; m <= 72; m += 3) {
+    const t = 2026 + m / 12;
+    proj.push([t, 2.28 * Math.pow(2, m / 7)]);
+  }
+  const projPath = proj.filter(p => p[1] < 200).map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)},${yy(p[1]).toFixed(1)}`).join("");
+
+  const bands = [
+    [1/60, "1 min"], [10/60, "10 min"], [1, "1 hr"], [8, "1 work day"], [40, "1 work week"]
+  ];
+  const gridY = bands.map(b =>
+    `<line x1="${ml}" y1="${yy(b[0])}" x2="${ml + pw}" y2="${yy(b[0])}" class="dg-grid"/>
+     <text x="${ml - 8}" y="${yy(b[0]) + 4}" class="dg-ylab">${b[1]}</text>`).join("");
+  const gridX = [2019, 2022, 2025, 2028, 2031].map(t =>
+    `<line x1="${x(t)}" y1="${mt}" x2="${x(t)}" y2="${mt + ph}" class="dg-grid"/>
+     <text x="${x(t)}" y="${mt + ph + 20}" class="dg-xlab">${t}</text>`).join("");
+
+  const dots = pts.map(p => `<circle cx="${x(p[0])}" cy="${yy(p[1])}" r="4" class="dg-dot"/>`).join("");
+
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="Task horizon doubling curve from 2019 to 2032">
+    <defs><linearGradient id="thg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0f7a52"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs>
+    ${gridY}${gridX}
+    <rect x="${x(2026)}" y="${mt}" width="${ml + pw - x(2026)}" height="${ph}" class="dg-future"/>
+    <text x="${ml + pw - 4}" y="${mt + ph - 8}" class="dg-note" text-anchor="end">projected · 7-month doubling</text>
+    <path d="${projPath}" class="dg-proj"/>
+    <path d="${path}" class="dg-line" stroke="url(#thg)"/>
+    ${dots}
+    <text x="${x(2026) + 6}" y="${yy(2.28) - 12}" class="dg-anno">2h17m · 2026</text>
+    <text x="${ml}" y="${H - 6}" class="dg-cap">Task length completable at 50% reliability · log scale · METR</text>
+  </svg>`;
+}
+
+function ninesChart() {
+  const W = 760, H = 300, ml = 70, mr = 30, mt = 26, mb = 50;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const nines = [1, 2, 3, 4, 5];
+  const bw = pw / nines.length * 0.55;
+  const bars = nines.map((n, i) => {
+    const cx = ml + (i + 0.5) * (pw / nines.length);
+    const h = ph * 0.16 * n;
+    const label = ["90%", "99%", "99.9%", "99.99%", "99.999%"][i];
+    const stage = ["demo", "internal tool", "enterprise", "critical", "safety-critical"][i];
+    return `<rect x="${cx - bw / 2}" y="${mt + ph - h}" width="${bw}" height="${h}" class="dg-bar" style="--i:${i}"/>
+      <text x="${cx}" y="${mt + ph - h - 9}" class="dg-barval">${label}</text>
+      <text x="${cx}" y="${mt + ph + 20}" class="dg-xlab">nine ${n}</text>
+      <text x="${cx}" y="${mt + ph + 37}" class="dg-sub">${stage}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="Cumulative effort by reliability nine">
+    <line x1="${ml}" y1="${mt + ph}" x2="${ml + pw}" y2="${mt + ph}" class="dg-axis"/>
+    <text x="${ml - 10}" y="${mt + 12}" class="dg-ylab" text-anchor="end">effort</text>
+    ${bars}
+  </svg>`;
+}
+
+function stackDiagram() {
+  const layers = [
+    ["Energy · grid interconnect", "7–10 yr lead time · 156 GW by 2030", "#be123c", "the true floor"],
+    ["Land, cooling, transformers", "physical construction · years", "#c2410c", "slow"],
+    ["Silicon · HBM bandwidth", "fab quarters · memory-bound", "#a16207", "supply-limited"],
+    ["Interconnect · CUDA · kernels", "the actual moat · a decade deep", "#3f7d20", "concentrated"],
+    ["Training runs · frontier models", "months · a few labs", "#0f7a52", "capital-gated"],
+    ["Post-training · RL · reasoning", "weeks · where gains now come from", "#1d4ed8", "fast-moving"],
+    ["Inference · agents · products", "continuous opex · where revenue must appear", "#7c3aed", "unproven"]
+  ];
+  const W = 760, rowH = 54, pad = 6;
+  const H = layers.length * (rowH + pad) + 24;
+  const rows = layers.map((l, i) => {
+    const y = 12 + i * (rowH + pad);
+    const inset = i * 14;
+    return `<g class="dg-layer" style="--i:${i}">
+      <rect x="${inset}" y="${y}" width="${W - inset * 2}" height="${rowH}" rx="8" fill="${l[2]}" fill-opacity="0.10" stroke="${l[2]}" stroke-opacity="0.5"/>
+      <text x="${inset + 18}" y="${y + 23}" class="dg-ltitle" fill="${l[2]}">${l[0]}</text>
+      <text x="${inset + 18}" y="${y + 41}" class="dg-lsub">${l[1]}</text>
+      <text x="${W - inset - 18}" y="${y + 32}" class="dg-ltag" text-anchor="end" fill="${l[2]}">${l[3]}</text>
+    </g>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="The AI stack from energy to inference">${rows}</svg>`;
+}
+
+function spectrumDiagram(minds) {
+  // Position each mind on two axes: timeline (x) and scale-sufficiency (y).
+  const coords = {
+    musk: [0.92, 0.93], huang: [0.78, 0.80], amodei: [0.84, 0.74],
+    hassabis: [0.62, 0.55], karpathy: [0.44, 0.62], liang: [0.58, 0.70],
+    sutskever: [0.50, 0.22], lecun: [0.24, 0.10], sutton: [0.34, 0.18],
+    hinton: [0.72, 0.66], li: [0.40, 0.34], marcus: [0.10, 0.06],
+    raschka: [0.46, 0.44],
+    keller: [0.70, 0.86], kelley: [0.16, 0.30], tsmc: [0.54, 0.64], ousterhout: [0.28, 0.40],
+    scholl: [0.38, 0.76]
+  };
+  const adjacent = new Set(["keller", "kelley", "tsmc", "ousterhout", "scholl"]);
+  const W = 760, H = 500, mL = 78, mR = 34, mT = 54, mB = 62;
+  const pw = W - mL - mR, ph = H - mT - mB;
+  const nodes = minds.filter(mind => coords[mind.id]).map(mind => {
+    const [cx, cy] = coords[mind.id];
+    const px = mL + cx * pw, py = mT + (1 - cy) * ph;
+    const short = mind.name.split(" ").slice(-1)[0];
+    const isAdj = adjacent.has(mind.id);
+    return `<g class="dg-node">
+      ${isAdj
+        ? `<rect x="${px - 6}" y="${py - 6}" width="12" height="12" fill="${mind.color}" fill-opacity="0.75" transform="rotate(45 ${px} ${py})"/>
+           <rect x="${px - 13}" y="${py - 13}" width="26" height="26" fill="none" stroke="${mind.color}" stroke-opacity="0.24" stroke-dasharray="3 3" transform="rotate(45 ${px} ${py})"/>`
+        : `<circle cx="${px}" cy="${py}" r="7" fill="${mind.color}" fill-opacity="0.85"/>
+           <circle cx="${px}" cy="${py}" r="14" fill="none" stroke="${mind.color}" stroke-opacity="0.28"/>`}
+      <text x="${px}" y="${py - 21}" class="dg-nname" fill="${mind.color}">${short}</text>
+    </g>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="Positions on timeline and scale-sufficiency">
+    <line x1="${mL}" y1="${mT + ph}" x2="${mL + pw}" y2="${mT + ph}" class="dg-axis"/>
+    <line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT + ph}" class="dg-axis"/>
+    <line x1="${mL + pw / 2}" y1="${mT}" x2="${mL + pw / 2}" y2="${mT + ph}" class="dg-grid"/>
+    <line x1="${mL}" y1="${mT + ph / 2}" x2="${mL + pw}" y2="${mT + ph / 2}" class="dg-grid"/>
+    ${nodes}
+    <text x="${mL + pw}" y="${mT + ph + 24}" class="dg-axlab" text-anchor="end">sooner →</text>
+    <text x="${mL}" y="${mT + ph + 24}" class="dg-axlab">← later</text>
+    <text x="${mL - 20}" y="${mT + ph}" class="dg-axlab" text-anchor="start" transform="rotate(-90 ${mL - 20} ${mT + ph})">← something is missing</text>
+    <text x="${mL - 20}" y="${mT}" class="dg-axlab" text-anchor="end" transform="rotate(-90 ${mL - 20} ${mT})">scale is sufficient →</text>
+    <g transform="translate(${mL},${mT - 26})">
+      <circle cx="6" cy="0" r="5" fill="var(--ink-3)" fill-opacity="0.7"/>
+      <text x="18" y="4" class="dg-axlab">works on AI</text>
+      <rect x="97" y="-5" width="10" height="10" fill="var(--ink-3)" fill-opacity="0.7" transform="rotate(45 102 0)"/>
+      <text x="114" y="4" class="dg-axlab">from outside</text>
+    </g>
+  </svg>`;
+}
+
+function verifiabilityDiagram() {
+  const rows = [
+    ["Competitive programming", 95, true], ["Formal mathematics", 88, true],
+    ["Software engineering", 76, true], ["Data analysis", 64, true],
+    ["Medical diagnosis", 52, false], ["Legal drafting", 46, false],
+    ["Original research judgment", 28, false], ["Strategy & taste", 18, false],
+    ["General manipulation", 14, false]
+  ];
+  const W = 760, rowH = 36, H = rows.length * rowH + 40;
+  const lw = 250, bw = W - lw - 130;
+  const out = rows.map((r, i) => {
+    const y = 20 + i * rowH;
+    const c = r[2] ? "#0f7a52" : "#be123c";
+    return `<g class="dg-vrow" style="--i:${i}">
+      <text x="${lw - 14}" y="${y + 18}" class="dg-vlab" text-anchor="end">${r[0]}</text>
+      <rect x="${lw}" y="${y + 7}" width="${bw}" height="15" rx="7" class="dg-vtrack"/>
+      <rect x="${lw}" y="${y + 7}" width="${bw * r[1] / 100}" height="15" rx="7" fill="${c}" fill-opacity="0.75"/>
+      <text x="${lw + bw + 14}" y="${y + 19}" class="dg-vtag" fill="${c}">${r[2] ? "checkable" : "contested"}</text>
+    </g>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="Progress by machine-verifiability of the domain">${out}</svg>`;
+}
+
+function agentMathDiagram() {
+  const steps = [1, 5, 10, 20, 50];
+  const rates = [0.95, 0.99, 0.999];
+  const W = 760, H = 250, ml = 90, mt = 40, mb = 50, mr = 40;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const colors = ["#be123c", "#a16207", "#0f7a52"];
+  const lines = rates.map((r, ri) => {
+    const pts = steps.map((s, i) => {
+      const px = ml + (i / (steps.length - 1)) * pw;
+      const py = mt + ph - Math.pow(r, s) * ph;
+      return `${i ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`;
+    }).join("");
+    const dots = steps.map((s, i) => {
+      const px = ml + (i / (steps.length - 1)) * pw;
+      const py = mt + ph - Math.pow(r, s) * ph;
+      return `<circle cx="${px}" cy="${py}" r="3.5" fill="${colors[ri]}"/>`;
+    }).join("");
+    const endY = mt + ph - Math.pow(r, 50) * ph;
+    return `<path d="${pts}" fill="none" stroke="${colors[ri]}" stroke-width="2"/>${dots}
+      <text x="${ml + pw + 8}" y="${endY + 4}" class="dg-vtag" fill="${colors[ri]}">${(r * 100).toFixed(r === 0.999 ? 1 : 0)}%</text>`;
+  }).join("");
+  const xl = steps.map((s, i) =>
+    `<text x="${ml + (i / (steps.length - 1)) * pw}" y="${mt + ph + 22}" class="dg-xlab">${s}</text>`).join("");
+  const yl = [0, 50, 100].map(v =>
+    `<line x1="${ml}" y1="${mt + ph - v / 100 * ph}" x2="${ml + pw}" y2="${mt + ph - v / 100 * ph}" class="dg-grid"/>
+     <text x="${ml - 10}" y="${mt + ph - v / 100 * ph + 4}" class="dg-ylab">${v}%</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="dg" role="img" aria-label="Compounding failure across agent steps">
+    ${yl}${lines}${xl}
+    <text x="${ml + pw / 2}" y="${H - 8}" class="dg-cap" text-anchor="middle">number of chained steps →</text>
+  </svg>`;
+}
+
+
+/* ---- main.js ---- */
+
+
+
+
+
+const byId = Object.fromEntries(MINDS.map(m => [m.id, m]));
+
+const fig = (title, sub, svg, note) => `
+  <div class="figure">
+    <div class="fig-t">${title}</div>
+    <div class="fig-s">${sub}</div>
+    ${svg}
+    ${note ? `<div class="fig-note">${note}</div>` : ""}
+  </div>`;
+
+function hero() {
+  return `<section class="hero" id="top">
+    <div class="hero-tag">A critic's operating system for artificial intelligence</div>
+    <h1>The<br><em>Revolution</em><br>Handbook</h1>
+    <p class="hero-lede">Not a course in machine learning. A field manual for <strong>thinking clearly about the most consequential technology of your lifetime</strong> — built from the positions, disagreements and blind spots of the people actually deciding its direction.</p>
+    <div class="hero-meta">
+      <div class="hm"><div class="hm-n">${MINDS.length}</div><div class="hm-l">minds mapped</div></div>
+      <div class="hm"><div class="hm-n">${MINDS.filter(m=>m.domain==="adjacent").length}</div><div class="hm-l">from outside AI</div></div>
+      <div class="hm"><div class="hm-n">${FAULTLINES.length}</div><div class="hm-l">fault lines</div></div>
+      <div class="hm"><div class="hm-n">${CONCEPTS.length}</div><div class="hm-l">load-bearing ideas</div></div>
+      <div class="hm"><div class="hm-n">${TOOLS.length}</div><div class="hm-l">critical tools</div></div>
+      <div class="hm"><div class="hm-n">${SCORECARD.rows.length}</div><div class="hm-l">predictions scored</div></div>
+    </div>
+    <div class="hero-note">Every position here is attributed as a public, on-record stance and paired with where that person has been <em>wrong</em>. No quotes are invented. Where a figure has publicly reversed — and several have — the reversal is treated as the most interesting fact about them, not as an embarrassment to omit. Current as of the 2026 landscape.</div>
+  </section>`;
+}
+
+function mindCard(m) {
+  return `
+    <article class="mind" id="mind-${m.id}" style="--mc:${m.color}">
+      <div class="mind-top" data-toggle="${m.id}">
+        <div class="mind-glyph">${m.glyph}</div>
+        <div class="mind-id">
+          <div class="mind-name">${m.name}</div>
+          <div class="mind-role">${m.role}</div>
+          <div class="mind-arch">${m.archetype}</div>
+        </div>
+        <div class="mind-x">+</div>
+      </div>
+      <div class="mind-thesis">${m.thesis}</div>
+      <div class="mind-body">
+        <div class="stake"><b>Skin in the game</b>${m.stakes}</div>
+        ${m.core.map(c => `<div class="core-item"><b>${c[0]}</b><span>${c[1]}</span></div>`).join("")}
+        <div class="judge">
+          <div class="jc w"><b>Where they've been wrong</b><span>${m.wrong}</span></div>
+          <div class="jc b"><b>The blind spot</b><span>${m.blindspot}</span></div>
+        </div>
+        <div class="test"><b>How you'd check them</b><span>${m.testable}</span></div>
+        ${m.lesson ? `<div class="lesson"><b>What it transfers to AI</b><span>${m.lesson}</span></div>` : ""}
+      </div>
+    </article>`;
+}
+
+function partMinds() {
+  const core = MINDS.filter(m => m.domain !== "adjacent").map(mindCard).join("");
+  const adj = MINDS.filter(m => m.domain === "adjacent").map(m => `
+    <div class="adj-field">${m.field}</div>${mindCard(m)}`).join("");
+
+  return `<section class="wrap" id="minds">
+    <div class="part-head">
+      <div class="part-n">Part I</div>
+      <h2>The Minds</h2>
+      <p>Thirteen people whose beliefs are currently allocating hundreds of billions of dollars — followed by five from outside AI whose disciplines constrain it anyway. Read each for the argument, then for the position that argument protects. Click any card to open the full dossier.</p>
+    </div>
+    ${fig("Where they actually stand", "Two axes that explain most disagreement: how soon, and whether scale alone gets there.", spectrumDiagram(MINDS), "Positions are inferred from public statements and are approximate. The useful observation is not any single placement but the <em>clustering</em> — and that the cluster boundaries track capital position at least as well as they track technical argument.")}
+    ${core}
+    <div class="callout"><h3>${FOILS.title}</h3><p>${FOILS.body}</p></div>
+
+    <div class="part-head" id="adjacent" style="margin-top:76px">
+      <div class="part-n">Part I · B</div>
+      <h2>Minds From Outside</h2>
+      <p>Five people who do not work on AI and whose disciplines nonetheless constrain it. They are here for a specific reason: the AI discourse is an echo chamber with its own load-bearing assumptions, and the fastest way to see those assumptions is to stand in a field that never adopted them. Each dossier ends with what transfers.</p>
+    </div>
+    ${adj}
+    <div class="callout">
+      <h3>Why these five, specifically</h3>
+      <p><strong>Scholl</strong> is the control experiment: he is testing AI's core assumption — that motivated people plus capital beat hard problems — in atoms, publicly, on a schedule, and the result cuts both ways at once. <strong>Keller</strong> supplies the rebuttal to every hard-limit claim — decompose the trend into component curves before accepting an obituary. <strong>Chang</strong> supplies the reminder that structural decisions outrank technical ones, and that every GPU in every datacenter descends from a business-model choice made in 1987. <strong>Kelley</strong> supplies the value system AI development abandoned: simplicity as a precondition for knowing anything about your artifact — hold his standard against a frontier model and interpretability stops being an abstract concern. <strong>Ousterhout</strong> supplies the vocabulary for how organizations accumulate ruin one locally-reasonable decision at a time, which is exactly how a lab defers safety work. None of them are talking about AI. All five are describing it.</p>
+    </div>
+  </section>`;
+}
+
+function partFault() {
+  const cards = FAULTLINES.map(f => `
+    <article class="fl" id="fl-${f.id}">
+      <div class="fl-h">
+        <div class="fl-n">Fault line ${f.n}</div>
+        <h3>${f.title}</h3>
+        <div class="fl-stake">${f.stake}</div>
+      </div>
+      <div class="sides">
+        <div class="side a">
+          <div class="side-l">${f.sideA.label}</div>
+          <div class="side-who">${f.sideA.who}</div>
+          <div class="side-claim">${f.sideA.claim}</div>
+          <div class="side-ev"><b>Evidence</b>${f.sideA.evidence}</div>
+        </div>
+        <div class="side b">
+          <div class="side-l">${f.sideB.label}</div>
+          <div class="side-who">${f.sideB.who}</div>
+          <div class="side-claim">${f.sideB.claim}</div>
+          <div class="side-ev"><b>Evidence</b>${f.sideB.evidence}</div>
+        </div>
+      </div>
+      <div class="fl-res"><b>What would settle it</b><span>${f.resolution}</span></div>
+      <div class="fl-crit"><b>The critic's read</b><span>${f.critic}</span></div>
+    </article>`).join("");
+
+  return `<section class="wrap" id="faultlines">
+    <div class="part-head">
+      <div class="part-n">Part II</div>
+      <h2>The Disagreement Map</h2>
+      <p>Serious people disagree about these six things, and almost everything else is downstream. Each is steelmanned on both sides and given a resolution criterion — the observable that would actually settle it. A disagreement with no such criterion is not a debate; it is a fandom.</p>
+    </div>
+    ${fig("The number the whole timeline argument rests on", "Task length an AI completes at 50% reliability. Doubling roughly every seven months since 2019.", taskHorizonChart(), "Karpathy's decade and the labs' short timelines are the <em>same disagreement about this one curve</em>: whether it stays straight or bends. Naive extrapolation reaches a full working day around 2028. If you track one number in this entire field, track this one — it is public, unambiguous, and it settles the argument on a schedule.")}
+    ${cards}
+  </section>`;
+}
+
+function partConcepts() {
+  const cards = CONCEPTS.map(c => `
+    <article class="cpt" data-tag="${c.tag}" id="cpt-${c.id}">
+      <div class="cpt-top">
+        <span class="cpt-n">${c.n}</span>
+        <span class="cpt-tag">${c.tag}</span>
+        <h3>${c.title}</h3>
+      </div>
+      <div class="cpt-origin">${c.origin}</div>
+      <div class="cpt-one">${c.oneline}</div>
+      <div class="cpt-body">${c.body}</div>
+      <div class="cpt-grid">
+        <div class="cb why"><b>Why it matters</b>${c.why}</div>
+        <div class="cb pred"><b>What it predicts</b>${c.predicts}</div>
+        <div class="cb cav"><b>Where it breaks</b>${c.caveat}</div>
+      </div>
+      <div class="cpt-voices"><span>Argued by</span>${c.voices.map(v => {
+        const m = byId[v];
+        return m ? `<a class="vchip" href="#mind-${m.id}" style="color:${m.color}">${m.glyph} ${m.name.split(" ").slice(-1)[0]}</a>` : "";
+      }).join("")}</div>
+    </article>`).join("");
+
+  return `<section class="wrap" id="concepts">
+    <div class="part-head">
+      <div class="part-n">Part III</div>
+      <h2>Concepts That Actually Matter</h2>
+      <p>Selected for predictive power, not mechanical completeness. You do not need to know how attention works. You need the fourteen ideas that let you forecast what happens next — each one framed by what it predicts and where it fails.</p>
+    </div>
+    <div class="filters" id="cpt-filters">
+      <button class="on" data-f="all">All ${CONCEPTS.length}</button>
+      ${TAGS.map(t => `<button data-f="${t}">${t}</button>`).join("")}
+    </div>
+    ${cards}
+    ${fig("Why progress is shaped the way it is", "Machine-verifiable domains compound. Contested ones crawl. This one property explains the jagged frontier.", verifiabilityDiagram(), "Ask of any job: <em>can a machine check the answer without a human?</em> Code compiles, proofs verify, tests pass. Strategy, taste and research judgment do not. The seam between these two families is where the frontier stays jagged — and it is predictable in advance, which makes it the most useful single question in the toolkit.")}
+    ${fig("The march of nines", "Each nine of reliability costs roughly what the last one cost. Demos are exponentially cheaper than products.", ninesChart(), "A 90%-reliable demo is not nine-tenths finished — it may be a tenth of the way through the engineering. This model, applied in 2024, correctly predicted the 2026 agent disappointment.")}
+    ${fig("Why agents disappointed", "Reliability compounds multiplicatively across chained steps. This is the arithmetic behind the 2026 cancellations.", agentMathDiagram(), "A 95%-reliable step chained twenty times succeeds 36% of the time. At 99% it is 82%; at 99.9%, 98%. Long-horizon agency does not need a slightly better model — it needs <em>orders of magnitude</em> better per-step reliability. That is the march of nines expressed as multiplication.")}
+  </section>`;
+}
+
+function partSystems() {
+  return `<section class="wrap" id="systems">
+    <div class="part-head">
+      <div class="part-n">Part IV</div>
+      <h2>The Physical Layer</h2>
+      <p>Everything above runs on concrete, copper and power. The slowest element in the stack sets the pace for all of it — and it is the element almost nobody in the discourse is watching.</p>
+    </div>
+    ${fig("The stack, ordered by how slowly it moves", "Read bottom-up for revenue, top-down for constraints. The floor is energy, and energy moves on permitting cycles.", stackDiagram(), "Note the inversion: the layers that move fastest (post-training, inference products) sit on layers that move slowest (grid interconnects, transformers, fabs). A capability breakthrough cannot outrun a substation queue, which is why 2026's binding constraint migrated from chips to power.")}
+    <div class="callout">
+      <h3>The four numbers to hold</h3>
+      <p><strong>$635–690B</strong> — guided 2026 hyperscaler capex, ~75% AI infrastructure, more than double 2024. <strong>156 GW</strong> — projected US datacenter power demand by 2030, from ~50 GW in 2024. <strong>7–10 years</strong> — time to plan and energize a single new high-voltage interconnect. <strong>~7 months</strong> — the task-horizon doubling time. The first three are matters of public record with years of visibility. The fourth is the only genuinely uncertain one — and the whole argument lives there.</p>
+    </div>
+  </section>`;
+}
+
+function partToolkit() {
+  const cards = TOOLS.map(t => `
+    <article class="tool" data-n="${t.n}">
+      <h3>${t.title}</h3>
+      <div class="tool-move">${t.move}</div>
+      <div class="tool-detail">${t.detail}</div>
+      <div class="tool-pair">
+        <div class="tp tell"><b>The tell</b>${t.tell}</div>
+        <div class="tp inv"><b>Where it misfires</b>${t.inverse}</div>
+      </div>
+    </article>`).join("");
+
+  return `<section class="wrap" id="toolkit">
+    <div class="part-head">
+      <div class="part-n">Part V</div>
+      <h2>The Critic's Toolkit</h2>
+      <p>Ten moves, each applicable without technical expertise, each paired with the failure mode it produces when over-applied. Skepticism that never updates is as useless as credulity — these are calibration instruments, not dismissal devices.</p>
+    </div>
+    ${cards}
+  </section>`;
+}
+
+function partScore() {
+  const rows = SCORECARD.rows.map(r => `
+    <div class="sc-row">
+      <div class="sc-era">${r.era}</div>
+      <div class="sc-mid">
+        <div class="sc-claim">${r.claim}</div>
+        <div class="sc-why">${r.why}</div>
+        <div class="sc-lesson">${r.lesson}</div>
+      </div>
+      <div class="sc-v"><span class="vb ${r.verdict}">${r.verdict}</span></div>
+    </div>`).join("");
+
+  return `<section class="wrap" id="scorecard">
+    <div class="part-head">
+      <div class="part-n">Part VI</div>
+      <h2>The Scorecard</h2>
+      <p>${SCORECARD.intro}</p>
+    </div>
+    <div class="sc">${rows}</div>
+    <div class="closing" style="margin-top:56px">
+      <h3 style="font-size:1.9rem;margin-bottom:20px">${CLOSING.title}</h3>
+      ${CLOSING.paras.map(p => `<p>${p}</p>`).join("")}
+    </div>
+    <div class="sources">
+      <h4>On sourcing</h4>
+      <p>Positions are drawn from public statements, published papers and on-record interviews through the 2026 landscape. Quantitative anchors — METR task-horizon measurements, hyperscaler capex guidance, datacenter power projections, funding rounds — are cited in-line at the point of use.</p>
+      <p>No quotations are invented. Where a view is characterized rather than quoted, it is a characterization of a documented position, and every profile pairs the position with a specific instance of that person being wrong. Fast-moving facts carry their date; treat anything undated as needing a check before you rely on it.</p>
+    </div>
+  </section>`;
+}
+
+function nav() {
+  return `<nav class="nav" id="nav">
+    <div class="brand">
+      <div class="brand-mark">Revolution</div>
+      <div class="brand-name">The Handbook</div>
+      <div class="brand-sub">Thinking clearly about AI, from the positions of the people building it</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-h">Contents</div>
+      <a href="#top"><span class="gl">◇</span>Opening</a>
+      <a href="#minds"><span class="nn">I</span>The Minds</a>
+      <a href="#faultlines"><span class="nn">II</span>Disagreement Map</a>
+      <a href="#concepts"><span class="nn">III</span>Concepts</a>
+      <a href="#systems"><span class="nn">IV</span>Physical Layer</a>
+      <a href="#toolkit"><span class="nn">V</span>Critic's Toolkit</a>
+      <a href="#scorecard"><span class="nn">VI</span>The Scorecard</a>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-h">The Minds</div>
+      ${MINDS.filter(m => m.domain !== "adjacent").map(m => `<a href="#mind-${m.id}"><span class="gl" style="color:${m.color}">${m.glyph}</span>${m.name}</a>`).join("")}
+    </div>
+    <div class="nav-sec">
+      <div class="nav-h">From Outside</div>
+      ${MINDS.filter(m => m.domain === "adjacent").map(m => `<a href="#mind-${m.id}"><span class="gl" style="color:${m.color}">${m.glyph}</span>${m.name}</a>`).join("")}
+    </div>
+  </nav>`;
+}
+
+document.getElementById("app").innerHTML = `
+  <button class="navtoggle" id="navtoggle">☰</button>
+  <div class="shell">
+    ${nav()}
+    <main class="main">
+      ${hero()}${partMinds()}${partFault()}${partConcepts()}${partSystems()}${partToolkit()}${partScore()}
+    </main>
+  </div>
+  <button class="top" id="top" aria-label="Back to top">↑</button>`;
+
+// mind card expand/collapse
+document.querySelectorAll("[data-toggle]").forEach(el => {
+  el.addEventListener("click", () => el.closest(".mind").classList.toggle("open"));
+});
+
+// concept filters
+const filterBar = document.getElementById("cpt-filters");
+filterBar.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  filterBar.querySelectorAll("button").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  const f = b.dataset.f;
+  document.querySelectorAll(".cpt").forEach(c => {
+    c.style.display = (f === "all" || c.dataset.tag === f) ? "" : "none";
+  });
+});
+
+// deep link to a mind opens it
+function openHash() {
+  const h = location.hash;
+  if (h.startsWith("#mind-")) {
+    const el = document.querySelector(h);
+    if (el) el.classList.add("open");
+  }
+}
+window.addEventListener("hashchange", openHash);
+openHash();
+
+// mobile nav
+const navEl = document.getElementById("nav");
+document.getElementById("navtoggle").addEventListener("click", () => navEl.classList.toggle("open"));
+navEl.addEventListener("click", e => { if (e.target.tagName === "A") navEl.classList.remove("open"); });
+
+// scroll spy + back to top
+const topBtn = document.getElementById("top");
+const secs = [...document.querySelectorAll("section[id]")];
+const links = [...document.querySelectorAll('.nav a[href^="#"]')];
+window.addEventListener("scroll", () => {
+  topBtn.classList.toggle("show", window.scrollY > 700);
+  const y = window.scrollY + 140;
+  let cur = secs[0]?.id;
+  for (const s of secs) if (s.offsetTop <= y) cur = s.id;
+  links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + cur));
+}, { passive: true });
+topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+
+</script>
+</body>
+</html>

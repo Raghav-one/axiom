@@ -1,6 +1,6 @@
 {
   "name": "ai-everything", "version": "1.0.0", "private": true, "type": "module",
-  "scripts": {"dev": "vite --host 127.0.0.1", "build": "node scripts/build-content.mjs && vite build && node scripts/copy-gpu.mjs", "preview": "vite preview --host 127.0.0.1", "test": "node tests/browser.mjs"},
+  "scripts": {"dev": "vite --host 127.0.0.1", "build": "node scripts/build-content.mjs && vite build && node scripts/copy-gpu.mjs && node scripts/copy-perspective.mjs", "preview": "vite preview --host 127.0.0.1", "test": "node tests/browser.mjs"},
   "dependencies": {"preact": "^10.26.4"},
   "devDependencies": {"vite": "^5.4.10", "playwright": "^1.51.1"}
 }

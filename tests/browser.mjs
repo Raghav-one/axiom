@@ -11,6 +11,7 @@ for (const id of required) {
   if (id !== 'gpu') await access(`public/content/${id}.json`);
 }
 await access('gpu.html');
+await access('public/perspective.html');
 for (const chapter of manifest) {
   const source = chapter.id === 'gpu'
     ? await readFile('gpu.html', 'utf8')
@@ -19,4 +20,6 @@ for (const chapter of manifest) {
     throw new Error(`Chapter needs a visual diagram or interactive graphic: ${chapter.id}`);
   }
 }
+const app = await readFile('src/main.jsx', 'utf8');
+if (/target="_blank"|href=\{url\}/.test(app)) throw new Error('The library shell must not send readers to external source links.');
 console.log(`Validated ${manifest.length} chapters and the standalone GPU handbook.`);

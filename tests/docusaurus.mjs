@@ -17,6 +17,12 @@ await access('public/vendor/katex.min.js');
 await access('public/vendor/d3.min.js');
 await access('dist/search.html');
 
+const home = await readFile('dist/index.html', 'utf8');
+for (const domain of new Set(manifest.map(chapter => chapter.group))) {
+  if (!home.includes(`href="/axiom/${domain}"`)) throw new Error(`Homepage card for ${domain} does not preserve the deployment base path.`);
+}
+if (home.includes('href="/computing/"')) throw new Error('Homepage still contains root-level volume links.');
+
 for (const domain of new Set(manifest.map(chapter => chapter.group))) {
   const file = await readFile(`docs/volumes/${domain}.mdx`, 'utf8');
   if (!file.includes('hide_table_of_contents: true')) throw new Error(`Duplicate navigation rail enabled for ${domain}.`);

@@ -10,7 +10,7 @@ await fs.mkdir('docs/volumes', {recursive: true});
 
 const cards = domains.map((domain, domainIndex) => {
   const domainChapters = manifest.filter(chapter => chapter.group === domain.id);
-  return `<a className="domainCard" href="/${domain.id}/"><span>${String(domainIndex + 1).padStart(2, '0')} · ${domainChapters.length} chapters</span><strong>${domain.name}</strong><p>${domain.description}</p></a>`;
+  return `<Link className="domainCard" to="/${domain.id}"><span>${String(domainIndex + 1).padStart(2, '0')} · ${domainChapters.length} chapters</span><strong>${domain.name}</strong><p>${domain.description}</p></Link>`;
 }).join('\n');
 
 const landing = `---
@@ -22,6 +22,8 @@ hide_title: true
 pagination_next: null
 pagination_prev: null
 ---
+
+import Link from '@docusaurus/Link';
 
 <header className="libraryHero">
   <p className="eyebrow">THE COMPLETE FIELD LIBRARY</p>

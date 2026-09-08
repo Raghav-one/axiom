@@ -16,6 +16,18 @@ for (const [index, match] of aiMapSections.entries()) {
   if (words < 250) throw new Error(`AI map section ${index + 1} remains too thin at ${words} words.`);
   if (!match[1].includes('signal-bullets') || !match[1].includes('class="gotcha"')) throw new Error(`AI map section ${index + 1} does not follow the Signal section format.`);
 }
+const linear = manifest.find(item => item.id === 'linear-algebra');
+if (linear.words < 2800) throw new Error(`Linear algebra remains too thin at ${linear.words} words.`);
+if (linear.headings.length > 10) throw new Error(`Linear algebra remains fragmented across ${linear.headings.length} headings.`);
+const linearContent = JSON.parse(await readFile('public/content/linear-algebra.json', 'utf8'));
+const linearSections = [...linearContent.html.matchAll(/<h2[^>]*>[\s\S]*?<\/h2>([\s\S]*?)(?=<h2|$)/g)];
+for (const [index, match] of linearSections.entries()) {
+  const words = match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  if (words < 250) throw new Error(`Linear algebra section ${index + 1} remains too thin at ${words} words.`);
+  if (!match[1].includes('class="gotcha"')) throw new Error(`Linear algebra section ${index + 1} has no specific gotcha.`);
+}
+if ((linearContent.html.match(/class="concept-diagram"/g) || []).length < 2) throw new Error('Linear algebra needs at least two information-carrying diagrams.');
+if ((linearContent.html.match(/<pre>/g) || []).length < 3) throw new Error('Linear algebra needs runnable numerical examples.');
 
 await access('docusaurus.config.js');
 await access('sidebars.js');

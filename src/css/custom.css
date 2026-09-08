@@ -1,0 +1,67 @@
+:root {
+  --ifm-color-primary: #a43b19;
+  --ifm-color-primary-dark: #8f3114;
+  --ifm-color-primary-darker: #7c2a11;
+  --ifm-color-primary-darkest: #67220e;
+  --ifm-color-primary-light: #bd4b24;
+  --ifm-color-primary-lighter: #d06036;
+  --ifm-color-primary-lightest: #ef8d68;
+  --ifm-background-color: #fff;
+  --ifm-background-surface-color: #fff;
+  --ifm-font-family-base: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ifm-heading-font-family: Georgia, "Iowan Old Style", serif;
+  --ifm-font-size-base: 16px;
+  --ifm-line-height-base: 1.75;
+  --ifm-navbar-height: 68px;
+  --ifm-toc-border-color: #e7e0d9;
+  --ifm-color-emphasis-200: #e7e0d9;
+  --ifm-code-font-size: 85%;
+}
+
+html[data-theme='dark'] {--ifm-background-color:#fff;--ifm-background-surface-color:#fff;color:#211d1a}
+body {background:#fff;color:#332d29}
+.navbar {box-shadow:none;border-bottom:1px solid #e7e0d9;background:#fff}
+.navbar__brand {font-family:var(--ifm-heading-font-family);font-size:23px;letter-spacing:-.5px}
+.navbar__logo {height:36px}.navbar__item {font-size:13px;font-weight:600}
+.theme-doc-sidebar-container {border-right:1px solid #e7e0d9!important;background:#fff}
+.menu {padding:18px 12px 40px;font-size:12px}.menu__link {border-radius:3px;line-height:1.4;padding:7px 10px}
+.menu__link--active {background:#fff0e9;color:#8f3114;font-weight:650}
+.menu__list-item-collapsible:hover,.menu__link:hover {background:#fff7f3;color:#8f3114}
+.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:10px;color:#81766e;padding-top:5px;padding-bottom:5px;border-left:1px solid #e7e0d9;border-radius:0;margin-left:7px}
+.theme-doc-toc-desktop {display:none}.docItemCol_VOVn,.docItemCol {max-width:900px!important}
+.theme-doc-markdown {max-width:900px;margin:0 auto;padding-bottom:80px}
+.breadcrumbs {font-size:11px;margin-bottom:34px}
+.libraryHero {padding:52px 0 45px;border-bottom:1px solid #e7e0d9;margin-bottom:35px}
+.libraryHero h1 {font-size:clamp(42px,6vw,72px);line-height:1.05;letter-spacing:-2.7px;max-width:850px;margin:17px 0 22px}
+.libraryHero>p:last-of-type {font:20px/1.65 Georgia,serif;color:#655d57;max-width:750px}
+.eyebrow,.chapterKicker {font:700 10px/1.5 Inter,sans-serif;letter-spacing:1.5px;color:#9a4a2b}
+.heroFacts,.chapterMeta {display:flex;gap:25px;flex-wrap:wrap;margin-top:28px;color:#766d66;font-size:12px}
+.heroFacts strong {font:600 22px/1 Georgia,serif;color:#251f1b;margin-right:5px}
+.domainGrid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:35px 0 70px}
+.domainCard {display:flex;flex-direction:column;border:1px solid #e4ddd6;padding:21px 22px;color:#2d2824;text-decoration:none!important;min-height:175px;transition:border-color .15s,transform .15s}
+.domainCard:hover {border-color:#b97050;transform:translateY(-2px);color:#2d2824}.domainCard>span {font:700 9px/1.4 Inter,sans-serif;letter-spacing:1.1px;color:#9a4a2b}.domainCard>strong {font:600 23px/1.2 Georgia,serif;margin:16px 0 8px}.domainCard>p {font-size:12px;line-height:1.7;color:#726860;margin:0}
+.theme-doc-markdown>h1 {font-size:clamp(39px,5vw,61px);line-height:1.07;letter-spacing:-2px;margin:16px 0 20px}
+.chapterSummary {font:19px/1.65 Georgia,serif;color:#625952;max-width:760px}
+.chapterMeta {padding:15px 0 25px;border-bottom:1px solid #e7e0d9;margin-bottom:25px}
+.prerequisites {padding:14px 17px;background:#fff7f3;border-left:3px solid #b5411a;margin:20px 0 32px;font-size:12px}
+.theme-doc-markdown>h2 {font-family:Inter,sans-serif;font-size:27px;line-height:1.25;letter-spacing:-.6px;border-top:1px solid #e7e0d9;padding-top:39px;margin-top:48px;scroll-margin-top:90px}
+.theme-doc-markdown>h2 {font-family:Georgia,"Iowan Old Style",serif;font-size:36px;letter-spacing:-1px;margin-top:72px;padding-top:48px}.theme-doc-markdown>h3 {font-size:25px;margin-top:46px;padding-top:12px;scroll-margin-top:90px}
+.theme-doc-markdown>h3,.signal-prose h3 {font-family:Inter,sans-serif;letter-spacing:-.3px}
+.signal-prose {font-family:Georgia,"Iowan Old Style",serif;font-size:16px;line-height:1.86;color:#403a35}
+.signal-prose p {margin:0 0 20px}.signal-prose strong {color:#29211d}
+.signal-prose li {margin:10px 0}.signal-prose ul,.signal-prose ol {padding-left:25px;margin:16px 0 26px}
+.signal-prose pre {background:#26211e;color:#f7eee8;padding:20px 22px;border-radius:4px;overflow:auto}
+.signal-prose pre code {background:transparent;color:inherit;border:0;padding:0}
+.signal-prose code {background:#f5eee8;color:#793015;border:1px solid #eadfd5;border-radius:3px;padding:2px 5px}
+.signal-prose .callout,.signal-prose blockquote {background:#fff3ed;border-left:3px solid #b5411a;padding:18px 21px;margin:25px 0;color:#603c2d}
+.signal-prose .diagram {border:1px solid #e3d8cd;background:#fff;padding:18px;margin:28px 0;overflow:auto;border-radius:4px}
+.signal-prose .diagram svg {display:block;width:100%;min-width:650px;height:auto;overflow:visible}.signal-prose .diagram text {font-family:Inter,sans-serif}
+.signal-prose .diagram-caption {font:11px/1.65 Inter,sans-serif;color:#756a62;border-top:1px solid #ebe3dc;margin-top:12px;padding-top:12px}
+.signal-prose .table-scroll {overflow:auto;border:1px solid #e4ddd6;border-radius:4px;margin:25px 0}
+.signal-prose table {display:table;width:100%;min-width:580px;font-family:Inter,sans-serif;font-size:12px}.signal-prose th {background:#faf7f4}
+.signal-prose .exercise {border:1px solid #e0d3c8;background:#fffaf7;padding:20px;margin:28px 0}
+.evidenceLedger {border-top:1px solid #e7e0d9;border-bottom:1px solid #e7e0d9;padding:14px 0;margin:35px 0 55px;font:12px/1.6 Inter,sans-serif;color:#665d56}.evidenceLedger summary {font-weight:700;color:#8f3114;cursor:pointer}.evidenceLedger p {margin:10px 0}
+.gpuCallout {border:1px solid #decfc4;background:#fff8f4;padding:28px;margin:24px 0 55px;display:flex;flex-direction:column}.gpuCallout>span {font:700 9px/1.4 Inter,sans-serif;letter-spacing:1.2px;color:#9a4a2b}.gpuCallout>strong {font:600 26px/1.25 Georgia,serif;margin:12px 0}.gpuCallout>p {font-size:13px;color:#665d56;max-width:680px}.gpuCallout>a {font-size:12px;font-weight:700}
+.footer {border-top:1px solid #e7e0d9;background:#fff;color:#756c65}
+@media (max-width:996px) {.theme-doc-markdown {padding-left:8px;padding-right:8px}.libraryHero {padding-top:30px}.libraryHero h1 {font-size:45px}.theme-doc-markdown>h1 {font-size:40px}.domainGrid {grid-template-columns:1fr}}
+@media print {.navbar,.theme-doc-sidebar-container,.breadcrumbs,.footer {display:none!important}.main-wrapper {margin:0}.theme-doc-markdown {max-width:none}.signal-prose .diagram svg {min-width:0}}

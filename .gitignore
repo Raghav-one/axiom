@@ -1,4 +1,11 @@
 node_modules/
 dist/
+.docusaurus/
+docs/
+public/.nojekyll
+public/gpu.html
+public/gpu-enhancements.css
+public/gpu-enhancements.js
+public/vendor/
+research/docusaurus-*.png
 .DS_Store
-

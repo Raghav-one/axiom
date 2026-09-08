@@ -1,6 +1,29 @@
 {
-  "name": "ai-everything", "version": "1.0.0", "private": true, "type": "module",
-  "scripts": {"dev": "vite --host 127.0.0.1", "build": "node scripts/build-content.mjs && vite build && node scripts/copy-gpu.mjs && node scripts/copy-perspective.mjs", "preview": "vite preview --host 127.0.0.1", "test": "node tests/browser.mjs"},
-  "dependencies": {"preact": "^10.26.4"},
-  "devDependencies": {"vite": "^5.4.10", "playwright": "^1.51.1"}
+  "name": "axiom-ai-field-library",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run content && docusaurus start --host 127.0.0.1",
+    "content": "node scripts/build-content.mjs && node scripts/build-docusaurus-docs.mjs && node scripts/prepare-static.mjs",
+    "build": "npm run content && docusaurus build --out-dir dist",
+    "serve": "docusaurus serve --dir dist --host 127.0.0.1",
+    "clear": "docusaurus clear",
+    "test": "node tests/docusaurus.mjs"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@easyops-cn/docusaurus-search-local": "^0.52.3",
+    "@mdx-js/react": "^3.1.1",
+    "clsx": "2.1.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.51.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

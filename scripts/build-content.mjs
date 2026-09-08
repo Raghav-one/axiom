@@ -3,6 +3,7 @@ import {authored} from '../src/content/authored.mjs';
 import {deepenChapter} from '../src/content/deepening.mjs';
 import {expandFoundation} from '../src/content/foundation-expansions.mjs';
 import {deepenComputing} from '../src/content/computing-depth.mjs';
+import {deepenMathematics} from '../src/content/mathematics-depth.mjs';
 import {domains} from '../src/catalog.mjs';
 const frontier=JSON.parse(await fs.readFile('src/content/frontier.json','utf8'));
 const additions={
@@ -11,7 +12,7 @@ const additions={
  'mechanistic-interpretability':[['Towards Monosemanticity','https://transformer-circuits.pub/2023/monosemantic-features/index.html']],
  'research-craft':[['Improving Reproducibility in Machine Learning','https://jmlr.org/papers/v22/20-303.html']]
 };
-const all=[...authored.map(deepenChapter).map(expandFoundation).map(deepenComputing),...frontier].sort((a,b)=>domains.findIndex(d=>d.id===a.group)-domains.findIndex(d=>d.id===b.group));
+const all=[...authored.map(deepenChapter).map(expandFoundation).map(deepenComputing).map(deepenMathematics),...frontier].sort((a,b)=>domains.findIndex(d=>d.id===a.group)-domains.findIndex(d=>d.id===b.group));
 const ids=new Set(all.map(x=>x.id));
 if(ids.size!==all.length)throw Error('Duplicate chapter ids');
 const clean=s=>s.replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim();

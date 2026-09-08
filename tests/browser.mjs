@@ -20,6 +20,11 @@ for (const chapter of manifest) {
     throw new Error(`Chapter needs a visual diagram or interactive graphic: ${chapter.id}`);
   }
 }
+for (const chapter of manifest.filter(item => item.origin === 'New foundation' && item.id !== 'gpu')) {
+  const source = await readFile(`public/content/${chapter.id}.json`, 'utf8');
+  if (!source.includes('Worked system:')) throw new Error(`New foundation chapter needs a specific worked system: ${chapter.id}`);
+  if (!source.includes('<pre><code>')) throw new Error(`New foundation chapter needs a notebook artifact: ${chapter.id}`);
+}
 const app = await readFile('src/main.jsx', 'utf8');
 if (/target="_blank"|href=\{url\}/.test(app)) throw new Error('The library shell must not send readers to external source links.');
 console.log(`Validated ${manifest.length} chapters and the standalone GPU handbook.`);

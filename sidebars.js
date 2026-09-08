@@ -28,7 +28,10 @@ const library = domains.map((domain, domainIndex) => ({
     return {
       type: 'category',
       label: `${chapter.number}  ${chapter.title}`,
-      collapsed: true,
+      // Hash-only routes do not make Docusaurus reopen a category. Keep every
+      // chapter outline visible so direct subsection links remain usable.
+      collapsed: false,
+      collapsible: false,
       items: [{
         type: 'link',
         label: '00  Chapter overview',

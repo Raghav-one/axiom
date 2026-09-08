@@ -28,6 +28,7 @@ body {background:#fff;color:#332d29}
 .menu__link--active {background:#fff0e9;color:#8f3114;font-weight:650}
 .menu__list-item-collapsible:hover,.menu__link:hover {background:#fff7f3;color:#8f3114}
 .sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:10px;color:#81766e;padding-top:5px;padding-bottom:5px;border-left:1px solid #e7e0d9;border-radius:0;margin-left:7px}
+.sidebar-section-link .menu__link.sidebar-section-active,.menu__link.sidebar-section-link.sidebar-section-active {color:#8f3114;background:#fff0e9;border-left:3px solid #a43b19;font-weight:700;padding-left:8px}
 .theme-doc-toc-desktop {display:none}.docItemCol_VOVn,.docItemCol {max-width:900px!important}
 .theme-doc-markdown {max-width:900px;margin:0 auto;padding-bottom:80px}
 .breadcrumbs {font-size:11px;margin-bottom:34px}

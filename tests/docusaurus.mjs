@@ -9,6 +9,7 @@ for (const id of ['ai-map', 'linear-algebra']) {
 
 await access('docusaurus.config.js');
 await access('sidebars.js');
+await access('src/theme/Root.js');
 await access('docs/index.mdx');
 await access('public/gpu.html');
 await access('public/perspective.html');
@@ -29,4 +30,7 @@ for (const domain of new Set(manifest.map(chapter => chapter.group))) {
 
 const sidebars = await readFile('sidebars.js', 'utf8');
 if (!sidebars.includes('chapter.headings.map')) throw new Error('Sidebar does not enumerate chapter subsections.');
+if (!sidebars.includes('collapsible: false')) throw new Error('Chapter subsections can collapse and disappear on hash navigation.');
+const root = await readFile('src/theme/Root.js', 'utf8');
+if (!root.includes("aria-current', 'location'")) throw new Error('Subsection hash state is not exposed or highlighted.');
 console.log(`Validated Docusaurus hierarchy for ${manifest.length} chapters.`);

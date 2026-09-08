@@ -28,6 +28,14 @@ for (const [index, match] of linearSections.entries()) {
 }
 if ((linearContent.html.match(/class="concept-diagram"/g) || []).length < 2) throw new Error('Linear algebra needs at least two information-carrying diagrams.');
 if ((linearContent.html.match(/<pre>/g) || []).length < 3) throw new Error('Linear algebra needs runnable numerical examples.');
+const calculus = manifest.find(item => item.id === 'calculus-and-gradients');
+if (calculus.words < 2000 || calculus.headings.length > 9) throw new Error(`Calculus depth failed: ${calculus.words} words across ${calculus.headings.length} sections.`);
+const calculusContent = JSON.parse(await readFile('public/content/calculus-and-gradients.json', 'utf8'));
+const calculusSections = [...calculusContent.html.matchAll(/<h2[^>]*>[\s\S]*?<\/h2>([\s\S]*?)(?=<h2|$)/g)];
+for (const [index, match] of calculusSections.entries()) {
+  const words = match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  if (words < 220 || !match[1].includes('class="gotcha"')) throw new Error(`Calculus section ${index + 1} lacks depth or a gotcha.`);
+}
 
 await access('docusaurus.config.js');
 await access('sidebars.js');

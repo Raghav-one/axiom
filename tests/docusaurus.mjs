@@ -6,6 +6,16 @@ for (const id of ['ai-map', 'linear-algebra']) {
   const chapter = manifest.find(item => item.id === id);
   if (chapter.words < 2000) throw new Error(`${id} has not received the required deep-reference expansion.`);
 }
+const aiMap = manifest.find(item => item.id === 'ai-map');
+if (aiMap.words < 4300) throw new Error(`AI map remains too thin at ${aiMap.words} words.`);
+if (aiMap.headings.length > 12) throw new Error(`AI map remains fragmented across ${aiMap.headings.length} headings.`);
+const aiMapContent = JSON.parse(await readFile('public/content/ai-map.json', 'utf8'));
+const aiMapSections = [...aiMapContent.html.matchAll(/<h2[^>]*>[\s\S]*?<\/h2>([\s\S]*?)(?=<h2|$)/g)];
+for (const [index, match] of aiMapSections.entries()) {
+  const words = match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  if (words < 250) throw new Error(`AI map section ${index + 1} remains too thin at ${words} words.`);
+  if (!match[1].includes('signal-bullets') || !match[1].includes('class="gotcha"')) throw new Error(`AI map section ${index + 1} does not follow the Signal section format.`);
+}
 
 await access('docusaurus.config.js');
 await access('sidebars.js');

@@ -54,7 +54,7 @@ for (const [domainIndex, domain] of domains.entries()) {
       ? `<div className="prerequisites"><strong>Prerequisites</strong> · ${chapter.prerequisites.map(id => manifest.find(item => item.id === id)?.title).filter(Boolean).join(' · ')}</div>`
       : '';
     const sources = chapter.sources.length
-      ? `<details className="evidenceLedger"><summary>Evidence ledger</summary>${chapter.sources.map(([name]) => `<p><strong>${name}.</strong> Retained as provenance for this chapter.</p>`).join('')}</details>`
+      ? `<details className="evidenceLedger"><summary>Evidence ledger</summary>${chapter.sources.map(([name, url]) => `<p><strong><a href="${url}">${name}</a>.</strong> Primary reference retained as provenance for this chapter.</p>`).join('')}</details>`
       : '';
     return `## ${chapter.number}. ${chapter.title} {#${chapter.id}}\n\n<p className="chapterSummary">${chapter.summary}</p>\n\n<div className="chapterMeta"><span>${chapter.words.toLocaleString()} words</span><span>${chapter.minutes} minute reference</span><span>${chapter.headings.length} sections</span></div>\n\n${prerequisites}\n\n<ChapterIntro html={chapter${dataIndex}.html} />\n\n${sections}\n\n${sources}`;
   }).join('\n\n');

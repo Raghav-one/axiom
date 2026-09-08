@@ -52,5 +52,5 @@ if (typeof window !== 'undefined') {
   window.addEventListener('popstate', scheduleSync);
   window.addEventListener('load', scheduleSync);
   new MutationObserver(scheduleSync).observe(document.documentElement, {childList: true, subtree: true});
-  window.setTimeout(syncSidebar, 250);
+  [250, 600, 1200, 2000].forEach(delay => window.setTimeout(syncSidebar, delay));
 }

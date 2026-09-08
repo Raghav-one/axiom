@@ -83,6 +83,31 @@ body {background:#fff;color:#332d29}
 .signal-prose .exercise {border:1px solid #e0d3c8;background:#fffaf7;padding:20px;margin:28px 0}
 .evidenceLedger {border-top:1px solid #e7e0d9;border-bottom:1px solid #e7e0d9;padding:14px 0;margin:35px 0 55px;font:12px/1.6 Inter,sans-serif;color:#665d56}.evidenceLedger summary {font-weight:700;color:#8f3114;cursor:pointer}.evidenceLedger p {margin:10px 0}
 .gpuCallout {border:1px solid #decfc4;background:#fff8f4;padding:28px;margin:24px 0 55px;display:flex;flex-direction:column}.gpuCallout>span {font:700 9px/1.4 Inter,sans-serif;letter-spacing:1.2px;color:#9a4a2b}.gpuCallout>strong {font:600 26px/1.25 Georgia,serif;margin:12px 0}.gpuCallout>p {font-size:13px;color:#665d56;max-width:680px}.gpuCallout>a {font-size:12px;font-weight:700}
+/* Mathematics uses the compact single-lesson reading surface from the backend reference. */
+body:has(#mathematics-layout) .theme-doc-markdown {max-width:896px;margin-left:0;margin-right:0;padding:40px 56px 96px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body:has(#mathematics-layout) .chapterKicker {font-size:9px;letter-spacing:1.3px;margin:0 0 10px;color:#d0530c}
+body:has(#mathematics-layout) .theme-doc-markdown>header>h1 {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:32px;line-height:1.25;letter-spacing:-.8px;margin:0 0 10px;color:#0f1115}
+body:has(#mathematics-layout) .chapterSummary {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.65;color:#454851;max-width:720px;margin:0}
+body:has(#mathematics-layout) .chapterMeta {gap:16px;padding:11px 0 17px;margin:17px 0 25px;border-bottom:1px solid #e7e8eb;color:#82858d;font-size:11px}
+body:has(#mathematics-layout) .theme-doc-markdown>h2 {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:24px;line-height:1.3;letter-spacing:-.45px;color:#0f1115;border:0;margin:45px 0 8px;padding:0}
+body:has(#mathematics-layout) .theme-doc-markdown>h2:not(:first-of-type) {padding-top:39px;border-top:1px solid #e7e8eb}
+body:has(#mathematics-layout) .theme-doc-markdown>h3 {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.4;letter-spacing:-.15px;color:#20232a;margin:27px 0 9px;padding:0}
+body:has(#mathematics-layout) .prerequisites {background:#f6f7f8;border-left:3px solid #d0530c;color:#454851;padding:12px 14px;margin:17px 0 22px;font-size:12px}
+body:has(#mathematics-layout) .signal-prose {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.65;color:#30333a}
+body:has(#mathematics-layout) .signal-prose p {margin-bottom:14px}
+body:has(#mathematics-layout) .signal-prose strong {color:#17191e}
+body:has(#mathematics-layout) .signal-prose li {margin:6px 0}
+body:has(#mathematics-layout) .signal-prose .gotcha,body:has(#mathematics-layout) .signal-prose .callout,body:has(#mathematics-layout) .signal-prose blockquote {background:#f6f7f8;border-color:#d0530c;color:#454851;padding:13px 15px;margin:18px 0}
+body:has(#mathematics-layout) .signal-prose .gotcha p {color:#454851;font-size:12px}
+body:has(#mathematics-layout) .signal-prose .concept-diagram,body:has(#mathematics-layout) .signal-prose .worked-system,body:has(#mathematics-layout) .signal-prose .diagram,body:has(#mathematics-layout) .signal-prose .derivation {border-color:#e7e8eb;background:#fff;padding:16px 18px;margin:20px 0}
+body:has(#mathematics-layout) .signal-prose .concept-diagram figcaption,body:has(#mathematics-layout) .signal-prose .diagram-header {border-color:#e7e8eb}
+body:has(#mathematics-layout) .signal-prose .concept-diagram figcaption strong,body:has(#mathematics-layout) .signal-prose .worked-system h3,body:has(#mathematics-layout) .signal-prose .diagram-header h3 {font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17191e}
+body:has(#mathematics-layout) .signal-prose .concept-flow>div,body:has(#mathematics-layout) .signal-prose .vector-views>div,body:has(#mathematics-layout) .signal-prose .attention-flow>div {border-color:#e7e8eb;background:#f6f7f8}
+body:has(#mathematics-layout) .signal-prose pre {background:#f6f7f8;color:#20232a;border:1px solid #e7e8eb;border-radius:3px;padding:16px 18px}
+body:has(#mathematics-layout) .signal-prose code {background:#f6f7f8;border-color:#e7e8eb;color:#a43b19}
+body:has(#mathematics-layout) .signal-prose .table-scroll {border-color:#e7e8eb;border-radius:3px;margin:20px 0}
+body:has(#mathematics-layout) .signal-prose th {background:#f6f7f8}
+body:has(#mathematics-layout) .evidenceLedger {border-color:#e7e8eb;margin:28px 0 43px;color:#454851}
 .footer {border-top:1px solid #e7e0d9;background:#fff;color:#756c65}
 @media (max-width:996px) {.theme-doc-markdown {padding-left:8px;padding-right:8px}.libraryHero {padding-top:30px}.libraryHero h1 {font-size:45px}.theme-doc-markdown>h1 {font-size:40px}.domainGrid {grid-template-columns:1fr}}
 @media (max-width:640px) {.signal-prose .diagram {padding:17px 14px}.signal-prose .diagram-header h3 {font-size:21px}.signal-prose .diagram-flow {display:none}.signal-prose .diagram-stage-list {display:flex;flex-direction:column;gap:20px;border:0;margin-top:0}.signal-prose .diagram-stage-list li {position:relative;padding:14px;border:1px solid #ded5cd}.signal-prose .diagram-stage-list li:not(:last-child)::after {content:"↓";position:absolute;left:50%;bottom:-19px;transform:translateX(-50%);font:700 13px/1 Inter,sans-serif;color:#a43b19;background:#fff;padding:2px 5px}.signal-prose .concept-flow {grid-template-columns:1fr;gap:17px}.signal-prose .concept-flow i {justify-self:center;height:0;transform:rotate(90deg)}.signal-prose .history-rail>div {grid-template-columns:70px 1fr}.signal-prose .worked-system {padding:16px}.signal-prose .vector-views,.signal-prose .attention-flow {flex-direction:column}.signal-prose .vector-views i,.signal-prose .attention-flow i {align-self:center}.signal-prose .attention-flow i {transform:rotate(90deg);height:7px}}

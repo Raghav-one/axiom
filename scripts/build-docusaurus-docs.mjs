@@ -59,6 +59,7 @@ for (const [domainIndex, domain] of domains.entries()) {
     return `## ${chapter.number}. ${chapter.title} {#${chapter.id}}\n\n<p className="chapterSummary">${chapter.summary}</p>\n\n<div className="chapterMeta"><span>${chapter.words.toLocaleString()} words</span><span>${chapter.minutes} minute reference</span><span>${chapter.headings.length} sections</span></div>\n\n${prerequisites}\n\n<ChapterIntro html={chapter${dataIndex}.html} />\n\n${sections}\n\n${sources}`;
   }).join('\n\n');
   const totalWords = chapters.reduce((sum, chapter) => sum + (chapter.id === 'gpu' ? 0 : chapter.words), 0);
+  const layoutHook = domain.id === 'mathematics' ? '<span id="mathematics-layout" aria-hidden="true" />' : '';
   const doc = `---
 id: ${domain.id}
 title: ${yaml(domain.name)}
@@ -81,6 +82,8 @@ ${imports}
 <p className="chapterSummary">${domain.description}</p>
 
 <div className="chapterMeta"><span>${totalWords.toLocaleString()} words</span><span>${chapters.reduce((sum, chapter) => sum + chapter.headings.length, 0)} indexed sections</span><span>Read continuously or navigate from the sidebar</span></div>
+
+${layoutHook}
 
 ${chapterSections}
 `;

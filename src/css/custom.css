@@ -59,9 +59,20 @@ body {background:#fff;color:#332d29}
 .signal-prose pre code {background:transparent;color:inherit;border:0;padding:0}
 .signal-prose code {background:#f5eee8;color:#793015;border:1px solid #eadfd5;border-radius:3px;padding:2px 5px}
 .signal-prose .callout,.signal-prose blockquote {background:#fff3ed;border-left:3px solid #b5411a;padding:18px 21px;margin:25px 0;color:#603c2d}
-.signal-prose .diagram {border:1px solid #e3d8cd;background:#fff;padding:18px;margin:28px 0;overflow:auto;border-radius:4px}
-.signal-prose .diagram svg {display:block;width:100%;min-width:650px;height:auto;overflow:visible}.signal-prose .diagram text {font-family:Inter,sans-serif}
-.signal-prose .diagram-caption {font:11px/1.65 Inter,sans-serif;color:#756a62;border-top:1px solid #ebe3dc;margin-top:12px;padding-top:12px}
+.signal-prose .diagram {border:1px solid #ded5cd;background:#fff;padding:24px;margin:28px 0;border-radius:4px}
+.signal-prose .diagram-header {font-family:Inter,sans-serif;border-bottom:1px solid #ebe3dc;padding-bottom:17px;margin-bottom:18px}
+.signal-prose .diagram-header>span {display:block;font-size:9px;line-height:1.4;font-weight:800;letter-spacing:1.5px;color:#a43b19}
+.signal-prose .diagram-header h3 {font:600 24px/1.25 Georgia,"Iowan Old Style",serif;letter-spacing:-.35px;color:#29211d;margin:7px 0 2px;padding:0}
+.signal-prose .diagram-header p {font-size:11px;line-height:1.5;color:#82766e;margin:0}
+.signal-prose .diagram-flow {overflow-x:auto;padding:2px 0 7px}
+.signal-prose .diagram svg {display:block;width:100%;min-width:650px;height:auto;overflow:visible}
+.signal-prose .diagram text {font-family:Inter,sans-serif}.signal-prose .diagram-node rect {fill:#fffaf7;stroke:#d8c9bd;stroke-width:1}.signal-prose .diagram-node .step {fill:#a43b19;font-size:10px;font-weight:800;letter-spacing:1px}.signal-prose .diagram-node .diagram-title {fill:#302824;font-size:13px;font-weight:700}.signal-prose .diagram-node .connector {fill:none;stroke:#a43b19;stroke-width:1.5}
+.signal-prose .diagram-stage-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:1px solid #ebe3dc;border-left:1px solid #ebe3dc;padding:0;margin:5px 0 0;list-style:none;font-family:Inter,sans-serif}
+.signal-prose .diagram-stage-list li {display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;border-right:1px solid #ebe3dc;border-bottom:1px solid #ebe3dc;padding:15px;margin:0;min-width:0}
+.signal-prose .diagram-step-number {font-size:9px;line-height:1.5;font-weight:800;letter-spacing:.8px;color:#a43b19}
+.signal-prose .diagram-stage-list strong {display:block;font-size:12px;line-height:1.4;color:#302824;margin-bottom:4px}
+.signal-prose .diagram-stage-list p {font-size:11px;line-height:1.55;color:#6e635c;margin:0;overflow-wrap:anywhere}
+.signal-prose .diagram-caption {font:11px/1.65 Inter,sans-serif;color:#756a62;border-top:1px solid #ebe3dc;margin-top:16px;padding-top:12px}
 .signal-prose .table-scroll {overflow:auto;border:1px solid #e4ddd6;border-radius:4px;margin:25px 0}
 .signal-prose table {display:table;width:100%;min-width:580px;font-family:Inter,sans-serif;font-size:12px}.signal-prose th {background:#faf7f4}
 .signal-prose .exercise {border:1px solid #e0d3c8;background:#fffaf7;padding:20px;margin:28px 0}
@@ -69,4 +80,5 @@ body {background:#fff;color:#332d29}
 .gpuCallout {border:1px solid #decfc4;background:#fff8f4;padding:28px;margin:24px 0 55px;display:flex;flex-direction:column}.gpuCallout>span {font:700 9px/1.4 Inter,sans-serif;letter-spacing:1.2px;color:#9a4a2b}.gpuCallout>strong {font:600 26px/1.25 Georgia,serif;margin:12px 0}.gpuCallout>p {font-size:13px;color:#665d56;max-width:680px}.gpuCallout>a {font-size:12px;font-weight:700}
 .footer {border-top:1px solid #e7e0d9;background:#fff;color:#756c65}
 @media (max-width:996px) {.theme-doc-markdown {padding-left:8px;padding-right:8px}.libraryHero {padding-top:30px}.libraryHero h1 {font-size:45px}.theme-doc-markdown>h1 {font-size:40px}.domainGrid {grid-template-columns:1fr}}
+@media (max-width:640px) {.signal-prose .diagram {padding:17px 14px}.signal-prose .diagram-header h3 {font-size:21px}.signal-prose .diagram-flow {display:none}.signal-prose .diagram-stage-list {display:flex;flex-direction:column;gap:20px;border:0;margin-top:0}.signal-prose .diagram-stage-list li {position:relative;padding:14px;border:1px solid #ded5cd}.signal-prose .diagram-stage-list li:not(:last-child)::after {content:"↓";position:absolute;left:50%;bottom:-19px;transform:translateX(-50%);font:700 13px/1 Inter,sans-serif;color:#a43b19;background:#fff;padding:2px 5px}}
 @media print {.navbar,.theme-doc-sidebar-container,.breadcrumbs,.footer {display:none!important}.main-wrapper {margin:0}.theme-doc-markdown {max-width:none}.signal-prose .diagram svg {min-width:0}}

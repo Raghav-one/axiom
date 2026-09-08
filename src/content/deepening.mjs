@@ -35,6 +35,7 @@ export const deepening = {
 };
 
 const esc = text => text.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const escAttr = text => esc(text).replace(/"/g, '&quot;');
 const lines = (text, size) => {
   const words = text.split(' '); const result = []; let line = '';
   for (const word of words) {
@@ -46,12 +47,14 @@ const lines = (text, size) => {
 const svgText = (items, x, y, className, step = 14) => `<text x="${x}" y="${y}" class="${className}">${items.map((line, index) => `<tspan x="${x}" dy="${index ? step : 0}">${esc(line)}</tspan>`).join('')}</text>`;
 
 export function studyDiagram(title, stages) {
+  const markerId = `arrow-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`;
   const boxes = stages.map((item, i) => {
-    const x = 28 + i * 171;
-    return `<g><rect x="${x}" y="87" width="142" height="132" rx="8"/><text x="${x + 14}" y="116" class="step">0${i + 1}</text>${svgText(lines(item.stage, 18), x + 14, 141, 'diagram-title')}${svgText(lines(item.detail, 22), x + 14, 177, 'diagram-detail', 12)}${i < stages.length - 1 ? `<path class="connector" d="M${x + 143} 153H${x + 169}" marker-end="url(#arrow-${title.length})"/>` : ''}</g>`;
+    const x = 20 + i * 185;
+    return `<g class="diagram-node"><rect x="${x}" y="20" width="155" height="108" rx="8"/><text x="${x + 16}" y="49" class="step">0${i + 1}</text>${svgText(lines(item.stage, 17).slice(0, 2), x + 16, 78, 'diagram-title', 16)}${i < stages.length - 1 ? `<path class="connector" d="M${x + 156} 74H${x + 182}" marker-end="url(#${markerId})"/>` : ''}</g>`;
   }).join('');
   const caption = `${stages.map(item => item.stage).join(' → ')}. Each transition is a place where an assumption can be inspected before the next layer of the system compounds it.`;
-  return `<div class="diagram authored-diagram"><svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(title)} workflow"><defs><marker id="arrow-${title.length}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7690b7"/></marker></defs><text x="28" y="39" class="diagram-overline">MENTAL MODEL</text><text x="28" y="64" class="diagram-heading">${esc(title)} — from question to evidence</text>${boxes}</svg><div class="diagram-caption">${esc(caption)}</div></div>`;
+  const details = stages.map((item, i) => `<li><span class="diagram-step-number">0${i + 1}</span><div><strong>${esc(item.stage)}</strong><p>${esc(item.detail)}</p></div></li>`).join('');
+  return `<figure class="diagram authored-diagram"><header class="diagram-header"><span>MENTAL MODEL</span><h3>${esc(title)}</h3><p>From question to evidence</p></header><div class="diagram-flow"><svg viewBox="0 0 730 148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(title)} workflow"><defs><marker id="${markerId}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#a43b19"/></marker></defs>${boxes}</svg></div><ol class="diagram-stage-list">${details}</ol><figcaption class="diagram-caption">${esc(caption)}</figcaption></figure>`;
 }
 
 const notebooks = {

@@ -27,4 +27,6 @@ for (const chapter of manifest.filter(item => item.origin === 'New foundation' &
 }
 const app = await readFile('src/main.jsx', 'utf8');
 if (/target="_blank"|href=\{url\}/.test(app)) throw new Error('The library shell must not send readers to external source links.');
+if (app.includes('<aside class="article-toc"')) throw new Error('Chapter navigation must live in the sidebar, not a second article rail.');
+if (!app.includes('nav-sections')) throw new Error('The sidebar must include the current chapter sections.');
 console.log(`Validated ${manifest.length} chapters and the standalone GPU handbook.`);

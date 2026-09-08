@@ -1,13 +1,25 @@
 let timer;
 
 function syncSidebar() {
-  const id = decodeURIComponent(window.location.hash.slice(1)) || document.querySelector('main article h2[id]')?.id;
+  const hashId = decodeURIComponent(window.location.hash.slice(1));
+  if (!hashId && document.readyState !== 'complete') return;
+  const id = hashId || document.querySelector('main article h2[id]')?.id;
   if (!id) return;
   const links = Array.from(document.querySelectorAll('.sidebar-section-link a[href]'));
   const active = links.find(link => {
     try { return new URL(link.getAttribute('href'), window.location.href).hash === `#${id}`; }
     catch { return false; }
   });
+  if (!active && hashId) {
+    const chapter = Array.from(document.querySelectorAll('.sidebar-chapter-group')).find(group => {
+      const token = Array.from(group.classList).find(name => name.startsWith('sidebar-chapter-') && name !== 'sidebar-chapter-group');
+      const chapterId = token?.slice('sidebar-chapter-'.length);
+      return chapterId && (hashId === chapterId || hashId.startsWith(`${chapterId}-`));
+    });
+    const opener = chapter?.querySelector(':scope > .menu__list-item-collapsible [role="button"][aria-expanded="false"]');
+    if (opener) { opener.click(); window.setTimeout(syncSidebar, 120); }
+    return;
+  }
   links.forEach(link => {
     const selected = link === active;
     link.classList.toggle('sidebar-section-active', selected);

@@ -13,6 +13,7 @@
   --ifm-font-size-base: 16px;
   --ifm-line-height-base: 1.75;
   --ifm-navbar-height: 68px;
+  --doc-sidebar-width: 304px;
   --ifm-toc-border-color: #e7e0d9;
   --ifm-color-emphasis-200: #e7e0d9;
   --ifm-code-font-size: 85%;
@@ -24,10 +25,13 @@ body {background:#fff;color:#332d29}
 .navbar__brand {font-family:var(--ifm-heading-font-family);font-size:23px;letter-spacing:-.5px}
 .navbar__logo {height:36px}.navbar__item {font-size:13px;font-weight:600}
 .theme-doc-sidebar-container {border-right:1px solid #e7e0d9!important;background:#fff}
-.menu {padding:18px 12px 40px;font-size:12px}.menu__link {border-radius:3px;line-height:1.4;padding:7px 10px}
+.menu {padding:22px 14px 50px;font-size:13px}.menu__link {border-radius:5px;line-height:1.42;padding:8px 10px}
 .menu__link--active {background:#fff0e9;color:#8f3114;font-weight:650}
 .menu__list-item-collapsible:hover,.menu__link:hover {background:#fff7f3;color:#8f3114}
-.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:10px;color:#81766e;padding-top:5px;padding-bottom:5px;border-left:1px solid #e7e0d9;border-radius:0;margin-left:7px}
+.sidebar-domain-group>.menu__list-item-collapsible>.menu__link {font-size:13px;font-weight:700;color:#3c342f}
+.sidebar-chapter-group>.menu__list-item-collapsible>.menu__link {font-size:12px;font-weight:580;color:#5e544d;padding-top:7px;padding-bottom:7px}
+.sidebar-chapter-group>.menu__list {margin-left:13px;border-left:1px solid #e4ddd6;padding-left:5px}
+.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:11px;color:#81766e;padding:6px 9px;border-left:2px solid transparent;border-radius:3px;margin-left:0}
 .sidebar-section-link .menu__link.sidebar-section-active,.menu__link.sidebar-section-link.sidebar-section-active {color:#8f3114;background:#fff0e9;border-left:3px solid #a43b19;font-weight:700;padding-left:8px}
 .theme-doc-toc-desktop {display:none}.docItemCol_VOVn,.docItemCol {max-width:900px!important}
 .theme-doc-markdown {max-width:900px;margin:0 auto;padding-bottom:80px}

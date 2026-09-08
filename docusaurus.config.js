@@ -10,6 +10,9 @@ const config = {
   onBrokenLinks: 'throw',
   markdown: {hooks: {onBrokenMarkdownLinks: 'throw'}},
   staticDirectories: ['public'],
+  plugins: [function axiomNavigation() {
+    return {name: 'axiom-navigation', getClientModules() { return [require.resolve('./src/client/sidebar.js')]; }};
+  }],
   presets: [['classic', {
     docs: {
       routeBasePath: '/',

@@ -9,7 +9,8 @@ for (const id of ['ai-map', 'linear-algebra']) {
 
 await access('docusaurus.config.js');
 await access('sidebars.js');
-await access('src/theme/Root.js');
+await access('src/theme/Root/index.js');
+await access('src/client/sidebar.js');
 await access('docs/index.mdx');
 await access('public/gpu.html');
 await access('public/perspective.html');
@@ -36,7 +37,10 @@ for (const domain of new Set(manifest.map(chapter => chapter.group))) {
 
 const sidebars = await readFile('sidebars.js', 'utf8');
 if (!sidebars.includes('chapter.headings.map')) throw new Error('Sidebar does not enumerate chapter subsections.');
-if (!sidebars.includes('collapsible: false')) throw new Error('Chapter subsections can collapse and disappear on hash navigation.');
-const root = await readFile('src/theme/Root.js', 'utf8');
+if (!sidebars.includes('sidebar-chapter-group sidebar-chapter-${chapter.id}')) throw new Error('Sidebar does not expose chapter hierarchy styling.');
+const root = await readFile('src/theme/Root/index.js', 'utf8');
 if (!root.includes("aria-current', 'location'")) throw new Error('Subsection hash state is not exposed or highlighted.');
+if (!root.includes('toggle.click()')) throw new Error('Hash navigation does not expand its owning chapter.');
+const client = await readFile('src/client/sidebar.js', 'utf8');
+if (!client.includes('sidebar-section-active')) throw new Error('Sidebar client module does not synchronize active sections.');
 console.log(`Validated Docusaurus hierarchy for ${manifest.length} chapters.`);

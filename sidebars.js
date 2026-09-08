@@ -18,6 +18,7 @@ const domains = [
 
 const library = domains.map((domain, domainIndex) => ({
   type: 'category',
+  className: 'sidebar-domain-group',
   label: `${String(domainIndex + 1).padStart(2, '0')}  ${domain.name}`,
   collapsed: domainIndex !== 0,
   link: {type: 'doc', id: `volumes/${domain.id}`},
@@ -27,11 +28,9 @@ const library = domains.map((domain, domainIndex) => ({
     }
     return {
       type: 'category',
+      className: `sidebar-chapter-group sidebar-chapter-${chapter.id}`,
       label: `${chapter.number}  ${chapter.title}`,
-      // Hash-only routes do not make Docusaurus reopen a category. Keep every
-      // chapter outline visible so direct subsection links remain usable.
       collapsed: false,
-      collapsible: false,
       items: [{
         type: 'link',
         label: '00  Chapter overview',

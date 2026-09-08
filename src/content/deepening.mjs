@@ -50,7 +50,8 @@ export function studyDiagram(title, stages) {
     const x = 28 + i * 171;
     return `<g><rect x="${x}" y="87" width="142" height="132" rx="8"/><text x="${x + 14}" y="116" class="step">0${i + 1}</text>${svgText(lines(item.stage, 18), x + 14, 141, 'diagram-title')}${svgText(lines(item.detail, 22), x + 14, 177, 'diagram-detail', 12)}${i < stages.length - 1 ? `<path class="connector" d="M${x + 143} 153H${x + 169}" marker-end="url(#arrow-${title.length})"/>` : ''}</g>`;
   }).join('');
-  return `<div class="diagram authored-diagram"><svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(title)} workflow"><defs><marker id="arrow-${title.length}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7690b7"/></marker></defs><text x="28" y="39" class="diagram-overline">MENTAL MODEL</text><text x="28" y="64" class="diagram-heading">${esc(title)} — from question to evidence</text>${boxes}</svg><div class="diagram-caption">A usable chapter has a flow of decisions, evidence, and checks. Use this diagram as a navigation aid, then test each step on a small real example.</div></div>`;
+  const caption = `${stages.map(item => item.stage).join(' → ')}. Each transition is a place where an assumption can be inspected before the next layer of the system compounds it.`;
+  return `<div class="diagram authored-diagram"><svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(title)} workflow"><defs><marker id="arrow-${title.length}" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7690b7"/></marker></defs><text x="28" y="39" class="diagram-overline">MENTAL MODEL</text><text x="28" y="64" class="diagram-heading">${esc(title)} — from question to evidence</text>${boxes}</svg><div class="diagram-caption">${esc(caption)}</div></div>`;
 }
 
 const notebooks = {

@@ -19,6 +19,7 @@
   --ifm-code-font-size: 85%;
 }
 
+html,body,#__docusaurus,.main-wrapper,.docsWrapper_hBAB,.docRoot_UBD9,.docMainContainer_TBSr {background:#fff}
 html[data-theme='dark'] {--ifm-background-color:#fff;--ifm-background-surface-color:#fff;color:#211d1a}
 body {background:#fff;color:#332d29}
 .navbar {box-shadow:none;border-bottom:1px solid #e7e0d9;background:#fff}

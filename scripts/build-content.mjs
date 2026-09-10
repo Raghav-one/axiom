@@ -20,7 +20,8 @@ if (gpuSections.length !== 24) throw Error(`Expected 24 GPU handbook sections, f
 const normalizeFragment = html => serialize(parseFragment(html));
 const standardizeGpuSection = html => {
   const $ = loadHtml(normalizeFragment(html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/href="#s(\d+)"/g, 'href="#gpu-part-$1"')), null, false);
-  $('script, style, canvas, button, input, form, svg').remove();
+  $('script, style, canvas, button, input, form').remove();
+  $('.sec-num').remove();
   $('*').removeAttr('id').removeAttr('style').removeAttr('onclick').removeAttr('onchange');
   $('div').each((_, element) => {
     const node = $(element);
@@ -31,7 +32,15 @@ const standardizeGpuSection = html => {
   $('span').each((_, element) => $(element).replaceWith($(element).contents()));
   return $.root().html();
 };
-const gpuHandbookHtml = `<p>A complete hardware reference: the arithmetic, execution model, memory system, numerical formats, kernels, profiling, and distributed limits behind modern AI workloads.</p><div class="gpu-reference">${gpuSections.map(({number, html}) => `<div class="gpu-handbook-section" data-section="${number}">${standardizeGpuSection(html)}</div>`).join('')}</div>`;
+const gpuVisuals = {
+  1: `<figure class="gpu-diagram"><figcaption><span>ARCHITECTURE</span><strong>CPU and GPU spend silicon differently</strong></figcaption><div class="gpu-compare"><div><b>CPU core</b><i>control, cache, branch prediction</i><em>few fast threads</em></div><div><b>GPU array</b><i>many arithmetic lanes and schedulers</i><em>many concurrent threads</em></div></div><p>Latency optimization makes one dependency chain fast. Throughput optimization makes many independent chains finish together.</p></figure>`,
+  7: `<figure class="gpu-diagram"><figcaption><span>MEMORY PATH</span><strong>Capacity increases as locality and speed decrease</strong></figcaption><div class="gpu-memory"><b>Registers</b><i>→</i><b>Shared memory / L1</b><i>→</i><b>L2 cache</b><i>→</i><b>HBM device memory</b><i>→</i><b>Host memory</b></div><p>Kernel design decides which values stay close enough to reuse before another HBM transaction is needed.</p></figure>`,
+  11: `<figure class="gpu-diagram"><figcaption><span>ROOFLINE</span><strong>Arithmetic intensity chooses the bottleneck</strong></figcaption><div class="gpu-roofline"><div><b>Low intensity</b><span>bytes dominate</span><small>increase reuse and reduce traffic</small></div><div><b>High intensity</b><span>compute dominates</span><small>increase useful arithmetic utilization</small></div></div><p>Performance cannot exceed the lower of the memory-bandwidth roof and compute-throughput roof.</p></figure>`,
+  12: `<figure class="gpu-diagram"><figcaption><span>GEMM TILING</span><strong>Reuse turns matrix multiply into a GPU workload</strong></figcaption><div class="gpu-tiles"><b>HBM tiles</b><i>→</i><b>shared-memory tiles</b><i>→</i><b>register fragments</b><i>→</i><b>matrix multiply-accumulate</b></div><p>Each smaller tile reuses values more times before fetching the next block from slower memory.</p></figure>`,
+  15: `<figure class="gpu-diagram"><figcaption><span>SCALE-OUT</span><strong>More devices create a communication schedule</strong></figcaption><div class="gpu-scale"><b>GPU 0</b><i>↔</i><b>GPU 1</b><i>↔</i><b>GPU 2</b><i>↔</i><b>GPU 3</b></div><p>Data, tensor, pipeline, and expert parallelism differ in which tensors cross these links and when synchronization blocks progress.</p></figure>`,
+  18: `<figure class="gpu-diagram"><figcaption><span>MEMORY LEDGER</span><strong>Model weights are only the first allocation</strong></figcaption><div class="gpu-ledger"><b>weights</b><b>optimizer state</b><b>gradients</b><b>activations</b><b>KV cache</b><b>workspace</b></div><p>Capacity planning names each allocation, its dtype, lifetime, and whether it scales with parameters, batch, sequence length, or concurrency.</p></figure>`
+};
+const gpuHandbookHtml = `<p>A complete hardware reference: the arithmetic, execution model, memory system, numerical formats, kernels, profiling, and distributed limits behind modern AI workloads.</p><div class="gpu-reference">${gpuSections.map(({number, html}) => `<div class="gpu-handbook-section" data-section="${number}">${standardizeGpuSection(html)}${gpuVisuals[number] || ''}</div>`).join('')}</div>`;
 const additions={
  'tokenization-data':[['Hugging Face: tokenization','https://huggingface.co/learn/llm-course/chapter6/5']],
  'red-teaming-robustness':[['OWASP GenAI Security Project','https://genai.owasp.org/']],

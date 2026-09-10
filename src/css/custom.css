@@ -117,6 +117,24 @@ body:has(#reference-layout) .gpu-reference .sec-head h2 {margin:0!important;padd
 body:has(#reference-layout) .gpu-reference .sec-head p {font-size:13px;line-height:1.55;color:#666a73;margin:4px 0 0}
 body:has(#reference-layout) .gpu-reference .formula,body:has(#reference-layout) .gpu-reference .spec,body:has(#reference-layout) .gpu-reference .metric {border:1px solid #e7e8eb;background:#f6f7f8;padding:12px 14px;margin:16px 0;overflow:auto}
 body:has(#reference-layout) .gpu-reference canvas {display:block;max-width:100%;height:auto;border:1px solid #e7e8eb;background:#f6f7f8;margin:18px 0}
+body:has(#reference-layout) .gpu-reference svg {display:block;width:100%;height:auto;max-height:430px;border:1px solid #e7e8eb;background:#fff;margin:18px 0}
+body:has(#reference-layout) .gpu-reference svg rect {fill:#f6f7f8;stroke:#d9dde3}
+body:has(#reference-layout) .gpu-reference svg text {fill:#30333a;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body:has(#reference-layout) .gpu-diagram {border:1px solid #e7e8eb;background:#fff;margin:22px 0;padding:16px 18px}
+body:has(#reference-layout) .gpu-diagram figcaption {border-bottom:1px solid #e7e8eb;padding-bottom:11px;margin-bottom:14px}
+body:has(#reference-layout) .gpu-diagram figcaption span {display:block;color:#d0530c;font-size:9px;font-weight:800;letter-spacing:1.2px}
+body:has(#reference-layout) .gpu-diagram figcaption strong {display:block;color:#17191e;font-size:16px;margin-top:4px}
+body:has(#reference-layout) .gpu-diagram p {font-size:12px;line-height:1.55;color:#666a73;margin:13px 0 0}
+body:has(#reference-layout) .gpu-compare,body:has(#reference-layout) .gpu-roofline {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+body:has(#reference-layout) .gpu-compare>div,body:has(#reference-layout) .gpu-roofline>div {border:1px solid #e7e8eb;background:#f6f7f8;padding:13px}
+body:has(#reference-layout) .gpu-compare b,body:has(#reference-layout) .gpu-roofline b {display:block;font-size:13px;color:#17191e}
+body:has(#reference-layout) .gpu-compare i,body:has(#reference-layout) .gpu-roofline span,body:has(#reference-layout) .gpu-roofline small {display:block;font-style:normal;font-size:11px;line-height:1.5;color:#666a73;margin-top:5px}
+body:has(#reference-layout) .gpu-compare em {display:inline-block;margin-top:9px;color:#a43b19;font-size:10px;font-style:normal;font-weight:700}
+body:has(#reference-layout) .gpu-memory,body:has(#reference-layout) .gpu-tiles,body:has(#reference-layout) .gpu-scale {display:flex;align-items:stretch;gap:7px;overflow:auto}
+body:has(#reference-layout) .gpu-memory b,body:has(#reference-layout) .gpu-tiles b,body:has(#reference-layout) .gpu-scale b {flex:1;min-width:110px;border:1px solid #e7e8eb;background:#f6f7f8;padding:12px;font-size:11px;color:#30333a}
+body:has(#reference-layout) .gpu-memory i,body:has(#reference-layout) .gpu-tiles i,body:has(#reference-layout) .gpu-scale i {align-self:center;color:#d0530c;font-style:normal}
+body:has(#reference-layout) .gpu-ledger {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+body:has(#reference-layout) .gpu-ledger b {border:1px solid #e7e8eb;background:#f6f7f8;padding:10px;font-size:11px;color:#30333a}
 .footer {border-top:1px solid #e7e0d9;background:#fff;color:#756c65}
 @media (max-width:996px) {.theme-doc-markdown {padding-left:8px;padding-right:8px}body:has(#reference-layout) .theme-doc-markdown {padding:32px 24px 72px}.libraryHero {padding-top:30px}.libraryHero h1 {font-size:45px}.theme-doc-markdown>h1 {font-size:40px}.domainGrid {grid-template-columns:1fr}}
 @media (min-width:997px) {body:has(#reference-layout) .container.padding-top--md {margin-left:64px}}

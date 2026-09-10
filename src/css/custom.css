@@ -25,15 +25,25 @@ body {background:#fff;color:#332d29}
 .navbar {box-shadow:none;border-bottom:1px solid #e7e0d9;background:#fff}
 .navbar__brand {font-family:var(--ifm-heading-font-family);font-size:23px;letter-spacing:-.5px}
 .navbar__logo {height:36px}.navbar__item {font-size:13px;font-weight:600}
-.theme-doc-sidebar-container {border-right:1px solid #e7e0d9!important;background:#fff}
-.menu {padding:14px 11px 40px;font-size:13px}.menu__link {border-radius:4px;line-height:1.32;padding:6px 9px}
-.menu__link--active {background:#fff0e9;color:#8f3114;font-weight:650}
-.menu__list-item-collapsible:hover,.menu__link:hover {background:#fff7f3;color:#8f3114}
-.sidebar-domain-group>.menu__list-item-collapsible>.menu__link {font-size:13px;font-weight:700;color:#3c342f}
-.sidebar-chapter-group>.menu__list-item-collapsible>.menu__link {font-size:12px;font-weight:580;color:#5e544d;padding-top:5px;padding-bottom:5px}
-.sidebar-chapter-group>.menu__list {margin-left:13px;border-left:1px solid #e4ddd6;padding-left:5px}
-.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:13px;line-height:1.4;color:#665d56;padding:5px 8px;border-left:2px solid transparent;border-radius:3px;margin-left:0}
-.sidebar-section-link .menu__link.sidebar-section-active,.menu__link.sidebar-section-link.sidebar-section-active {color:#8f3114;background:#fff0e9;border-left:3px solid #a43b19;font-weight:700;padding-left:8px}
+.theme-doc-sidebar-container {border-right:1px solid #e5e7eb!important;background:#fff}
+/* Documentation navigation: quiet structure, visible current location, no decorative panels. */
+.menu {padding:18px 10px 48px;font-size:13px}
+.menu__list {margin:0}
+.menu__link {border-radius:6px;line-height:1.35;padding:6px 10px;color:#4b5563;transition:background .14s ease,color .14s ease}
+.menu__link--active {background:#f1f5f9;color:#111827;font-weight:650}
+.menu__list-item-collapsible {border-radius:6px;min-height:32px}
+.menu__list-item-collapsible:hover,.menu__link:hover {background:#f6f7f9;color:#111827}
+.menu__caret {opacity:.56;transition:transform .16s ease,opacity .14s ease}
+.menu__list-item-collapsible:hover .menu__caret {opacity:.95}
+.sidebar-domain-group {margin:0 0 8px}
+.sidebar-domain-group>.menu__list-item-collapsible {margin:0 0 3px}
+.sidebar-domain-group>.menu__list-item-collapsible>.menu__link {font-size:11px;font-weight:750;letter-spacing:.01em;color:#374151;padding:8px 10px}
+.sidebar-domain-group>.menu__list {margin:0 0 10px;padding:3px 0 5px;border-bottom:1px solid #f0f1f3}
+.sidebar-chapter-group {margin:1px 0}
+.sidebar-chapter-group>.menu__list-item-collapsible>.menu__link {font-size:12px;font-weight:610;color:#4b5563;padding:7px 10px}
+.sidebar-chapter-group>.menu__list {margin:1px 0 4px 12px;border-left:1px solid #e5e7eb;padding:2px 0 3px 7px}
+.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:12px;line-height:1.42;color:#6b7280;padding:6px 8px;border-left:0;border-radius:5px;margin:0;overflow-wrap:anywhere}
+.sidebar-section-link .menu__link.sidebar-section-active,.menu__link.sidebar-section-link.sidebar-section-active {color:#b6431f;background:#fff0eb;border-left:0;font-weight:700;padding-left:8px;box-shadow:inset 2px 0 0 #d0530c}
 .theme-doc-toc-desktop {display:none}.docItemCol_VOVn,.docItemCol {max-width:1080px!important}
 .theme-doc-markdown {max-width:1000px;margin:0 auto;padding-bottom:64px}
 .breadcrumbs {font-size:11px;margin-bottom:22px}

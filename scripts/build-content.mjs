@@ -40,7 +40,11 @@ const gpuVisuals = {
   15: `<figure class="gpu-diagram"><figcaption><span>SCALE-OUT</span><strong>More devices create a communication schedule</strong></figcaption><div class="gpu-scale"><b>GPU 0</b><i>↔</i><b>GPU 1</b><i>↔</i><b>GPU 2</b><i>↔</i><b>GPU 3</b></div><p>Data, tensor, pipeline, and expert parallelism differ in which tensors cross these links and when synchronization blocks progress.</p></figure>`,
   18: `<figure class="gpu-diagram"><figcaption><span>MEMORY LEDGER</span><strong>Model weights are only the first allocation</strong></figcaption><div class="gpu-ledger"><b>weights</b><b>optimizer state</b><b>gradients</b><b>activations</b><b>KV cache</b><b>workspace</b></div><p>Capacity planning names each allocation, its dtype, lifetime, and whether it scales with parameters, batch, sequence length, or concurrency.</p></figure>`
 };
-const gpuHandbookHtml = `<p>A complete hardware reference: the arithmetic, execution model, memory system, numerical formats, kernels, profiling, and distributed limits behind modern AI workloads.</p><div class="gpu-reference">${gpuSections.map(({number, html}) => `<div class="gpu-handbook-section" data-section="${number}">${standardizeGpuSection(html)}${gpuVisuals[number] || ''}</div>`).join('')}</div>`;
+const gpuHandbookHtml = `<p>A complete hardware reference: the arithmetic, execution model, memory system, numerical formats, kernels, profiling, and distributed limits behind modern AI workloads.</p><div class="gpu-reference">${gpuSections.map(({number, html}) => {
+  const visual = gpuVisuals[number] || '';
+  const section = standardizeGpuSection(html);
+  return `<div class="gpu-handbook-section" data-section="${number}">${section.replace(/(<h2[^>]*>[\s\S]*?<\/h2>)/, `$1${visual}`)}</div>`;
+}).join('')}</div>`;
 const additions={
  'tokenization-data':[['Hugging Face: tokenization','https://huggingface.co/learn/llm-course/chapter6/5']],
  'red-teaming-robustness':[['OWASP GenAI Security Project','https://genai.owasp.org/']],

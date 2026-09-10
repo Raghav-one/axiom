@@ -121,6 +121,8 @@ body:has(#reference-layout) .gpu-reference canvas {display:block;max-width:100%;
 body:has(#reference-layout) .gpu-reference svg {display:block;width:100%;height:auto;max-height:430px;border:1px solid #e7e8eb;background:#fff;margin:18px 0}
 body:has(#reference-layout) .gpu-reference svg rect {fill:#f6f7f8;stroke:#d9dde3}
 body:has(#reference-layout) .gpu-reference svg text {fill:#30333a;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body:has(#reference-layout) .gpu-source-visual {margin:18px 0;border:1px solid #e7e8eb;background:#fff;padding:8px}
+body:has(#reference-layout) .gpu-source-visual img {display:block;width:100%;height:auto;max-height:560px;object-fit:contain;background:#fff}
 body:has(#reference-layout) .gpu-diagram {border:1px solid #e7e8eb;background:#fff;margin:22px 0;padding:16px 18px}
 body:has(#reference-layout) .gpu-diagram figcaption {border-bottom:1px solid #e7e8eb;padding-bottom:11px;margin-bottom:14px}
 body:has(#reference-layout) .gpu-diagram figcaption span {display:block;color:#d0530c;font-size:9px;font-weight:800;letter-spacing:1.2px}

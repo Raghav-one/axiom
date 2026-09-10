@@ -43,12 +43,9 @@ await fs.writeFile('docs/index.mdx', landing);
 
 for (const [domainIndex, domain] of domains.entries()) {
   const chapters = manifest.filter(chapter => chapter.group === domain.id);
-  const imports = chapters.filter(chapter => chapter.id !== 'gpu').map((chapter, index) => `import chapter${index} from '@site/public/content/${chapter.id}.json';`).join('\n');
+  const imports = chapters.map((chapter, index) => `import chapter${index} from '@site/public/content/${chapter.id}.json';`).join('\n');
   const chapterSections = chapters.map((chapter, chapterIndex) => {
-    if (chapter.id === 'gpu') {
-      return `## ${chapter.number}. ${chapter.title} {#gpu}\n\n<div className="gpuCallout"><span>THE HARDWARE VOLUME</span><strong>GPU: from silicon to distributed scale</strong><p>The standalone GPU handbook carries its own 24-part architecture rail, interactive diagrams, memory calculations, kernel examples, and distributed-compute sections.</p><StaticLink to="/gpu.html">Open the GPU handbook →</StaticLink></div>`;
-    }
-    const dataIndex = chapters.filter(item => item.id !== 'gpu').findIndex(item => item.id === chapter.id);
+    const dataIndex = chapterIndex;
     const sections = chapter.headings.map((heading, sectionIndex) => `### ${sectionIndex + 1}. ${safeHeading(heading.title)} {#${chapter.id}-${heading.id}}\n\n<ChapterSection html={chapter${dataIndex}.html} index={${sectionIndex}} />`).join('\n\n');
     const prerequisites = chapter.prerequisites.length
       ? `<div className="prerequisites"><strong>Prerequisites</strong> · ${chapter.prerequisites.map(id => manifest.find(item => item.id === id)?.title).filter(Boolean).join(' · ')}</div>`
@@ -58,7 +55,7 @@ for (const [domainIndex, domain] of domains.entries()) {
       : '';
     return `## ${chapter.number}. ${chapter.title} {#${chapter.id}}\n\n<p className="chapterSummary">${chapter.summary}</p>\n\n<div className="chapterMeta"><span>${chapter.words.toLocaleString()} words</span><span>${chapter.minutes} minute reference</span><span>${chapter.headings.length} sections</span></div>\n\n${prerequisites}\n\n<ChapterIntro html={chapter${dataIndex}.html} />\n\n${sections}\n\n${sources}`;
   }).join('\n\n');
-  const totalWords = chapters.reduce((sum, chapter) => sum + (chapter.id === 'gpu' ? 0 : chapter.words), 0);
+  const totalWords = chapters.reduce((sum, chapter) => sum + chapter.words, 0);
   const layoutHook = `<span id="reference-layout" data-domain="${domain.id}" aria-hidden="true" />`;
   const doc = `---
 id: ${domain.id}

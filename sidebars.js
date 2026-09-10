@@ -23,9 +23,6 @@ const library = domains.map((domain, domainIndex) => ({
   collapsed: domainIndex !== 0,
   link: {type: 'doc', id: `volumes/${domain.id}`},
   items: manifest.filter(chapter => chapter.group === domain.id).map(chapter => {
-    if (chapter.id === 'gpu') {
-      return {type: 'link', label: `${chapter.number}  ${chapter.title}`, href: 'pathname:///gpu.html'};
-    }
     return {
       type: 'category',
       className: `sidebar-chapter-group sidebar-chapter-${chapter.id}`,

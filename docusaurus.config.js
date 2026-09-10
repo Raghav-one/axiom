@@ -43,7 +43,7 @@ const config = {
       logo: {alt: 'Axiom', src: 'favicon.svg'},
       items: [
         {to: '/', label: 'Field library', position: 'left'},
-        {href: 'pathname:///gpu.html', label: 'GPU volume', position: 'left'},
+        {to: '/hardware#gpu', label: 'GPU', position: 'left'},
         {href: 'pathname:///perspective.html', label: 'Perspective', position: 'left'},
       ],
     },

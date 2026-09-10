@@ -110,6 +110,13 @@ body:has(#reference-layout) .signal-prose code {background:#f6f7f8;border-color:
 body:has(#reference-layout) .signal-prose .table-scroll {border-color:#e7e8eb;border-radius:3px;margin:20px 0}
 body:has(#reference-layout) .signal-prose th {background:#f6f7f8}
 body:has(#reference-layout) .evidenceLedger {border-color:#e7e8eb;margin:28px 0 43px;color:#454851}
+body:has(#reference-layout) .gpu-reference .gpu-handbook-section {margin:0}
+body:has(#reference-layout) .gpu-reference .sec-head {display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start;margin:28px 0 10px}
+body:has(#reference-layout) .gpu-reference .sec-num {font:800 10px/1.6 ui-monospace,"SFMono-Regular",Menlo,monospace;color:#d0530c;letter-spacing:.8px;padding-top:3px}
+body:has(#reference-layout) .gpu-reference .sec-head h2 {margin:0!important;padding:0!important;border:0!important;font-size:20px!important}
+body:has(#reference-layout) .gpu-reference .sec-head p {font-size:13px;line-height:1.55;color:#666a73;margin:4px 0 0}
+body:has(#reference-layout) .gpu-reference .formula,body:has(#reference-layout) .gpu-reference .spec,body:has(#reference-layout) .gpu-reference .metric {border:1px solid #e7e8eb;background:#f6f7f8;padding:12px 14px;margin:16px 0;overflow:auto}
+body:has(#reference-layout) .gpu-reference canvas {display:block;max-width:100%;height:auto;border:1px solid #e7e8eb;background:#f6f7f8;margin:18px 0}
 .footer {border-top:1px solid #e7e0d9;background:#fff;color:#756c65}
 @media (max-width:996px) {.theme-doc-markdown {padding-left:8px;padding-right:8px}body:has(#reference-layout) .theme-doc-markdown {padding:32px 24px 72px}.libraryHero {padding-top:30px}.libraryHero h1 {font-size:45px}.theme-doc-markdown>h1 {font-size:40px}.domainGrid {grid-template-columns:1fr}}
 @media (min-width:997px) {body:has(#reference-layout) .container.padding-top--md {margin-left:64px}}

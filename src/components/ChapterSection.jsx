@@ -7,10 +7,12 @@ function splitChapter(html) {
 
 export function ChapterIntro({html}) {
   const intro = splitChapter(html)[0];
-  return intro ? <div className="signal-prose" dangerouslySetInnerHTML={{__html: intro}} /> : null;
+  const isGpuHandbook = String(html).includes('gpu-reference');
+  return intro ? <div className="signal-prose" suppressHydrationWarning={isGpuHandbook} dangerouslySetInnerHTML={{__html: intro}} /> : null;
 }
 
 export default function ChapterSection({html, index}) {
   const section = splitChapter(html)[index + 1] || '';
-  return <div className="signal-prose" dangerouslySetInnerHTML={{__html: section}} />;
+  const isGpuHandbook = String(html).includes('gpu-reference');
+  return <div className="signal-prose" suppressHydrationWarning={isGpuHandbook} dangerouslySetInnerHTML={{__html: section}} />;
 }

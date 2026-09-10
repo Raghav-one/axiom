@@ -39,11 +39,8 @@ body {background:#fff;color:#332d29}
 .sidebar-domain-group>.menu__list-item-collapsible {margin:0 0 3px}
 .sidebar-domain-group>.menu__list-item-collapsible>.menu__link {font-size:11px;font-weight:750;letter-spacing:.01em;color:#374151;padding:8px 10px}
 .sidebar-domain-group>.menu__list {margin:0 0 10px;padding:3px 0 5px;border-bottom:1px solid #f0f1f3}
-.sidebar-chapter-group {margin:1px 0}
-.sidebar-chapter-group>.menu__list-item-collapsible>.menu__link {font-size:12px;font-weight:610;color:#4b5563;padding:7px 10px}
-.sidebar-chapter-group>.menu__list {margin:1px 0 4px 12px;border-left:1px solid #e5e7eb;padding:2px 0 3px 7px}
-.sidebar-section-link .menu__link,.menu__link.sidebar-section-link {font-size:12px;line-height:1.42;color:#6b7280;padding:6px 8px;border-left:0;border-radius:5px;margin:0;overflow-wrap:anywhere}
-.sidebar-section-link .menu__link.sidebar-section-active,.menu__link.sidebar-section-link.sidebar-section-active {color:#b6431f;background:#fff0eb;border-left:0;font-weight:700;padding-left:8px;box-shadow:inset 2px 0 0 #d0530c}
+.sidebar-chapter-link .menu__link,.menu__link.sidebar-chapter-link {font-size:12.5px;line-height:1.38;color:#4b5563;padding:7px 10px;margin:1px 0;border-radius:6px;overflow-wrap:anywhere}
+.sidebar-chapter-link .menu__link.sidebar-chapter-active,.menu__link.sidebar-chapter-link.sidebar-chapter-active {color:#b6431f;background:#fff0eb;font-weight:700;box-shadow:inset 2px 0 0 #d0530c}
 .theme-doc-toc-desktop {display:none}.docItemCol_VOVn,.docItemCol {max-width:1080px!important}
 .theme-doc-markdown {max-width:1000px;margin:0 auto;padding-bottom:64px}
 .breadcrumbs {font-size:11px;margin-bottom:22px}

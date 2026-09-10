@@ -22,25 +22,14 @@ const library = domains.map((domain, domainIndex) => ({
   label: `${String(domainIndex + 1).padStart(2, '0')}  ${domain.name}`,
   collapsed: domainIndex !== 0,
   link: {type: 'doc', id: `volumes/${domain.id}`},
-  items: manifest.filter(chapter => chapter.group === domain.id).map(chapter => {
-    return {
-      type: 'category',
-      className: `sidebar-chapter-group sidebar-chapter-${chapter.id}`,
-      label: `${chapter.number}  ${chapter.title}`,
-      collapsed: false,
-      items: [{
-        type: 'link',
-        label: '00  Chapter overview',
-        href: `/${domain.id}/#${chapter.id}`,
-        className: 'sidebar-section-link',
-      }, ...chapter.headings.map((heading, index) => ({
-        type: 'link',
-        label: `${String(index + 1).padStart(2, '0')}  ${heading.title}`,
-        href: `/${domain.id}/#${chapter.id}-${heading.id}`,
-        className: 'sidebar-section-link',
-      }))],
-    };
-  }),
+  // A volume is one continuous document. Keep navigation at chapter level so the
+  // sidebar remains an index, rather than duplicating the document outline.
+  items: manifest.filter(chapter => chapter.group === domain.id).map(chapter => ({
+    type: 'link',
+    label: `${chapter.number}  ${chapter.title}`,
+    href: `/${domain.id}/#${chapter.id}`,
+    className: `sidebar-chapter-link sidebar-chapter-${chapter.id}`,
+  })),
 }));
 
 module.exports = {library};

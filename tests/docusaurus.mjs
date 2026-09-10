@@ -65,10 +65,10 @@ for (const domain of new Set(manifest.map(chapter => chapter.group))) {
 }
 
 const sidebars = await readFile('sidebars.js', 'utf8');
-if (!sidebars.includes('chapter.headings.map')) throw new Error('Sidebar does not enumerate chapter subsections.');
-if (!sidebars.includes('sidebar-chapter-group sidebar-chapter-${chapter.id}')) throw new Error('Sidebar does not expose chapter hierarchy styling.');
+if (sidebars.includes('chapter.headings.map')) throw new Error('Sidebar still enumerates section-level links for a continuous volume.');
+if (!sidebars.includes('sidebar-chapter-link sidebar-chapter-${chapter.id}')) throw new Error('Sidebar does not expose chapter navigation styling.');
 const client = await readFile('src/client/sidebar.js', 'utf8');
-if (!client.includes('sidebar-section-active')) throw new Error('Sidebar client module does not synchronize active sections.');
+if (!client.includes('sidebar-chapter-active')) throw new Error('Sidebar client module does not synchronize active chapters.');
 const deepening = await readFile('src/content/deepening.mjs', 'utf8');
 if (!deepening.includes('diagram-stage-list')) throw new Error('Mental-model diagrams do not expose responsive stage details.');
 if (deepening.includes('class=\"diagram-detail\"')) throw new Error('Mental-model prose is still rendered inside fixed SVG coordinates.');

@@ -21,6 +21,9 @@ const normalizeFragment = html => serialize(parseFragment(html));
 const standardizeGpuSection = html => {
   const $ = loadHtml(normalizeFragment(html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/href="#s(\d+)"/g, 'href="#gpu-part-$1"')), null, false);
   $('script, style, canvas, button, input, form').remove();
+  // Each original plate depended on a canvas. Its screenshot is supplied separately
+  // where useful; keeping its badge/caption after removing the canvas creates a stray duplicate.
+  $('.plate').remove();
   $('.sec-num').remove();
   $('*').removeAttr('id').removeAttr('style').removeAttr('onclick').removeAttr('onchange');
   $('div').each((_, element) => {
@@ -37,10 +40,11 @@ const gpuVisuals = {
   7: `<figure class="gpu-diagram"><figcaption><span>MEMORY PATH</span><strong>Capacity increases as locality and speed decrease</strong></figcaption><div class="gpu-memory"><b>Registers</b><i>→</i><b>Shared memory / L1</b><i>→</i><b>L2 cache</b><i>→</i><b>HBM device memory</b><i>→</i><b>Host memory</b></div><p>Kernel design decides which values stay close enough to reuse before another HBM transaction is needed.</p></figure>`,
   11: `<figure class="gpu-diagram"><figcaption><span>ROOFLINE</span><strong>Arithmetic intensity chooses the bottleneck</strong></figcaption><div class="gpu-roofline"><div><b>Low intensity</b><span>bytes dominate</span><small>increase reuse and reduce traffic</small></div><div><b>High intensity</b><span>compute dominates</span><small>increase useful arithmetic utilization</small></div></div><p>Performance cannot exceed the lower of the memory-bandwidth roof and compute-throughput roof.</p></figure>`,
   12: `<figure class="gpu-diagram"><figcaption><span>GEMM TILING</span><strong>Reuse turns matrix multiply into a GPU workload</strong></figcaption><div class="gpu-tiles"><b>HBM tiles</b><i>→</i><b>shared-memory tiles</b><i>→</i><b>register fragments</b><i>→</i><b>matrix multiply-accumulate</b></div><p>Each smaller tile reuses values more times before fetching the next block from slower memory.</p></figure>`,
+  13: `<figure class="gpu-diagram gpu-flash-diagram"><figcaption><span>FLASHATTENTION</span><strong>The score matrix is computed, never stored</strong></figcaption><div class="gpu-flash-paths"><div class="gpu-flash-path gpu-flash-standard"><b>Standard attention</b><span>HBM</span><i>QKᵀ</i><span>HBM</span><i>softmax</i><span>HBM</span><i>· V</i><small>Materializes an N × N score matrix and sends it back to memory between stages.</small></div><div class="gpu-flash-path gpu-flash-tiled"><b>FlashAttention</b><span>HBM</span><i>Q / K / V tiles</i><span>SRAM</span><i>online softmax + output tile</i><span>HBM</span><small>Keeps the working tile on-chip; only the final output returns to HBM.</small></div></div><p>FlashAttention computes the same softmax attention result. The performance gain comes from removing HBM round trips, not from approximating the operation.</p></figure>`,
   15: `<figure class="gpu-diagram"><figcaption><span>SCALE-OUT</span><strong>More devices create a communication schedule</strong></figcaption><div class="gpu-scale"><b>GPU 0</b><i>↔</i><b>GPU 1</b><i>↔</i><b>GPU 2</b><i>↔</i><b>GPU 3</b></div><p>Data, tensor, pipeline, and expert parallelism differ in which tensors cross these links and when synchronization blocks progress.</p></figure>`,
   18: `<figure class="gpu-diagram"><figcaption><span>MEMORY LEDGER</span><strong>Model weights are only the first allocation</strong></figcaption><div class="gpu-ledger"><b>weights</b><b>optimizer state</b><b>gradients</b><b>activations</b><b>KV cache</b><b>workspace</b></div><p>Capacity planning names each allocation, its dtype, lifetime, and whether it scales with parameters, batch, sequence length, or concurrency.</p></figure>`
 };
-const gpuSourceVisualSections = new Set([1, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16]);
+const gpuSourceVisualSections = new Set([1, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16]);
 const gpuHandbookHtml = `<p>A complete hardware reference: the arithmetic, execution model, memory system, numerical formats, kernels, profiling, and distributed limits behind modern AI workloads.</p><div class="gpu-reference">${gpuSections.map(({number, html}) => {
   const visual = gpuVisuals[number] || '';
   const sourceVisual = gpuSourceVisualSections.has(number) ? `<figure class="gpu-source-visual"><img src="/axiom/gpu-visuals/section-${number}.png" alt="GPU handbook visual for section ${number}" loading="lazy" /></figure>` : '';

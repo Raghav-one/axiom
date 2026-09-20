@@ -47,7 +47,7 @@ const config = {
         {href: 'pathname:///perspective.html', label: 'Perspective', position: 'left'},
       ],
     },
-    docs: {sidebar: {hideable: true, autoCollapseCategories: true}},
+    docs: {sidebar: {hideable: true, autoCollapseCategories: false}},
     tableOfContents: {minHeadingLevel: 2, maxHeadingLevel: 4},
     footer: {style: 'light', copyright: 'Axiom · AI from bits and vectors to institutions and power'},
     prism: {additionalLanguages: ['python', 'bash', 'json']},

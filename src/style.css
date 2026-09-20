@@ -72,7 +72,7 @@ a { color: inherit; }
 /* Stable rail and compact reading rhythm. */
 @media (min-width:821px) {
   .sidebar { display:grid; grid-template-rows:auto auto auto minmax(0,1fr) auto; overflow:hidden; }
-  .domain-list { min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:5px; }
+  .domain-list { min-height:0; overflow-y:auto; overflow-anchor:none; overscroll-behavior:contain; padding-right:5px; }
   .special-links { background:#f6f6f5; margin-bottom:0; }
 }
 .chapter-content { line-height:1.55; }

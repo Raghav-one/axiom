@@ -152,9 +152,13 @@ function bindEvents() {
     event.preventDefault();
     const destination = link.getAttribute('href');
     sidebarOpen = false;
-    if (location.hash === destination) render().then(resetChapterPosition);
+    if (location.hash === destination) {
+      resetChapterPosition();
+      render().then(resetChapterPosition);
+    }
     else {
       history.pushState(null, '', destination);
+      resetChapterPosition();
       render().then(resetChapterPosition);
     }
   }));
@@ -184,6 +188,7 @@ async function start() {
 
 async function renderRoute() {
   sidebarOpen = false;
+  resetChapterPosition();
   await render();
   resetChapterPosition();
 }

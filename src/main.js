@@ -113,7 +113,13 @@ function bindEvents() {
     openDomains.has(id) ? openDomains.delete(id) : openDomains.add(id);
     persistNavigation(); render();
   }));
-  document.querySelectorAll('.chapter-link').forEach(link => link.addEventListener('click', () => { sidebarOpen = false; }));
+  document.querySelectorAll('.chapter-link').forEach(link => link.addEventListener('click', event => {
+    event.preventDefault();
+    const destination = link.getAttribute('href');
+    sidebarOpen = false;
+    if (location.hash === destination) render();
+    else location.hash = destination;
+  }));
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && sidebarOpen) { sidebarOpen = false; render(); } }, {once: true});
 }
 

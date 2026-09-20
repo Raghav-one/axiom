@@ -110,7 +110,9 @@ const cases = {
 export function deepenChapter(chapter) {
   const d = deepening[chapter.id];
   if (!d) return chapter;
-  const workflow = `<h2>How the pieces connect</h2>${studyDiagram(chapter.title, d.stages)}`;
+  // The sequence is an orientation aid directly after the opening paragraph,
+  // not another chapter-sized section competing with the actual concepts.
+  const workflow = studyDiagram(chapter.title, d.stages);
   const operating = `<h2>An operating model for ${chapter.title.toLowerCase()}</h2><p>${d.decision}</p><p><strong>The gotcha.</strong> A clean workflow diagram describes dependency order. It does not prove that any boundary is correct; each transition needs its own observable acceptance test.</p>`;
   const [notebookTitle, notebookCode] = notebooks[chapter.group] || notebooks.research;
   const notebook = `<h2>Notebook: ${notebookTitle}</h2><p>${d.evidence}</p><pre><code>${esc(notebookCode)}</code></pre><div class="callout warning"><strong>What to test next.</strong> ${esc(d.stages.map((x, i) => `${i + 1}. ${x.stage}: ${x.detail}`).join(' '))}</div><p><strong>The gotcha.</strong> A small inspection script proves only the quantities it prints. Preserve units, shapes, versions, and the input fixture beside its output.</p>`;

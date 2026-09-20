@@ -27,6 +27,12 @@ function currentChapter(current) {
   return current.name === 'chapter' ? manifest.find(chapter => chapter.id === current.id) : undefined;
 }
 
+function resetChapterPosition() {
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => window.scrollTo(0, 0));
+  window.setTimeout(() => window.scrollTo(0, 0), 80);
+}
+
 function domainChapters(domainId) {
   return manifest.filter(chapter => chapter.group === domainId);
 }
@@ -136,14 +142,21 @@ function bindEvents() {
   document.querySelectorAll('.domain-toggle').forEach(button => button.addEventListener('click', () => {
     const id = button.dataset.domain;
     openDomains.has(id) ? openDomains.delete(id) : openDomains.add(id);
-    persistNavigation(); render();
+    persistNavigation();
+    const expanded = openDomains.has(id);
+    button.setAttribute('aria-expanded', String(expanded));
+    button.querySelector('i').textContent = expanded ? '−' : '+';
+    document.querySelector(`#domain-${id}`).hidden = !expanded;
   }));
   document.querySelectorAll('.chapter-link').forEach(link => link.addEventListener('click', event => {
     event.preventDefault();
     const destination = link.getAttribute('href');
     sidebarOpen = false;
-    if (location.hash === destination) render();
-    else location.hash = destination;
+    if (location.hash === destination) render().then(resetChapterPosition);
+    else {
+      history.pushState(null, '', destination);
+      render().then(resetChapterPosition);
+    }
   }));
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && sidebarOpen) { sidebarOpen = false; render(); } }, {once: true});
 }
@@ -169,8 +182,12 @@ async function start() {
   await render();
 }
 
-window.addEventListener('hashchange', () => {
+async function renderRoute() {
   sidebarOpen = false;
-  render();
-});
+  await render();
+  resetChapterPosition();
+}
+
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('popstate', renderRoute);
 start();

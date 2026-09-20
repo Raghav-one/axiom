@@ -103,6 +103,31 @@ function shell(main) {
     <div class="app-layout">${sidebar(current)}<main class="main-content" id="main-content" tabindex="-1">${main}</main></div>`;
 }
 
+function enhanceReaderContent() {
+  const diagrams = document.querySelectorAll('.chapter-content .concept-diagram, .chapter-content .worked-system, .chapter-content .derivation, .chapter-content .diagram, .chapter-content .gpu-diagram, .chapter-content .history-rail');
+  diagrams.forEach(diagram => {
+    diagram.classList.add('standard-diagram');
+    if (diagram.matches('.history-rail') && !diagram.querySelector('.diagram-header')) {
+      const header = document.createElement('div');
+      header.className = 'diagram-header';
+      header.innerHTML = '<span>HISTORICAL SEQUENCE</span><h3>Changes in the field and its constraints</h3>';
+      diagram.prepend(header);
+    }
+  });
+
+  document.querySelectorAll('.chapter-content pre').forEach(block => {
+    if (block.dataset.enhanced) return;
+    const source = block.textContent || '';
+    const language = /^(import |from |def |print\()/m.test(source) ? 'Python' : /^(const |let |function |async )/m.test(source) ? 'JavaScript' : 'Implementation example';
+    const header = document.createElement('div');
+    block.classList.add('rich-code');
+    header.className = 'code-meta';
+    header.innerHTML = `<span>${language}</span><small>inspect → run → verify</small>`;
+    block.prepend(header);
+    block.dataset.enhanced = 'true';
+  });
+}
+
 function bindEvents() {
   document.querySelector('.drawer-toggle')?.addEventListener('click', () => { sidebarOpen = true; render(); });
   document.querySelector('.close-drawer')?.addEventListener('click', () => { sidebarOpen = false; render(); });
@@ -128,6 +153,7 @@ async function render() {
   try {
     const main = current.name === 'home' ? home() : await chapterView(currentChapter(current));
     app.innerHTML = shell(main);
+    enhanceReaderContent();
     bindEvents();
     if (current.name === 'chapter') document.querySelector('#main-content')?.focus({preventScroll: true});
   } catch (error) {

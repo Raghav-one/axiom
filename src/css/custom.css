@@ -607,4 +607,8 @@ body:has(#reference-layout) .signal-prose code { border-color: #e7e8eb; backgrou
   .theme-doc-sidebar-container { top: 54px !important; height: calc(100vh - 54px) !important; }
   body:has(#reference-layout) .container.padding-top--md { margin-left: 0; }
   body:has(#reference-layout) .theme-doc-markdown { padding: 32px 24px 72px; }
+  /* Docusaurus' desktop grid uses negative row margins. In the single-column
+     mobile layout those margins leak 15px past the viewport. */
+  body:has(#reference-layout) .container.padding-top--md > .row { margin: 0; }
+  body:has(#reference-layout) .container.padding-top--md > .row > .col { padding: 0; }
 }

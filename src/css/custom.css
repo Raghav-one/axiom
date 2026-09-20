@@ -160,3 +160,261 @@ body:has(#reference-layout) .gpu-flash-tiled span {color:#18794e;border-color:#b
 @media (max-width:640px) {body:has(#reference-layout) .gpu-flash-paths {grid-template-columns:1fr}body:has(#reference-layout) .gpu-flash-path {grid-template-columns:1fr auto 1fr auto 1fr}}
 @media (max-width:640px) {.signal-prose .diagram {padding:17px 14px}.signal-prose .diagram-header h3 {font-size:21px}.signal-prose .diagram-flow {display:none}.signal-prose .diagram-stage-list {display:flex;flex-direction:column;gap:20px;border:0;margin-top:0}.signal-prose .diagram-stage-list li {position:relative;padding:14px;border:1px solid #ded5cd}.signal-prose .diagram-stage-list li:not(:last-child)::after {content:"↓";position:absolute;left:50%;bottom:-19px;transform:translateX(-50%);font:700 13px/1 Inter,sans-serif;color:#a43b19;background:#fff;padding:2px 5px}.signal-prose .concept-flow {grid-template-columns:1fr;gap:17px}.signal-prose .concept-flow i {justify-self:center;height:0;transform:rotate(90deg)}.signal-prose .history-rail>div {grid-template-columns:70px 1fr}.signal-prose .worked-system {padding:16px}.signal-prose .vector-views,.signal-prose .attention-flow {flex-direction:column}.signal-prose .vector-views i,.signal-prose .attention-flow i {align-self:center}.signal-prose .attention-flow i {transform:rotate(90deg);height:7px}}
 @media print {.navbar,.theme-doc-sidebar-container,.breadcrumbs,.footer {display:none!important}.main-wrapper {margin:0}.theme-doc-markdown {max-width:none}.signal-prose .diagram svg {min-width:0}}
+
+/* Perspectives visual language. This layer changes presentation only: Axiom's
+   Docusaurus routes, content model, and generated chapter material stay intact. */
+:root {
+  --ifm-color-primary: #c2410c;
+  --ifm-color-primary-dark: #a9360a;
+  --ifm-color-primary-darker: #8e2e09;
+  --ifm-color-primary-darkest: #722507;
+  --ifm-color-primary-light: #dc5b20;
+  --ifm-color-primary-lighter: #e57640;
+  --ifm-color-primary-lightest: #f0a57f;
+  --axiom-paper: #ffffff;
+  --axiom-paper-muted: #faf9f7;
+  --axiom-wash: #f7f7f6;
+  --axiom-ink: #16181d;
+  --axiom-ink-soft: #4a4f5a;
+  --axiom-ink-faint: #7c828e;
+  --axiom-line: #e3e1dc;
+  --axiom-line-strong: #cfcdc7;
+  --axiom-hot: #c2410c;
+  --axiom-cool: #1d4ed8;
+  --axiom-green: #0f7a52;
+  --axiom-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --axiom-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --axiom-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+  --doc-sidebar-width: 266px;
+}
+
+html, body, #__docusaurus, .main-wrapper { background: var(--axiom-paper); }
+body {
+  color: var(--axiom-ink);
+  font-family: var(--axiom-sans);
+  font-size: 16px;
+  line-height: 1.68;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 12% -8%, rgba(29,78,216,.055), transparent 60%),
+    radial-gradient(760px 460px at 92% 4%, rgba(124,58,237,.045), transparent 62%),
+    radial-gradient(700px 500px at 50% 108%, rgba(194,65,12,.04), transparent 60%);
+}
+
+/* Axiom keeps the documentation sidebar but gives it the Perspectives rail. */
+.navbar { display: none; }
+.theme-doc-sidebar-container {
+  top: 0 !important;
+  height: 100vh !important;
+  width: var(--doc-sidebar-width) !important;
+  background: rgba(251,250,248,.90) !important;
+  border-right: 1px solid var(--axiom-line) !important;
+  backdrop-filter: blur(14px);
+}
+.menu {
+  padding: 0 14px 44px !important;
+  font-family: var(--axiom-sans);
+  font-size: .845rem;
+}
+.menu::before {
+  content: "AXIOM\A The field library for artificial intelligence";
+  white-space: pre-line;
+  display: block;
+  margin: 0 -14px 18px;
+  padding: 25px 22px 20px;
+  border-bottom: 1px solid var(--axiom-line);
+  color: var(--axiom-ink-faint);
+  font: .70rem/1.55 var(--axiom-sans);
+}
+.menu::first-line {
+  color: var(--axiom-hot);
+  font-family: var(--axiom-mono);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .30em;
+}
+.sidebar-domain-group { margin: 0 0 15px !important; }
+.sidebar-domain-group > .menu__list-item-collapsible {
+  margin: 0 !important;
+  border-radius: 7px !important;
+}
+.sidebar-domain-group > .menu__list-item-collapsible > .menu__link {
+  color: var(--axiom-ink-faint) !important;
+  font: .59rem/1.35 var(--axiom-mono) !important;
+  font-weight: 700 !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase;
+  padding: 8px 9px !important;
+}
+.sidebar-domain-group > .menu__list {
+  border-bottom: 0 !important;
+  margin: 2px 0 2px !important;
+  padding: 1px 0 2px !important;
+}
+.menu__link, .sidebar-chapter-link .menu__link, .menu__link.sidebar-chapter-link {
+  color: var(--axiom-ink-soft) !important;
+  border-left: 2px solid transparent !important;
+  border-radius: 7px !important;
+  font-size: .83rem !important;
+  line-height: 1.35 !important;
+  padding: 7px 9px !important;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.menu__link:hover, .menu__list-item-collapsible:hover {
+  background: var(--axiom-wash) !important;
+  color: var(--axiom-ink) !important;
+}
+.menu__link--active, .sidebar-chapter-link .menu__link.sidebar-chapter-active,
+.menu__link.sidebar-chapter-link.sidebar-chapter-active {
+  color: var(--axiom-ink) !important;
+  background: rgba(29,78,216,.07) !important;
+  border-left-color: var(--axiom-cool) !important;
+  box-shadow: none !important;
+  font-weight: 650 !important;
+}
+.menu__caret { opacity: .7; }
+
+body:has(#reference-layout) [class^="docRoot_"] { --doc-sidebar-width: 266px; }
+body:has(#reference-layout) .container.padding-top--md {
+  max-width: none;
+  margin: 0 0 0 44px;
+  padding: 0;
+}
+body:has(#reference-layout) .theme-doc-markdown {
+  max-width: 940px;
+  margin: 0;
+  padding: 74px 50px 132px 0;
+  color: var(--axiom-ink);
+  font-family: var(--axiom-sans);
+}
+.breadcrumbs {
+  font: .64rem/1.5 var(--axiom-mono) !important;
+  letter-spacing: .05em;
+  color: var(--axiom-ink-faint) !important;
+  margin-bottom: 25px !important;
+}
+.breadcrumbs a { color: var(--axiom-ink-faint) !important; }
+body:has(#reference-layout) .chapterKicker {
+  color: var(--axiom-hot);
+  font: .64rem/1.5 var(--axiom-mono);
+  font-weight: 700;
+  letter-spacing: .27em;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+body:has(#reference-layout) .theme-doc-markdown > header > h1,
+body:has(#reference-layout) .theme-doc-markdown > h1 {
+  color: var(--axiom-ink);
+  font-family: var(--axiom-serif);
+  font-size: clamp(2.8rem, 5.2vw, 4.7rem);
+  font-weight: 600;
+  line-height: .98;
+  letter-spacing: -.035em;
+  margin: 0 0 18px;
+}
+body:has(#reference-layout) .chapterSummary {
+  color: var(--axiom-ink-soft);
+  font-family: var(--axiom-serif);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  line-height: 1.55;
+  max-width: 720px;
+}
+body:has(#reference-layout) .chapterMeta {
+  gap: 25px;
+  margin: 29px 0 34px;
+  padding: 20px 0;
+  border-top: 1px solid var(--axiom-line);
+  border-bottom: 1px solid var(--axiom-line);
+  color: var(--axiom-ink-faint);
+  font: .62rem/1.4 var(--axiom-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+body:has(#reference-layout) .theme-doc-markdown > h2 {
+  color: var(--axiom-ink);
+  font-family: var(--axiom-serif);
+  font-size: clamp(2rem, 3.8vw, 3rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+  border-top: 1px solid var(--axiom-line);
+  margin: 64px 0 17px;
+  padding-top: 30px;
+}
+body:has(#reference-layout) .theme-doc-markdown > h3,
+body:has(#reference-layout) .signal-prose h3 {
+  color: var(--axiom-ink);
+  font-family: var(--axiom-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -.015em;
+  margin-top: 36px;
+}
+body:has(#reference-layout) .signal-prose {
+  color: var(--axiom-ink-soft);
+  font-family: var(--axiom-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+body:has(#reference-layout) .signal-prose strong { color: var(--axiom-ink); }
+body:has(#reference-layout) .signal-prose .gotcha,
+body:has(#reference-layout) .signal-prose .callout,
+body:has(#reference-layout) .signal-prose blockquote,
+body:has(#reference-layout) .prerequisites {
+  border: 1px solid var(--axiom-line) !important;
+  border-left: 3px solid var(--axiom-hot) !important;
+  border-radius: 0 9px 9px 0;
+  background: var(--axiom-wash) !important;
+  color: var(--axiom-ink-soft) !important;
+  box-shadow: 0 1px 2px rgba(22,24,29,.04), 0 8px 24px -18px rgba(22,24,29,.18);
+}
+body:has(#reference-layout) .signal-prose .gotcha > span,
+body:has(#reference-layout) .signal-prose .callout > span,
+body:has(#reference-layout) .prerequisites > span {
+  color: var(--axiom-hot) !important;
+  font-family: var(--axiom-mono);
+}
+body:has(#reference-layout) .signal-prose .concept-diagram,
+body:has(#reference-layout) .signal-prose .worked-system,
+body:has(#reference-layout) .signal-prose .diagram,
+body:has(#reference-layout) .signal-prose .derivation {
+  border: 1px solid var(--axiom-line) !important;
+  border-radius: 12px;
+  background: var(--axiom-paper) !important;
+  box-shadow: 0 1px 2px rgba(22,24,29,.04), 0 8px 24px -18px rgba(22,24,29,.16);
+}
+body:has(#reference-layout) .signal-prose .concept-flow > div,
+body:has(#reference-layout) .signal-prose .vector-views > div,
+body:has(#reference-layout) .signal-prose .attention-flow > div,
+body:has(#reference-layout) .signal-prose .derivation {
+  border-color: var(--axiom-line) !important;
+  background: var(--axiom-wash) !important;
+  border-radius: 9px;
+}
+body:has(#reference-layout) .signal-prose pre {
+  border: 1px solid #302c2a;
+  border-radius: 9px;
+  background: #252323;
+  color: #f7eee8;
+  box-shadow: 0 8px 20px -16px rgba(22,24,29,.55);
+}
+body:has(#reference-layout) .signal-prose code {
+  border-color: #efddd4;
+  background: #fff4ef;
+  color: #a9360a;
+}
+.footer { background: var(--axiom-paper-muted); border-top-color: var(--axiom-line); }
+
+@media (max-width: 996px) {
+  .navbar { display: flex; background: rgba(251,250,248,.94); border-bottom: 1px solid var(--axiom-line); box-shadow: none; }
+  .navbar__title { font-family: var(--axiom-serif); font-size: 1.3rem; }
+  body:has(#reference-layout) .container.padding-top--md { margin-left: 0; }
+  body:has(#reference-layout) .theme-doc-markdown { padding: 46px 26px 90px; }
+}

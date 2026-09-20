@@ -7,5 +7,7 @@ public/gpu.html
 public/gpu-enhancements.css
 public/gpu-enhancements.js
 public/vendor/
+public/gpu-visuals/
+public/content/manifest.json
 research/docusaurus-*.png
 .DS_Store

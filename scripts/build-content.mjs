@@ -75,5 +75,6 @@ for(const [i,a] of all.entries()){
  await fs.writeFile(`public/content/${a.id}.json`,JSON.stringify(a));
 }
 await fs.writeFile('src/manifest.json',JSON.stringify(manifest));
+await fs.writeFile('public/content/manifest.json',JSON.stringify(manifest));
 await fs.writeFile('public/search-index.json',JSON.stringify(search));
 console.log(`${all.length} chapters · ${domains.length} domains · ${manifest.reduce((s,x)=>s+x.words,0).toLocaleString()} words (plus GPU handbook)`);

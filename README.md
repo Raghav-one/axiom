@@ -1,6 +1,6 @@
 # Axiom
 
-A Docusaurus reference library for artificial intelligence, from computing and mathematics through systems, models, hardware, evaluation, institutions, and practice. The curriculum is published as 13 continuous volumes containing 55 chapters. The single documentation sidebar contains every discipline, chapter, and chapter subsection.
+A compact AI reference library covering computing, mathematics, data, models, hardware, systems, safety, and research practice. The Frontier-style reader groups 55 chapters across 13 domains, with hash-routed chapter links and a mobile navigation drawer.
 
 ## Local development
 
@@ -10,6 +10,6 @@ npm run build
 npm start
 ```
 
-`npm run content` rebuilds the chapter JSON, the Docusaurus MDX volumes, the sidebar targets, and the standalone GPU assets. Generated `docs/` files are intentionally ignored because the production build creates them before Docusaurus compiles the site.
+`npm run content` rebuilds chapter JSON and standalone GPU assets. `npm run build` produces the static Vite site in `dist/`. Perspective remains a separate static page at `/axiom/perspective.html`.
 
 The production site is deployed through GitHub Pages on every push to `main` at <https://raghav-one.github.io/axiom/>.
